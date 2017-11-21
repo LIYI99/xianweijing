@@ -17,9 +17,36 @@ typedef  enum{
 }OBJECT_S;
 
 
+typedef void  (*object_func)(void *data);
+
+
+#define     MENU_LEVEL      10
+struct object_node{
+     
+    struct object_node  *prev;
+    struct object_node  *next;
+    struct object_node  *s_head;
+    struct object_node  *s_end;
+    struct object_node  *f_node;
+    char                keys[MENU_LEVEL];
+    uint8_t             en_node;
+    uint8_t             en_mouse;
+    uint8_t             en_submenu;
+    uint8_t             en_freshen;
+    
+    OBJECT_S            object_s;
+   
+};
+
+
+
+
+
 struct  lqueue{
-    struct lqueue  *prev;
-    struct lqueue  *next;
+    
+    struct lqueue  *prev; //farther
+    struct lqueue  *next; 
+ 
     uint16_t        mouse_en;
     uint16_t        need_push;
     OBJECT_S        object_s;
@@ -27,7 +54,6 @@ struct  lqueue{
 };
 
 
-typedef void  (*object_func)(void *data);
 
 typedef struct image_sdk_button{
     uint16_t        order;
