@@ -21,9 +21,6 @@ typedef  enum{
 
 
 
-
-
-
 typedef struct window_node      window_node_t;
 
 typedef enum {
@@ -176,8 +173,8 @@ typedef struct  image_sdk_s{
     object_pool_t   *window_node_pool;
     object_pool_t   *object_pool;
     
-    window_node_t   *check_node;
     window_node_t   *last_check_node;
+    window_node_t   *check_node;
     window_node_mouse_t *mouse;
 }image_sdk_t;
 

@@ -162,9 +162,9 @@ static int inline  node_id_level_re(char *node_id){
 
 static inline window_node_t  *key_find_node(window_node_t *father,char key,int level)
 {
-   window_node_t *temp = father;
+   window_node_t *temp = father->s_head;
     
-   for (;temp != NULL; temp = father->next)
+   for (;temp != NULL; temp = temp->next)
    {
         if(temp->node_id[level] ==  key)
             break;
@@ -179,8 +179,8 @@ static window_node_t  *find_father_node(char *node_id,int level){
     
     window_node_t *temp  = sdk_handle->root;
     
-    int k = 0;
-    for (k = 0 ; k < level -1 ; k ++ ){
+    int k = 1;
+    for (k = 1 ; k < level -1 ; k ++ ){
         temp = key_find_node(sdk_handle->root,node_id[k],k);
     }
     return temp;
@@ -238,23 +238,25 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
         
         return -3;
     }
+   
+    window_node_button_t * button = NULL;
+    button = (window_node_button_t *)object_pool_get(sdk_handle->object_pool);
+    if(button == NULL){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        return -5;
+    }
+    
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
     if(ret < 0 ){
         object_pool_free(sdk_handle->window_node_pool,lq);
-        return -5;
+        object_pool_free(sdk_handle->object_pool);
+        return -6;
     }
 
-
-    window_node_button_t * button = NULL;
-    button = (window_node_button_t *)object_pool_get(sdk_handle->object_pool);
-    if(button == NULL)
-        return -5;
-    
-       
     *button =  _button;
-    
+    button->this_node = lq;
     if(_button.user_data == NULL)
         button->user_data  = (void *)button;
 
@@ -280,39 +282,251 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
     lq->en_node = atrr.en_node;
     lq->en_freshen = attr.en_freshen;
     lq->win_type = OBJECT_BUTTION;
-    lq->prev = NULL;
-    lq->next = NULL;
     lq->window = (void *)button;
-    memcpy(lq->node_id,attr.node_id,MENU_LEVEL);
 
-    if(sdk_handle->head == NULL){
-        
-        sdk_handle->head = sdk_handle->end = lq;
-    }else{
-        lq->next = sdk_handle->head;
-        sdk_handle->head->prev = lq;
-        sdk_handle->head = lq;
-
-
-    }
-    
-  //  printf("+++=add botton: head:%p  node:%p node->prev:%p,node->next:%p\n\n"
-    //        ,sdk_handle->head,lq,lq->prev,lq->next); 
     return 0;
 
 
 
 }
 int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
-        window_node_menu_t _menu);
-int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
-        window_node_line_t _line);
-int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
-        window_node_text_t _text);
+        window_node_menu_t _menu){
+    
+    if(sdk_handle == NULL)
+        return -2;
+    
+    window_node_t  *lq = NULL;
+    lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
+    if(lq == NULL){
+        
+        return -3;
+    }
+   
+    window_node_menu_t * menu = NULL;
+    menu = (window_node_menu_t *)object_pool_get(sdk_handle->object_pool);
+    if(menu == NULL){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        return -5;
+    }
+    
+    memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
+    int ret = 0;
+    ret = window_node_inster(lq); 
+    if(ret < 0 ){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        object_pool_free(sdk_handle->object_pool);
+        return -6;
+    }
 
-int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
-int     Image_SDK_Set_Node_En(char *node_id,uint8_t en);
-int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen);
+    *menu =  _menu;
+    menu->this_node = lq; 
+    if(_menu.user_data == NULL)
+        menu->user_data  = (void *)menu;
+
+    if(menu->x > sdk_handle->scree_w){
+        menu->x = sdk_handle->scree_w - menu->w;
+        printf("you set x > srcee_w\n");
+    }
+    if(menu->y > sdk_handle->scree_h){
+        menu->y = sdk_handle->scree_h -menu->h;
+        printf("you set y > srcee_h\n");
+    }
+    if(menu->w > sdk_handle->scree_w){
+        menu->w = 60;
+        printf("you set w > srcee_w,now set 60 pixl\n");
+
+    }
+    if(menu->h > sdk_handle->scree_h){
+        menu->h = 30;
+        printf("you set h > srcee_h,now set 30pixl\n");
+
+    }
+
+    lq->en_node = atrr.en_node;
+    lq->en_freshen = attr.en_freshen;
+    lq->win_type = OBJECT_MENU;
+    lq->window = (void *)menu;
+
+    return 0;
+
+}
+int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
+        window_node_line_t _line)
+{
+    
+    if(sdk_handle == NULL)
+        return -2;
+    
+    window_node_t  *lq = NULL;
+    lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
+    if(lq == NULL){
+        
+        return -3;
+    }
+   
+    window_node_line_t * line = NULL;
+    line = (window_node_line_t *)object_pool_get(sdk_handle->object_pool);
+    if(line == NULL){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        return -5;
+    }
+    
+    memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
+    int ret = 0;
+    ret = window_node_inster(lq); 
+    if(ret < 0 ){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        object_pool_free(sdk_handle->object_pool);
+        return -6;
+    }
+
+    *line =  _line;
+    line->this_node = lq; 
+    if(_line.user_data == NULL)
+        line->user_data  = (void *)line;
+
+    if(line->start_x > sdk_handle->scree_w){
+        line->x = sdk_handle->scree_w -line->size;
+        printf("you set x > srcee_w\n");
+    }
+    if(line->y > sdk_handle->scree_h){
+        line->y = sdk_handle->scree_h -line->size;
+        printf("you set y > srcee_h\n");
+    }
+    if(line->end_x > sdk_handle->scree_w){
+        line->w = sdk_handle->scree_w - line->size;
+        printf("you set w > srcee_w,now set 60 pixl\n");
+
+    }
+    if(line->end_y > sdk_handle->scree_h){
+        line->h = sdk_handle->scree_h - line->size;
+        printf("you set h > srcee_h,now set 30pixl\n");
+
+    }
+
+    lq->en_node = atrr.en_node;
+    lq->en_freshen = attr.en_freshen;
+    lq->win_type = OBJECT_MENU;
+        lq->window = (void *)line;
+    
+    return 0;
+
+
+}
+int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
+        window_node_text_t _text)
+{
+    
+    if(sdk_handle == NULL)
+        return -2;
+    
+    window_node_t  *lq = NULL;
+    lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
+    if(lq == NULL){
+        
+        return -3;
+    }
+   
+    window_node_text_t * text = NULL;
+    text = (window_node_text_t *)object_pool_get(sdk_handle->object_pool);
+    if(text == NULL){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        return -5;
+    }
+    
+    memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
+    int ret = 0;
+    ret = window_node_inster(lq); 
+    if(ret < 0 ){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        object_pool_free(sdk_handle->object_pool);
+        return -6;
+    }
+
+    *text =  _text;
+     text->this_node = lq;
+
+    if(_text.user_data == NULL)
+        text->user_data  = (void *)text;
+
+    if(text->x > sdk_handle->scree_w){
+        text->x = sdk_handle->scree_w - text->lens *text->size;
+        printf("you set x > srcee_w\n");
+    }
+    if(text->y > sdk_handle->scree_h){
+        text->y = sdk_handle->scree_h -text->size;
+        printf("you set y > srcee_h\n");
+    }
+   
+    lq->en_node = atrr.en_node;
+    lq->en_freshen = attr.en_freshen;
+    lq->win_type = OBJECT_MENU;
+    lq->window = (void *)text;
+
+    return 0;
+
+
+}
+
+
+static window_node_t  *find_all_key_node(char *node_id,int level){
+    
+    if(level == 2)
+        return sdk_handle->root;
+    
+    window_node_t *temp  = sdk_handle->root;
+    
+    int k ;
+    for (k = 1 ; k < level ; k ++ ){
+        temp = key_find_node(sdk_handle->root,node_id[k],k);
+    }
+    return temp;
+}
+
+
+int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
+{
+    
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+        return -2;
+    temp->move_arrt = _arrt;
+    
+    return 0;
+
+}
+
+int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
+{
+
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+        return -2;
+    temp->en_node = en;
+    
+    return 0;
+
+}
+
+int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen){
+
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+        return -2;
+    temp->en_freshen = en_freshen;
+    
+    return 0;
+
+}
 
 
 
