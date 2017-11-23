@@ -11,10 +11,12 @@
 #endif
 
 typedef  enum{
+    OBJECT_NOR,
     OBJECT_BUTTION,
     OBJECT_MENU,
     OBJECT_LINE,
     OBJECT_TXT_WIN,
+    OBJECT_BAR,
     OBJECT_NUMS,
 
 }WIN_TYPE_S;
@@ -33,6 +35,13 @@ typedef enum {
     MOVE_NUMS,
 }NODE_MOVE_ARRT;
 
+typedef enum{
+    NORTHING,
+    NEED_FRESHEN,
+    NEED_CLEAR,
+    FRESHEN_NUMS,
+}NODE_FRESHEN_ARRT;
+
 struct window_node{
 
 #define     MENU_LEVEL              5
@@ -44,8 +53,8 @@ struct window_node{
     window_node_t   *f_node;
     uint8_t         en_node;
     uint8_t         check_node;
-    uint8_t         en_freshen;
     uint8_t         en_submenu;
+    NODE_FRESHEN_ARRT   freshen_arrt;
 
 #define         CLOSE_REFLECT       0
 #define         OFFSET_REFLECT      1
@@ -72,6 +81,7 @@ typedef struct window_func{
     win_func        mouse_right_down;
     win_func        mouse_right_up;
     win_func        mouse_leave;
+    void            *data;
 
 }window_func_t;
 
@@ -102,7 +112,6 @@ typedef struct window_node_menu{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   func_set;
-    void            *user_data;
 }window_node_menu_t;
 
 typedef struct window_node_line{
@@ -117,7 +126,6 @@ typedef struct window_node_line{
     char            *image_cache;
     
     window_func_t   func_set;
-    void            *user_data;
 }window_node_line_t;
 
 typedef struct window_node_text{
@@ -129,12 +137,26 @@ typedef struct window_node_text{
     uint16_t        lens;
     uint32_t        win_color;
     uint32_t        text_color;
+    //char            *text;
     char            *text_cache;
     
     window_func_t   func_set;
-    void            *user_data;
 
 }window_node_text_t;
+
+typedef struct window_node_bar{
+       
+    window_node_t   *this_node;
+    uint16_t        x;
+    uint16_t        y;
+    uint16_t        size;
+    uint16_t        lens;
+    uint16_t        max_value;
+    uint16_t        now_value;
+    uint32_t        bar_color;
+    window_func_t   func_set;
+
+}window_node_bar_t;
 
 typedef struct window_node_mouse{
     
@@ -149,32 +171,37 @@ typedef struct window_node_mouse{
     char            *image_cache2;
     char            *save_cache;
 
-   
-
 }window_node_mouse_t;
 
 
 typedef struct  image_sdk_s{
          
     uint16_t        en;
+    //video params
     uint16_t        scree_w;
     uint16_t        scree_h;
     uint16_t        color_fmt;
     uint16_t        disp_fps;
-    
     int             video_fd;
     void            *mmap_p;
-
+    
+    //mouse
     int             mouse_fd;
     GK_MOUSE_DATA   mouse_new_data; 
+    uint8_t         need_restart_mouse;
+    uint8_t         mouse_data_updated;
     
+    //window root node
     window_node     *root;
-       
+    //pool
     object_pool_t   *window_node_pool;
     object_pool_t   *object_pool;
     
-    window_node_t   *last_check_node;
-    window_node_t   *check_node;
+    //mouse check node record
+    window_node_t   *last_check_node[MENU_LEVEL];
+    window_node_t   *check_node[MENU_LEVEL];
+    uint16_t        check_level_cnt;             ; 
+    //mouse image node
     window_node_mouse_t *mouse;
 }image_sdk_t;
 
@@ -189,7 +216,7 @@ void    Image_SDK_Run(void);
 struct user_set_node_atrr{
     char            node_id[MENU_LEVEL]; 
     uint8_t         en_node;
-    uint8_t         en_freshen;
+    NODE_FRESHEN_ARRT   en_freshen;
     NODE_MOVE_ARRT  move_arrt;
 };
 
