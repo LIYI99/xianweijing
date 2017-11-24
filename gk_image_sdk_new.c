@@ -65,8 +65,7 @@ static void     _image_mouse_image_load(window_node_mouse_t *mouse)
     uint16_t    *buf = NULL;
     r = mouse->size / 2;
 
-
-
+    mouse->color = 0xbbca;
     if(MOUSE_IMAGE_PATH_1 == NULL || MOUSE_IMAGE_PATH_2 == NULL){
         //build color mouse
         buf = (uint16_t *)mouse->image_cache;
@@ -98,7 +97,7 @@ static void     _image_mouse_image_load(window_node_mouse_t *mouse)
     }else{
         //load image to buf
     }
-    
+    mouse->image_p = mouse->image_cache;    
     return ;
 
 
@@ -174,7 +173,8 @@ void    Image_SDK_Init(void){
     memset(root, 0x0 ,sizeof(window_node_t));
     memcpy(root->node_id,"A",1);
     root->en_node = 1;
-
+    sdk_handle->root = root;
+    printf("window root:%p\n",root);
     //add mouse window node
     window_node_mouse_t *mouse = NULL;
     mouse = (window_node_mouse_t *)malloc(sizeof(window_node_mouse_t));
@@ -276,6 +276,7 @@ static int  window_node_inster(window_node_t *node){
     }
 
     //get window father window
+    printf("get level:%d\n",level);
     window_node_t *ftemp = NULL,*same = NULL;
     ftemp = find_father_node(node->node_id,level);
     if(ftemp == NULL){
@@ -318,7 +319,8 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
         
         return -3;
     }
-   
+    printf("linenode:%p \n",lq);
+ 
     window_node_button_t * button = NULL;
     button = (window_node_button_t *)object_pool_get(sdk_handle->object_pool);
     if(button == NULL){
@@ -444,7 +446,8 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
         
         return -3;
     }
-   
+    printf("linenode:%p \n",lq);
+
     window_node_line_t * line = NULL;
     line = (window_node_line_t *)object_pool_get(sdk_handle->object_pool);
     if(line == NULL){
@@ -783,17 +786,21 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
     if(sdk_handle->root == NULL)
         return;
    
-    memset(sdk_handle->check_node,0x0,sizeof(void *)*MENU_LEVEL);
+    int ks;
+    for(ks = 0 ; ks < MENU_LEVEL ; ks++)
+        sdk_handle->check_node[ks] = NULL;
 
-    window_node_t  *node = NULL,*save_node[MENU_LEVEL+1];
-    
+    window_node_t  *node = NULL,*save_node[MENU_LEVEL+1],*ft_stack[MENU_LEVEL] ;
     memset(save_node,0x0,sizeof(void *) * MENU_LEVEL+1);
-    int check_cnt = 0,ret = 0;
+    int check_cnt = 0,ret = 0,stack_cnt = 1;
+    
+    ft_stack[0] = sdk_handle->root;
+    
 
     node = sdk_handle->root->s_head;
      
     while ( node  ){
-        
+         
         if(node->win_type == OBJECT_BUTTION)
         {
             ret = image_buttont_xy_analysis(node->window,NULL);
@@ -817,12 +824,13 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             printf("erro ,the node not use\n");
         }
-        
+       // printf("line:%d func:%s node:%p\n",__LINE__,__func__,node);
+    
         if(ret > 0){
             
             node->check_node = 1;
             save_node[check_cnt] = node;
-            check_cnt++;
+                        check_cnt++;
         }
         // if check node dont have childe node ,so travle end
         if(ret > 0  && node->s_head == NULL ){
@@ -832,15 +840,20 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         // else tarvle bother node
         if( ret > 0  && node->s_head != NULL){
             node = node->s_head;
+            ft_stack[stack_cnt] = node;
+            stack_cnt++;
+
         }else{
             node = node->next;
         }
         // if now node == NULL ,goto father,s bother node
-        if(node == NULL){
-            node = node->f_node->next;
+        if(node == NULL ){
+            stack_cnt--;
+            node = ft_stack[stack_cnt]->next;
         }
     
     }
+   // printf("line:%d func:%s \n",__LINE__,__func__);
     //move check node  to  top
     int  k;
     for (k  =  0 ; k < check_cnt ; node = save_node[k],k++)
@@ -859,6 +872,8 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         node->next = node->f_node->s_head;
         node->f_node->s_head = node;
     }
+ //   printf("line:%d func:%s \n",__LINE__,__func__);
+
     sdk_handle->check_level_cnt = check_cnt;
     //save now mouse check node
     for (k  =  0 ; k < check_cnt ; k++)
@@ -913,7 +928,10 @@ static void  _image_window_func_run(void *data)
     //leave event
     window_func_t *funcs = NULL;
     for(k = MENU_LEVEL -1  ; k >= 0; k--){
-    
+        
+        if(sdk_handle->last_check_node[k] == NULL)
+            break;
+
         node = sdk_handle->last_check_node[k];
         if(!node->check_node)
             continue;
@@ -1307,10 +1325,13 @@ static void  _image_freshen_video(void)
         return ;
     
   
-    window_node_t *node = NULL;
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
+    int stack_cnt = 1;
+    ft_stack[0] = sdk_handle->root;
     
     node = sdk_handle->root->s_end;
     
+
     while ( node  ){
         
         if(node->en_node && node->freshen_arrt != NORTHING ){
@@ -1321,12 +1342,15 @@ static void  _image_freshen_video(void)
         if(node->en_submenu && node->s_end != NULL){
             
             node = node->s_end;
+            ft_stack[stack_cnt] = node;
+            stack_cnt++;
         }else{
             node = node->prev;
         }
 
         if(node == NULL){
-            node = node->f_node->prev;
+            stack_cnt--;
+            node = ft_stack[stack_cnt]->prev;
         }         
            
     }
@@ -1366,6 +1390,8 @@ static  void*   _image_mouse_event_read_thread(void *data)
 
             FD_ZERO(&readfds);
             FD_SET(sdk_handle->mouse_fd, &readfds);
+            tv.tv_sec = 1;
+            tv.tv_usec = 0;
             retval = select(sdk_handle->mouse_fd+1,&readfds,NULL,NULL,&tv);
             if(FD_ISSET(sdk_handle->mouse_fd,&readfds))
             {
@@ -1398,15 +1424,14 @@ static void* _image_sdk_handle_data_process_thread(void *data)
     
     while(1)
     {
-       
+        
         if(sdk_handle->mouse_data_updated){
             
             _ldata = sdk_handle->mouse_new_data;
             
             _image_analysis_mdata(sdk_handle->mouse_new_data);
-            _image_obj_func_run();
-            _image_freshen_video();
-
+            _image_window_func_run(NULL);
+            
 
             if(_ldata.x == sdk_handle->mouse_new_data.x &&
                     _ldata.y == sdk_handle->mouse_new_data.y &&
@@ -1417,10 +1442,11 @@ static void* _image_sdk_handle_data_process_thread(void *data)
             
             usleep(wait_times);
         } 
-    
+         
+        _image_freshen_video();
     }
     
-    return NULL;
+       return NULL;
 
 }
 
@@ -1430,14 +1456,15 @@ static  pthread_t   mouse_thread_id, process_thread_id;
 void    Image_SDK_Run(void)
 {
     
-    pthread_create(&mouse_thread_id,NULL,
+   pthread_create(&mouse_thread_id,NULL,
             _image_mouse_event_read_thread,NULL);
 
     pthread_create(&process_thread_id,NULL,
             _image_sdk_handle_data_process_thread,NULL);
   
 #if 1  //block use test
-    
+    for(;;)
+        sleep(1);
     pthread_join(mouse_thread_id,NULL);
     pthread_join(process_thread_id,NULL);
 

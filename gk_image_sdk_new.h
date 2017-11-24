@@ -2,7 +2,7 @@
 #define __GK_IMAGE_SDK_H__
 
 #include <stdint.h>
-#include <ptread.h>
+#include <pthread.h>
 #include "gk_mouse_event.h"
 #include "object_pool.h"
 
@@ -199,7 +199,7 @@ typedef struct  image_sdk_s{
     uint8_t         mouse_data_updated;
     
     //window root node
-    window_node     *root;
+    window_node_t     *root;
     //pool
     object_pool_t   *window_node_pool;
     object_pool_t   *object_pool;
