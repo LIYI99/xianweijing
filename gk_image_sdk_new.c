@@ -26,10 +26,6 @@
 
 #define     MOUSE_SIZE          30
 
-#define     MOUSE_IMAGE_PATH_1  NULL
-#define     MOUSE_IMAGE_PATH_2  NULL
-#define     MOUSE_IMAGE_PATH_3  NULL
-
 
 static      image_sdk_t         *sdk_handle = NULL;
 
@@ -40,30 +36,93 @@ static void   _image_fb_push(int xoffset,int yoffset);
 
 // mouse image load
 static void     _image_mouse_image_load(window_node_mouse_t *mouse);
+static void     _image_mouse_image_deload(window_node_mouse_t *mouse);
+
 static void*    _image_mouse_event_read_thread(void *data);
 
 //handle data proess
 static void*    _image_sdk_handle_data_process(void *data);
 
 
+static void     _image_mouse_image_load(window_node_mouse_t *mouse)
+{
+
+#define     MOUSE_IMAGE_PATH_1  NULL
+#define     MOUSE_IMAGE_PATH_2  NULL
+    
+    //16bit color
+    mouse->image_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
+    if(mouse->image_cache == NULL)
+    {
+        printf("mouse load fail\n");
+        return ;
+    }
+    
+    mouse->save_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt/8);
+
+
+    int i,k,j,r;
+    uint16_t    *buf = NULL;
+    r = mouse->size / 2;
+
+
+
+    if(MOUSE_IMAGE_PATH_1 == NULL || MOUSE_IMAGE_PATH_2 == NULL){
+        //build color mouse
+        buf = (uint16_t *)mouse->image_cache;
+        for(k = 0 ,j = 0; k < mouse->size; k ++ ){
+            for(i = 0; i < mouse->size; i++,j++)
+                if(((k-r)*(k-r) + (i-r)*(i-r)) <= r *r)
+                {
+                    buf[j] = mouse->color;
+
+                }else{
+                    buf[j] = 0;
+                }
+        }    
+        buf = (uint16_t *)(mouse->image_cache + mouse->size* mouse->size*2);
+
+        for(k = 0 ,j = 0; k < mouse->size; k ++ ){
+            for(i = 0; i < mouse->size; i++,j++)
+                if(((k-r)*(k-r) + (i-r)*(i-r)) <= r *r)
+                {
+                    buf[j] = 0xFF80;
+
+                }else{
+                    buf[j] = 0;
+                }
+        }
+
+        
+    
+    }else{
+        //load image to buf
+    }
+    
+    return ;
+
+
+}
+
+static void     _image_mouse_image_deload(window_node_mouse_t *mouse)
+{
+
+    if(mouse == NULL)
+        return;
+
+    
+    free(mouse->image_cache);
+    free(mouse->save_cache);
+
+    return ;
+
+}
 
 
 
 
 
-
-
-
-//image 
-
-#if 0
-    static void   _analysis_mdata(GK_MOUSE_DATA mdata,struct obj_func_set *set);
-    static void   _obj_func_run(struct obj_func_set *set);
-    static void   _freshen_image(void);
-#endif
-
-
-
+//ok
 void    Image_SDK_Init(void){
     
     if(sdk_handle != NULL)
@@ -80,7 +139,7 @@ void    Image_SDK_Init(void){
     sdk_handle->disp_fps = VO_DISP_FPS;    
     
     //open fb fd
-    sdk_handle->mmap_p = _gk_fb_init(GK_DEVICE_FB,&sdk_handle->video_fd);
+    sdk_handle->mmap_p = _image_fb_init(GK_DEVICE_FB,&sdk_handle->video_fd);
     if(sdk_handle->video_fd < 0)
         goto ERR1;
     //open mouse fd 
@@ -113,7 +172,7 @@ void    Image_SDK_Init(void){
     //init root node
     window_node_t *root = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     memset(root, 0x0 ,sizeof(window_node_t));
-    memcpy(root->node_id,'A',1);
+    memcpy(root->node_id,"A",1);
     root->en_node = 1;
 
     //add mouse window node
@@ -125,8 +184,7 @@ void    Image_SDK_Init(void){
     
     memset(mouse,0x0,sizeof(window_node_mouse_t));
     mouse->size = MOUSE_SIZE;
-    mouse->save_cache = (char *)malloc(mouse->size *mouse->size);
-    _image_mouse_image_load(mouse);
+     _image_mouse_image_load(mouse);
     sdk_handle->mouse = mouse;
     
     //en sdk handle
@@ -149,6 +207,8 @@ ERR1:
     return ;
 }
 
+
+//ok
 void    Image_SDK_deInit(void)
 {
     if(sdk_handle == NULL)
@@ -160,7 +220,7 @@ void    Image_SDK_deInit(void)
 
     object_pool_destory(sdk_handle->window_node_pool);
     object_pool_destory(sdk_handle->object_pool);
-    free(sdk_handle->mouse->save_cache);
+    _image_mouse_image_deload(sdk_handle->mouse);
     free(sdk_handle->mouse);
     free(sdk_handle);
     sdk_handle = NULL;
@@ -168,7 +228,7 @@ void    Image_SDK_deInit(void)
 }
 
 
-
+//ok
 static int inline  node_id_level_re(char *node_id){
     
     int i;
@@ -178,7 +238,7 @@ static int inline  node_id_level_re(char *node_id){
     }
     return i;
 }
-
+//ok
 static inline window_node_t  *key_find_node(window_node_t *father,char key,int level)
 {
    window_node_t *temp = father->s_head;
@@ -190,7 +250,7 @@ static inline window_node_t  *key_find_node(window_node_t *father,char key,int l
    }
     return temp;
 }
-
+//ok
 static window_node_t  *find_father_node(char *node_id,int level){
     
     if(level == 2)
@@ -204,10 +264,10 @@ static window_node_t  *find_father_node(char *node_id,int level){
     }
     return temp;
 }
-
+//ok
 static int  window_node_inster(window_node_t *node){
 
-    int level ,k ;
+    int level ;
     //get window level
     level = node_id_level_re(node->node_id);
     if(level < 2){
@@ -245,6 +305,7 @@ static int  window_node_inster(window_node_t *node){
     return 0;
 }
 
+//ok
 int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
         window_node_button_t _button){
 
@@ -270,14 +331,14 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
     ret = window_node_inster(lq); 
     if(ret < 0 ){
         object_pool_free(sdk_handle->window_node_pool,lq);
-        object_pool_free(sdk_handle->object_pool);
+        object_pool_free(sdk_handle->object_pool,button);
         return -6;
     }
 
     *button =  _button;
     button->this_node = lq;
-    if(_button.func_set.data == NULL)
-        button->func_set.data  = (void *)button;
+    if(_button.video_set.data == NULL)
+        button->video_set.data  = (void *)button;
 
     if(button->x > sdk_handle->scree_w){
         button->x = sdk_handle->scree_w - button->w;
@@ -298,11 +359,11 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
 
     }
 
-    lq->en_node = atrr.en_node;
-    lq->en_freshen = attr.en_freshen;
+    lq->en_node = attr.en_node;
+    lq->freshen_arrt = attr.en_freshen;
     lq->win_type = OBJECT_BUTTION;
     lq->window = (void *)button;
-
+    lq->mouse_garp_reflect = attr.mouse_garp_reflect;
     return 0;
 
 
@@ -333,14 +394,14 @@ int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
     ret = window_node_inster(lq); 
     if(ret < 0 ){
         object_pool_free(sdk_handle->window_node_pool,lq);
-        object_pool_free(sdk_handle->object_pool);
+        object_pool_free(sdk_handle->object_pool,menu);
         return -6;
     }
 
     *menu =  _menu;
     menu->this_node = lq; 
-    if(_menu.func_set.data == NULL)
-        menu->func_set.data  = (void *)menu;
+    if(_menu.video_set.data == NULL)
+        menu->video_set.data  = (void *)menu;
 
     if(menu->x > sdk_handle->scree_w){
         menu->x = sdk_handle->scree_w - menu->w;
@@ -361,10 +422,11 @@ int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
 
     }
 
-    lq->en_node = atrr.en_node;
-    lq->en_freshen = attr.en_freshen;
+    lq->en_node = attr.en_node;
+    lq->freshen_arrt = attr.en_freshen;
     lq->win_type = OBJECT_MENU;
     lq->window = (void *)menu;
+    lq->mouse_garp_reflect = attr.mouse_garp_reflect;
 
     return 0;
 
@@ -395,44 +457,45 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
     ret = window_node_inster(lq); 
     if(ret < 0 ){
         object_pool_free(sdk_handle->window_node_pool,lq);
-        object_pool_free(sdk_handle->object_pool);
+        object_pool_free(sdk_handle->object_pool,line);
         return -6;
     }
 
     *line =  _line;
     line->this_node = lq; 
-    if(_line.func_set.data == NULL)
-        line->func_set.data  = (void *)line;
+    if(_line.video_set.data == NULL)
+        line->video_set.data  = (void *)line;
 
     if(line->start_x > sdk_handle->scree_w){
-        line->x = sdk_handle->scree_w -line->size;
+        line->start_x = sdk_handle->scree_w -line->size;
         printf("you set x > srcee_w\n");
     }
-    if(line->y > sdk_handle->scree_h){
-        line->y = sdk_handle->scree_h -line->size;
+    if(line->start_y > sdk_handle->scree_h){
+        line->start_y = sdk_handle->scree_h -line->size;
         printf("you set y > srcee_h\n");
     }
     if(line->end_x > sdk_handle->scree_w){
-        line->w = sdk_handle->scree_w - line->size;
+        line->end_x = sdk_handle->scree_w - line->size;
         printf("you set w > srcee_w,now set 60 pixl\n");
 
     }
     if(line->end_y > sdk_handle->scree_h){
-        line->h = sdk_handle->scree_h - line->size;
+        line->end_y = sdk_handle->scree_h - line->size;
         printf("you set h > srcee_h,now set 30pixl\n");
 
     }
 
-    lq->en_node = atrr.en_node;
-    lq->en_freshen = attr.en_freshen;
-    lq->win_type = OBJECT_MENU;
-        lq->window = (void *)line;
-    
+    lq->en_node = attr.en_node;
+    lq->freshen_arrt = attr.en_freshen;
+    lq->win_type = OBJECT_LINE;
+    lq->window = (void *)line;
+    lq->mouse_garp_reflect = attr.mouse_garp_reflect;
+
     return 0;
 
 
 }
-int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
+int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text)
 {
     
@@ -458,15 +521,15 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
     ret = window_node_inster(lq); 
     if(ret < 0 ){
         object_pool_free(sdk_handle->window_node_pool,lq);
-        object_pool_free(sdk_handle->object_pool);
+        object_pool_free(sdk_handle->object_pool,text);
         return -6;
     }
 
     *text =  _text;
      text->this_node = lq;
 
-    if(_text.func_set.data == NULL)
-        text->func_set.data  = (void *)text;
+    if(_text.video_set.data == NULL)
+        text->video_set.data  = (void *)text;
 
     if(text->x > sdk_handle->scree_w){
         text->x = sdk_handle->scree_w - text->lens *text->size;
@@ -477,10 +540,67 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
         printf("you set y > srcee_h\n");
     }
    
-    lq->en_node = atrr.en_node;
-    lq->en_freshen = attr.en_freshen;
-    lq->win_type = OBJECT_MENU;
+    lq->en_node = attr.en_node;
+    lq->freshen_arrt = attr.en_freshen;
+    lq->win_type = OBJECT_TEXT_WIN;
     lq->window = (void *)text;
+    lq->mouse_garp_reflect = attr.mouse_garp_reflect;
+
+    return 0;
+
+
+}
+
+int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
+        window_node_bar_t _bar)
+{
+     
+    if(sdk_handle == NULL)
+        return -2;
+    
+    window_node_t  *lq = NULL;
+    lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
+    if(lq == NULL){
+        
+        return -3;
+    }
+   
+    window_node_bar_t * bar = NULL;
+    bar = (window_node_bar_t *)object_pool_get(sdk_handle->object_pool);
+    if(bar == NULL){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        return -5;
+    }
+    
+    memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
+    int ret = 0;
+    ret = window_node_inster(lq); 
+    if(ret < 0 ){
+        object_pool_free(sdk_handle->window_node_pool,lq);
+        object_pool_free(sdk_handle->object_pool,bar);
+        return -6;
+    }
+
+    *bar =  _bar;
+     bar->this_node = lq;
+
+    if(_bar.video_set.data == NULL)
+        bar->video_set.data  = (void *)bar;
+
+    if(bar->x > sdk_handle->scree_w){
+        bar->x = sdk_handle->scree_w - bar->w;
+        printf("you set x > srcee_w\n");
+    }
+    if(bar->y > sdk_handle->scree_h){
+        bar->y = sdk_handle->scree_h -bar->h;
+        printf("you set y > srcee_h\n");
+    }
+   
+    lq->en_node = attr.en_node;
+    lq->freshen_arrt = attr.en_freshen;
+    lq->win_type = OBJECT_BAR;
+    lq->window = (void *)bar;
+    lq->mouse_garp_reflect = attr.mouse_garp_reflect;
 
     return 0;
 
@@ -488,6 +608,7 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
 }
 
 
+//ok
 static window_node_t  *find_all_key_node(char *node_id,int level){
     
     if(level == 2)
@@ -497,12 +618,12 @@ static window_node_t  *find_all_key_node(char *node_id,int level){
     
     int k ;
     for (k = 1 ; k < level ; k ++ ){
-        temp = key_find_node(sdk_handle->root,node_id[k],k);
+        temp = key_find_node(temp,node_id[k],k);
     }
     return temp;
 }
 
-
+//ok
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
 {
     
@@ -517,7 +638,7 @@ int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
     return 0;
 
 }
-
+//ok
 int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
 {
 
@@ -533,7 +654,9 @@ int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
 
 }
 
-int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen){
+//ok
+int     Image_SDK_Set_Node_En_Freshen(char *node_id, NODE_FRESHEN_ARRT en_freshen)
+{
 
     int level = 0;
     level = node_id_level_re(node_id);
@@ -541,7 +664,7 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen){
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL)
         return -2;
-    temp->en_freshen = en_freshen;
+    temp->freshen_arrt = en_freshen;
     
     return 0;
 
@@ -549,10 +672,10 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen){
 
 
 
-static inline int gk_buttont_xy_analysis(void *data,
-        struct obj_func_set *set){
+static inline int image_buttont_xy_analysis(void *data,window_func_t *set)
+{
     
-    image_sdk_button_t *bt = (image_sdk_button_t *)data;
+    window_node_button_t *bt = (window_node_button_t *)data;
     GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     
     
@@ -560,14 +683,6 @@ static inline int gk_buttont_xy_analysis(void *data,
     if( (mdata.x  >= bt->x || mdata.x+ MOUSE_SIZE >= bt->x)  && mdata.x <= bt->x+bt->w 
             && (mdata.y >= bt->y || mdata.y + MOUSE_SIZE >= bt->y)&& mdata.y <= bt->y+bt->h){
               
-        set->offset = bt->mouse_offset;
-        set->ldown = bt->mouse_left_down;
-        set->lup = bt->mouse_left_up;
-        set->rdown = bt->mouse_right_down;
-        set->rup = bt->mouse_right_up;
-        set->leave = bt->mouse_leave;
-        set->data = bt->data;
-        
         return 1;
     }
     else 
@@ -575,22 +690,15 @@ static inline int gk_buttont_xy_analysis(void *data,
 
 }
 
-static inline int gk_menu_xy_analysis(void *data,
-        struct obj_func_set *set){
+static inline int image_menu_xy_analysis(void *data,
+        window_func_t *set){
     
-    image_sdk_menu_t *bt = (image_sdk_menu_t *)data;
+    window_node_menu_t *bt = (window_node_menu_t *)data;
     GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     
     if( mdata.x  >= bt->x  && mdata.x <= bt->x+bt->w 
-            && mdata.y >= bt->y && mdata.y <= bt->y+bt->h){
-               set->offset = bt->mouse_offset;
-        set->ldown = bt->mouse_left_down;
-        set->lup = bt->mouse_left_up;
-        set->rdown = bt->mouse_right_down;
-        set->rup = bt->mouse_right_up;
-        set->data = bt->data;
-        set->leave = bt->mouse_leave;
-
+            && mdata.y >= bt->y && mdata.y <= bt->y+bt->h)
+    {
         return 1;
     }
     else 
@@ -598,15 +706,14 @@ static inline int gk_menu_xy_analysis(void *data,
 
 }
 
-static inline int gk_line_xy_analysis(void *data,
-        struct obj_func_set *set){
+static inline int image_line_xy_analysis(void *data,
+        window_func_t *set){
     
     
-    image_sdk_line_t *bt = (image_sdk_line_t *)data;
+    window_node_line_t *bt = (window_node_line_t *)data;
     
     GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
-
     if( mdata.x  >= bt->start_x  && mdata.x <= bt->end_x 
             && mdata.y >= bt->start_y-5 && mdata.y <= bt->start_y+bt->size+5){
         
@@ -621,13 +728,59 @@ static inline int gk_line_xy_analysis(void *data,
 }
 
 
+static inline int image_text_xy_analysis(void *data,
+        window_func_t *set){
+    
+    
+    window_node_text_t *bt = (window_node_text_t *)data;
+    
+    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
+    if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->size * bt->lens 
+            && mdata.y >= bt->y  && mdata.y <= bt->y+bt->size){
+        
+         return 1;
+    }
+    else 
+        return 0;
+
+    
+    return 0;
+
+}
+
+static inline int image_bar_xy_analysis(void *data,
+        window_func_t *set){
+    
+    
+    window_node_bar_t *bt = (window_node_bar_t *)data;
+    
+    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
+    if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->w  
+            && mdata.y >= bt->y  && mdata.y <= bt->y+bt->h){
+        
+         return 1;
+    }
+    else 
+        return 0;
+
+    
+    return 0;
+
+}
+
+
+
+
+
 
 
 static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
 
 {
     
-    if(sdk_handle->head == NULL)
+    if(sdk_handle->root == NULL)
         return;
    
     memset(sdk_handle->check_node,0x0,sizeof(void *)*MENU_LEVEL);
@@ -635,28 +788,32 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
     window_node_t  *node = NULL,*save_node[MENU_LEVEL+1];
     
     memset(save_node,0x0,sizeof(void *) * MENU_LEVEL+1);
-    int check_cnt = 0;
+    int check_cnt = 0,ret = 0;
 
     node = sdk_handle->root->s_head;
-    
+     
     while ( node  ){
         
         if(node->win_type == OBJECT_BUTTION)
         {
-            ret = gk_buttont_xy_analysis(node->data,set);
+            ret = image_buttont_xy_analysis(node->window,NULL);
              
         }else if(node->win_type == OBJECT_MENU)
         {
-            ret = gk_menu_xy_analysis(node->data,set);
+            ret = image_menu_xy_analysis(node->window,NULL);
         
         }else if (node->win_type == OBJECT_LINE){
             
-            ret = gk_line_xy_analysis(node->data,set);
+            ret = image_line_xy_analysis(node->window,NULL);
         
-        }else if(node->win_type == OBJECT_TXT_WIN){
-        
+        }else if(node->win_type == OBJECT_TEXT_WIN){
+            
+            ret  = image_text_xy_analysis(node->window,NULL);
+
         }else if(node->win_type == OBJECT_BAR){
             
+            ret  = image_bar_xy_analysis(node->window,NULL);
+
         }else{
             printf("erro ,the node not use\n");
         }
@@ -684,8 +841,7 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }
     
     }
-    //move check node
-    window_node_t *temp;
+    //move check node  to  top
     int  k;
     for (k  =  0 ; k < check_cnt ; node = save_node[k],k++)
     {
@@ -700,7 +856,7 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }
         node->f_node->s_head->prev = node;
         node->prev = NULL;
-        node->next = node->f_node->head;
+        node->next = node->f_node->s_head;
         node->f_node->s_head = node;
     }
     sdk_handle->check_level_cnt = check_cnt;
@@ -714,26 +870,35 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
 
 static window_func_t inline *get_window_func(window_node_t *node)
 {
-    
+
+
     if(node == NULL)
         return NULL;
-    
-    window_func_t *func = NULL;
-    
-    if(node->win_type == OBJECT_BAR){
-        func = &(((window_node_bar_t *)node->data)->func_set);
-    }else if(node->win_type == OBJECT_BUTTION){
-        func = &(((window_node_button_t *)node->data)->func_set);
-    }else if(node->win_type == OBJECT_LINE){
-        func = &(((window_node_line_t *)node->data)->func_set);
-    }else if(node->win_type == OBJECT_TXT_WIN){
-        func = &(((window_node_text_t *)node->data)->func_set);
-    }else if(node->win_type == OBJECT_MENU){
-        func = &(((window_node_menu_t *)node->data)->func_set);
 
-    }else{
-        func = NULL;
+    window_func_t *func = NULL;
+
+    switch(node->win_type){
+
+        case OBJECT_BUTTION:
+            func = &(((window_node_button_t *)node->window)->video_set);
+            break;
+        case OBJECT_MENU:
+            func = &(((window_node_menu_t *)node->window)->video_set);
+            break;
+        case OBJECT_LINE:
+            func = &(((window_node_line_t *)node->window)->video_set);
+            break;
+        case OBJECT_TEXT_WIN:
+            func = &(((window_node_text_t *)node->window)->video_set);
+            break;
+        case OBJECT_BAR:
+            func = &(((window_node_bar_t *)node->window)->video_set);
+            break;
+        default:
+            func = NULL;
+            break;
     }
+
 
     return func;;
 }
@@ -741,11 +906,10 @@ static window_func_t inline *get_window_func(window_node_t *node)
 static void  _image_window_func_run(void *data)
 {
     
-    if(sdk_handle->head == NULL)
+    if(sdk_handle->root->s_head == NULL)
         return;
-    window_node_t  *node = NULL,*save_leave_node[MENU_LEVEL];
-    int k = 0,j = 0 ;
-
+    window_node_t  *node = NULL ;
+    int k = 0;
     //leave event
     window_func_t *funcs = NULL;
     for(k = MENU_LEVEL -1  ; k >= 0; k--){
@@ -775,26 +939,46 @@ static void  _image_window_func_run(void *data)
     if(funcs == NULL)
         return;
     
-    if(sdk_handle->mouse_new_data.event == GK_MOUSE_OFFSET){
-        if(funcs->offfuncs)    
-            funcs->offfuncs(funcs->data);
-    }else if(sdk_handle->mouse_new_data.event ==  GK_MOUSE_LEFT_DOWN){
-        if(funcs->ldown)    
-            funcs->ldown(funcs->data);
-    }else if (sdk_handle->mouse_new_data.event ==  GK_MOUSE_LEFT_UP){
-        if(funcs->lup)
-            funcs->lup(funcs->data);
-    }else if(sdk_handle->mouse_new_data.event ==  GK_MOUSE_RIGHT_DOWN){
-        if(funcs->rdown)    
-            funcs->rdown(funcs->data);
-    }else if(sdk_handle->mouse_new_data.event == GK_MOUSE_RIGHT_UP){
-        if(funcs->rup)
-            funcs->rup(funcs->data);
-    }else if(sdk_handle->mouse_new_data.event == GK_MOUSE_LEAVE){
-        if(funcs->leave)
-            funcs->leave(funcs->data);
+   
+    switch(sdk_handle->mouse_new_data.event)
+
+    {
+
+        case GK_MOUSE_OFFSET:
+            if(funcs->mouse_offset)    
+                funcs->mouse_offset(funcs->data);
+            break;
+        case GK_MOUSE_LEFT_DOWN:
+            if(funcs->mouse_left_down)    
+                funcs->mouse_left_down(funcs->data);
+            break;
+        case GK_MOUSE_LEFT_UP:
+            if(funcs->mouse_left_up)
+                funcs->mouse_left_up(funcs->data);
+            break;
+        case GK_MOUSE_RIGHT_DOWN:
+            if(funcs->mouse_right_down)
+                funcs->mouse_right_down(funcs->data);
+            break;
+        case GK_MOUSE_RIGHT_UP:
+            if(funcs->mouse_right_up)    
+                funcs->mouse_right_up(funcs->data);
+            break;
+        case GK_MOUSE_LEAVE:
+            if(funcs->mouse_leave)
+                funcs->mouse_leave(funcs->data);
+            break;
+        
+        case GK_MOUSE_NOTHOR:
+            break;
+        
+        case GK_MOUSE_DEL:
+            break;
+        
+        default:
+            break;
     }
-    
+
     //clear buf
     for(k = 0; k < MENU_LEVEL ; k++){
         sdk_handle->last_check_node[k] = NULL;
@@ -804,7 +988,7 @@ static void  _image_window_func_run(void *data)
         sdk_handle->check_node[k]->check_node = 0;
         sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
     }
-    
+    sdk_handle->check_level_cnt = 0; 
     return ;
 
 }
@@ -812,78 +996,243 @@ static void  _image_window_func_run(void *data)
 
 
 static void freshen_image_buttion(void *data){
-    
-    
-    image_sdk_button_t *bt =  (image_sdk_button_t *)data;
+
+    window_node_button_t *bt =  (window_node_button_t *)data;
+
+    if(bt->user_video_freshen){
+
+        bt->user_video_freshen(data);
+
+        return;
+    }
+
     int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
-    
-    
+
     int k,i;
-    //clean before
-    if(bt->en_follow){
-        
+    //
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        //if open move attr ,need clear before x,y
+        if(bt->this_node->move_arrt != NOT_MOVE){
+            for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
+                    *(buf+ sdk_handle->scree_w*k + i) = 0;    
+            }
+        }
+
         for(k = bt->y ; k < (bt->h + bt->y) ;k++){
             for(i = bt->x ;  i < (bt->w + bt->x) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = 0;    
-        
+                *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
         }
-        
-        bt->y = sdk_handle->mouse_new_data.y;
-        bt->x = sdk_handle->mouse_new_data.x;
+        bt->last_x = bt->x;
+        bt->last_y = bt->y;
     }
-    for(k = bt->y ; k < (bt->h + bt->y) ;k++){
-        for(i = bt->x ;  i < (bt->w + bt->x) ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
-    }
-    
-    return ;
+
 }
 
 static void freshen_image_menu(void *data){
     
-    image_sdk_menu_t *bt =  (image_sdk_menu_t *)data;
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
-    
-    int k,i;
-    //after modfiy memcpy 
-    for(k = bt->y ; k < (bt->h + bt->y) ;k++){
-        for(i = bt->x ;  i < (bt->w + bt->x) ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
+    window_node_menu_t *bt =  (window_node_menu_t *)data;
+       if(bt->user_video_freshen){
+
+        bt->user_video_freshen(data);
+
+        return;
     }
- //   printf("push good menu \n");
+
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+
+    int k,i ,s;
+    //
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        //if open move attr ,need clear before x,y
+        if(bt->this_node->move_arrt != NOT_MOVE){
+            for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
+                    *(buf+ sdk_handle->scree_w*k + i) = 0;    
+            }
+        }
+        
+        for(k = bt->y ; k < (bt->h + bt->y) ;k++) {
+            for(s = 0,i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
+            {
+               
+                if(bt->image_cache){
+                  *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
+                }else{
+                    *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+                }
+             
+            }    
+        }
+
+        bt->last_x = bt->x;
+        bt->last_y = bt->y;
+    }
+
     return ;
        
 }
 static void freshen_image_line(void *data){
     
-    image_sdk_line_t *bt =  (image_sdk_line_t *)data;
+    window_node_line_t *bt =  (window_node_line_t *)data;
+    
+    if(bt->user_video_freshen){
+
+        bt->user_video_freshen(data);
+
+        return;
+    }
+
     int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
-    
     int k,i;
+    //
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < bt->end_x ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        //if open move attr ,need clear before x,y
+        if(bt->this_node->move_arrt != NOT_MOVE){
+            for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < bt->end_x  ; i++ )
+                    *(buf+ sdk_handle->scree_w*k + i) = 0;    
+            }
+        }
+
+        for(k = bt->start_y ; k < (bt->size + bt->start_y) ;k++){
+            for(i = bt->start_x ;  i < bt->end_x  ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
+        }
+        bt->last_x = bt->start_x;
+        bt->last_y = bt->start_y;
+    }
     
-    if(bt->en_follow){
-    
-        //memset(buf,0x0,VO_SCREE_H * VO_SCREE_W*2);
-    for(k = bt->start_y ; k < (bt->start_y + bt->size) ;k++){
-        
-        for(i = bt->start_x ;  i < bt->end_x ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = 0;    
-    }
-        bt->start_y = sdk_handle->mouse_new_data.y;
-        bt->end_y = sdk_handle->mouse_new_data.y;
-        
-    }
-
-    //after modfiy memcpy 
-    for(k = bt->start_y ; k < (bt->start_y + bt->size) ;k++){
-        for(i = bt->start_x ;  i < bt->end_x ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
-    }
- //   printf("push good menu \n");
-
-
     return ;
 }
+
+static void freshen_image_bar(void *data){
+    
+    window_node_bar_t *bt =  (window_node_bar_t *)data;
+    
+    if(bt->user_video_freshen){
+
+        bt->user_video_freshen(data);
+
+        return;
+    }
+
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    int k,i;
+    //
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->last_x +bt->w); i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->last_x +bt->w) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+
+        for(k = bt->y ; k < (bt->h + bt->y) ;k++){
+            for(i = bt->x ;  i < ( bt->x + (bt->w*bt->now_value/bt->max_value))  ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = bt->bar_color;    
+        }
+        bt->last_x = bt->x;
+        bt->last_y = bt->y;
+
+
+    }
+    
+    return ;
+}
+//need wirte text load lib
+static int16_t  *image_text_get_bit(char *s){
+    
+    printf("not load text lib \n");
+
+    return NULL;
+}
+
+static void freshen_image_text(void *data){
+
+    window_node_text_t *bt =  (window_node_text_t *)data;
+
+    if(bt->user_video_freshen){
+
+        bt->user_video_freshen(data);
+
+        return;
+    }
+
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p,*text_bit = NULL; 
+
+    int k,i;
+    //
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->size *bt->lens + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->size *bt->lens + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        }
+
+        char  s;
+        int   nums = 0 ;
+
+        for(nums = 0; nums < bt->lens; nums++){
+            s = bt->text_cache[k];
+            text_bit = image_text_get_bit(&s);
+
+            if(text_bit == NULL)
+                break;
+            int j = 0; 
+            for(k = bt->y ; k < (bt->size + bt->y) ;k++){
+                for(i = bt->x + nums*bt->size ;  i < (bt->size + bt->x + nums*bt->size) ; i++,j++ )
+                {
+                    if(text_bit[j] == 0)
+                        *(buf+ sdk_handle->scree_w*k + i) = 0;    
+                    else
+                        *(buf+ sdk_handle->scree_w*k + i) = bt->text_color;  
+                }
+            }
+        }
+
+
+        bt->last_x = bt->x;
+        bt->last_y = bt->y;
+    }
+
+    return ;
+
+
+}
+
 
 static void freshen_image_mouse(void)
 {
@@ -892,99 +1241,99 @@ static void freshen_image_mouse(void)
     
     sdk_handle->mouse->x = sdk_handle->mouse_new_data.x;
     sdk_handle->mouse->y = sdk_handle->mouse_new_data.y;
-    image_sdk_mouse_t *bt = sdk_handle->mouse;
+    window_node_mouse_t *bt = sdk_handle->mouse;
     int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
     int k,i,j;
     
     //reset data
     //clear
 #if 1 
-    for(k = bt->y_o ,j = 0 ; k < (bt->h + bt->y_o) ; k++)
+    for(k = bt->y_last ,j = 0 ; k < (bt->size + bt->y_last) ; k++)
     {
-        for(i = bt->x_o ;  i < (bt->w + bt->x_o) ; i++ ,j++)
+        for(i = bt->x_last ;  i < (bt->size + bt->x_last) ; i++ ,j++)
             *(buf+ sdk_handle->scree_w*k + i) = 0;
-    }
-#endif
-#if 0
-     //reset data
-    for(k = bt->y_o ,j = 0 ; k < (bt->h + bt->y_o) ; k++)
-    {
-        for(i = bt->x_o ;  i < (bt->w + bt->x_o) ; i++ ,j++)
-            *(buf+ sdk_handle->scree_w*k + i) = *(uint16_t *)(((uint16_t *)bt->save_buf)+j);
-    }
-    
-    //save 
-    for(k = bt->y ,j = 0; k < (bt->h + bt->y) ;k++)
-    {
-        for(i = bt->x ;  i < (bt->w + bt->x) ; i++,j++ ){
-           *(uint16_t *)(((uint16_t *)bt->save_buf)+j) =  *(buf+ sdk_handle->scree_w*k + i);
-        }
     }
 #endif
 
     //push 
-    for(k = bt->y ; k < (bt->h + bt->y) ;k++){
-        for(i = bt->x ;  i < (bt->w + bt->x) ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
+    for(k = bt->y,j= 0 ; k < (bt->size + bt->y) ;k++){
+        for(i = bt->x ;  i < (bt->size + bt->x) ; i++,j++)
+
+            *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_p)+j);    
     }
     
-    bt->x_o = bt->x;
-    bt->y_o = bt->y;
-//    printf("push good mouse \n");
+    bt->x_last = bt->x;
+    bt->y_last = bt->y;
+    
     return ;
 }
 
 
-
-static void  _image_freshen_image(void)
+static inline void _image_freshen(window_node_t *node)
 {
     
-    if(sdk_handle->end == NULL)
+    switch(node->win_type){
+        
+        case OBJECT_BUTTION:
+            freshen_image_buttion(node->window);
+            break;
+        case OBJECT_MENU:
+            freshen_image_menu(node->window);
+ 
+            break;
+
+        case OBJECT_LINE:
+             freshen_image_line(node->window);
+
+            break;
+        case OBJECT_TEXT_WIN:
+            freshen_image_text(node->window);
+            break;
+        case OBJECT_BAR:
+            freshen_image_bar(node->window);
+            break;
+
+        default:
+            break;
+    }
+
+}
+
+
+static void  _image_freshen_video(void)
+{
+    
+    if(sdk_handle->root->s_end == NULL)
         return ;
     
   
-    struct lqueue *temp = NULL,*node = NULL;
+    window_node_t *node = NULL;
     
-    temp = sdk_handle->end;
-   
-
+    node = sdk_handle->root->s_end;
     
-
-    for(;temp != NULL;temp = temp->prev){
+    while ( node  ){
         
-        if(temp->need_push == 0)
-            continue;
-        if(temp->need_push == 2){
-            node = temp;
-            continue;
+        if(node->en_node && node->freshen_arrt != NORTHING ){
+        
+            _image_freshen(node);
         }
-        if(temp->object_s ==  OBJECT_BUTTION){
-            freshen_image_buttion(temp->data);        
-        }else if(temp->object_s == OBJECT_MENU){
-            freshen_image_menu(temp->data);
-        }else {
-            freshen_image_line(temp->data);
+        
+        if(node->en_submenu && node->s_end != NULL){
+            
+            node = node->s_end;
+        }else{
+            node = node->prev;
         }
-        temp->need_push =  0;
 
+        if(node == NULL){
+            node = node->f_node->prev;
+        }         
+           
     }
-   
 
     freshen_image_mouse();
     
-    if(node != NULL){
-        
-        if(node->object_s ==  OBJECT_BUTTION){
-            freshen_image_buttion(node->data);        
-        }else if(node->object_s == OBJECT_MENU){
-            freshen_image_menu(node->data);
-        }else {
-            freshen_image_line(node->data);
-        }
-        node->need_push =  0;
-        //printf("push data node:%p\n",node);
-    }
-
+    
     return ;
 
 }
@@ -1054,9 +1403,9 @@ static void* _image_sdk_handle_data_process_thread(void *data)
             
             _ldata = sdk_handle->mouse_new_data;
             
-            _image_analysis_mdata();
+            _image_analysis_mdata(sdk_handle->mouse_new_data);
             _image_obj_func_run();
-            _image_freshen_image();
+            _image_freshen_video();
 
 
             if(_ldata.x == sdk_handle->mouse_new_data.x &&

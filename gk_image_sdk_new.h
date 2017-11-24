@@ -15,7 +15,7 @@ typedef  enum{
     OBJECT_BUTTION,
     OBJECT_MENU,
     OBJECT_LINE,
-    OBJECT_TXT_WIN,
+    OBJECT_TEXT_WIN,
     OBJECT_BAR,
     OBJECT_NUMS,
 
@@ -87,7 +87,9 @@ typedef struct window_func{
 
 typedef struct window_node_button{
    
-    window_node_t   *this_node; 
+    window_node_t   *this_node;
+    uint16_t        last_x;
+    uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
     uint16_t        w;
@@ -95,15 +97,16 @@ typedef struct window_node_button{
     uint16_t        size;
     uint32_t        color; 
     char            *image_cache;
-    
-    window_func_t   func_set;
-    void            *user_data;
+    window_func_t   video_set;
+    win_func        user_video_freshen; 
 
 }window_node_button_t;
 
 
 typedef struct window_node_menu{
     window_node_t   *this_node;
+    uint16_t        last_x;
+    uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
     uint16_t        w;
@@ -111,12 +114,15 @@ typedef struct window_node_menu{
     uint16_t        size;
     uint32_t        color; 
     char            *image_cache;
-    window_func_t   func_set;
+    window_func_t   video_set;
+    win_func        user_video_freshen; 
 }window_node_menu_t;
 
 typedef struct window_node_line{
        
     window_node_t   *this_node;
+    uint16_t        last_x;
+    uint16_t        last_y;
     uint16_t        start_x;
     uint16_t        start_y;
     uint16_t        end_x;
@@ -124,38 +130,40 @@ typedef struct window_node_line{
     uint16_t        size;
     uint32_t        color; 
     char            *image_cache;
-    
-    window_func_t   func_set;
+    window_func_t   video_set;
+    win_func        user_video_freshen; 
 }window_node_line_t;
 
 typedef struct window_node_text{
        
     window_node_t   *this_node;
+    uint16_t        last_x;
+    uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
     uint16_t        size;
     uint16_t        lens;
     uint32_t        win_color;
     uint32_t        text_color;
-    //char            *text;
     char            *text_cache;
-    
-    window_func_t   func_set;
-
+    window_func_t   video_set;
+    win_func        user_video_freshen; 
 }window_node_text_t;
 
 typedef struct window_node_bar{
        
     window_node_t   *this_node;
+    uint16_t        last_x;
+    uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
-    uint16_t        size;
-    uint16_t        lens;
+    uint16_t        w;
+    uint16_t        h;
     uint16_t        max_value;
     uint16_t        now_value;
     uint32_t        bar_color;
-    window_func_t   func_set;
-
+    window_func_t   video_set;
+    win_func        user_video_freshen; 
 }window_node_bar_t;
 
 typedef struct window_node_mouse{
@@ -166,9 +174,8 @@ typedef struct window_node_mouse{
     uint16_t        y;
     uint16_t        size;
     uint32_t        color;
-    char            *image_cache0;
-    char            *image_cache1;
-    char            *image_cache2;
+    char            *image_p;
+    char            *image_cache;
     char            *save_cache;
 
 }window_node_mouse_t;
@@ -200,7 +207,7 @@ typedef struct  image_sdk_s{
     //mouse check node record
     window_node_t   *last_check_node[MENU_LEVEL];
     window_node_t   *check_node[MENU_LEVEL];
-    uint16_t        check_level_cnt;             ; 
+    uint16_t        check_level_cnt;             
     //mouse image node
     window_node_mouse_t *mouse;
 }image_sdk_t;
@@ -216,10 +223,10 @@ void    Image_SDK_Run(void);
 struct user_set_node_atrr{
     char            node_id[MENU_LEVEL]; 
     uint8_t         en_node;
+    uint8_t         mouse_garp_reflect;
     NODE_FRESHEN_ARRT   en_freshen;
     NODE_MOVE_ARRT  move_arrt;
 };
-
 
 
 int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
@@ -228,12 +235,15 @@ int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
         window_node_menu_t _menu);
 int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
         window_node_line_t _line);
-int    Image_SDK_Create_Text(struct user_set_node_atrr arrt,
+int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text);
+int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
+        window_node_bar_t _text);
+
 
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
 int     Image_SDK_Set_Node_En(char *node_id,uint8_t en);
-int     Image_SDK_Set_Node_En_Freshen(char *node_id,uint8_t en_freshen);
+int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
 
 
 
