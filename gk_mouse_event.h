@@ -4,14 +4,14 @@
 #include <stdint.h>
 
 typedef     enum{
-    GK_MOUSE_OFFSET=0,
+    GK_MOUSE_NOTHOR = 0,
+    GK_MOUSE_OFFSET,
     GK_MOUSE_LEFT_DOWN,
     GK_MOUSE_LEFT_UP,
     GK_MOUSE_RIGHT_DOWN,
     GK_MOUSE_RIGHT_UP,
     GK_MOUSE_LEAVE,
-    GK_MOUSE_NOTHOR,
-    GK_MOUSE_DEL,
+       GK_MOUSE_DEL,
 }GK_MOUSE_EVENT;
 
 

@@ -108,6 +108,8 @@ typedef struct window_node_menu{
     window_node_t   *this_node;
     uint16_t        last_x;
     uint16_t        last_y;
+    uint16_t        last_w;
+    uint16_t        last_h;
     uint16_t        x;
     uint16_t        y;
     uint16_t        w;

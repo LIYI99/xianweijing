@@ -98,11 +98,14 @@ static  void  mouse_offset_func_bian_meun(void *data){
 
     window_node_menu_t *window = (window_node_menu_t *)data;
 
-    window->x = 1500;
-    window->y = 100;
-    window->h = 800;
-    window->w = 400;
-    window->this_node->freshen_arrt = NEED_FRESHEN;
+    if(window->x != 1500){
+        window->this_node->freshen_arrt = NEED_FRESHEN;
+        window->x = 1500;
+        window->y = 100;
+        window->h = 800;
+        window->w = 400;
+    }
+    
     
     return;
 }
@@ -110,12 +113,12 @@ static  void  mouse_offset_func_bian_meun(void *data){
   
 static  void  mouse_leave_func_bian_meun(void *data){
 
-    
+    printf("menu set claer \n"); 
     window_node_menu_t *window = (window_node_menu_t *)data;
-    window->x = 1800;
+    window->x = 1880;
     window->y = 100;
     window->h = 800;
-    window->w = 100;
+    window->w = 40;
     window->this_node->freshen_arrt = NEED_CLEAR;
     
     return;
@@ -138,10 +141,10 @@ int main(int argc,char **argv)
     start_read_venc_thread(); //ok 
     
     Image_SDK_Init();
-    window_node_button_t    bt;
+    window_node_menu_t    bt;
     struct user_set_node_atrr  node_attr;
     
-    memset(&bt,0x0,sizeof(window_node_button_t));
+    memset(&bt,0x0,sizeof(window_node_menu_t));
     
     memset(&node_attr,0x0,sizeof(struct user_set_node_atrr));
     
@@ -159,16 +162,16 @@ int main(int argc,char **argv)
     bt.color = 0xf00f;
     
     bt.video_set.mouse_offset =  mouse_offset_func_bian_meun;
-    bt.video_set.mouse_leave = mouse_leave_func_bian_menu;
+    bt.video_set.mouse_leave =   mouse_leave_func_bian_meun;
 
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     
-    ret = Image_SDK_Create_Button( node_attr,bt);
+    ret = Image_SDK_Create_Menu( node_attr,bt);
 
     memcpy(node_attr.node_id,"Ab",2);
 
-
+#if 0
     bt.video_set.mouse_leave = mouse_leave_botton_func_v2; 
     bt.x = 750;
     bt.y = 450;
@@ -200,7 +203,9 @@ int main(int argc,char **argv)
     lt.video_set.mouse_left_down = mouse_ldown_line_func_v2;
     lt.video_set.mouse_left_up = mouse_lup_line_func_v2;
     
+
     ret = Image_SDK_Create_Line(node_attr,lt);
+#endif
 
 
 
