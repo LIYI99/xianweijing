@@ -51,6 +51,7 @@ struct window_node{
     window_node_t   *s_head;
     window_node_t   *s_end;
     window_node_t   *f_node;
+    GK_MOUSE_EVENT   last_event; 
     uint8_t         en_node;
     uint8_t         check_node;
     uint8_t         en_submenu;

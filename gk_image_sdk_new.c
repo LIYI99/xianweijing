@@ -779,12 +779,12 @@ static inline int image_bar_xy_analysis(void *data,
 
 
 
-static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
+static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
 
 {
     
     if(sdk_handle->root == NULL)
-        return;
+        return ;
    
     int ks;
     for(ks = 0 ; ks < MENU_LEVEL ; ks++)
@@ -824,7 +824,6 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             printf("erro ,the node not use\n");
         }
-       // printf("line:%d func:%s node:%p\n",__LINE__,__func__,node);
     
         if(ret > 0){
             
@@ -846,15 +845,24 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             node = node->next;
         }
-        // if now node == NULL ,goto father,s bother node
         if(node == NULL ){
             stack_cnt--;
             node = ft_stack[stack_cnt]->next;
         }
     
     }
-   // printf("line:%d func:%s \n",__LINE__,__func__);
+    
     //move check node  to  top
+    if(save_node[check_cnt] != NULL)
+    {
+        if(save_node[check_cnt]->last_event == sdk_handle->mouse_new_data.event
+                &&save_node[check_cnt].move_arrt == NOT_MOVE )
+        {
+            check_cnt = 0;
+        }
+    }
+    
+    //move top
     int  k;
     for (k  =  0 ; k < check_cnt ; node = save_node[k],k++)
     {
@@ -872,14 +880,14 @@ static void _image_analysis_mdata(GK_MOUSE_DATA mdata)
         node->next = node->f_node->s_head;
         node->f_node->s_head = node;
     }
- //   printf("line:%d func:%s \n",__LINE__,__func__);
-
+    
     sdk_handle->check_level_cnt = check_cnt;
     //save now mouse check node
-    for (k  =  0 ; k < check_cnt ; k++)
+    for (k  =  0 ; k < check_cnt ; k++){
         sdk_handle->check_node[k] = save_node[k];
-    
-    return ;
+        sdk_handle->check_node[k]->last_event = sdk_handle->mouse_new_data.event;
+    }
+    return  ;
 
  }
 
@@ -1051,6 +1059,8 @@ static void freshen_image_buttion(void *data){
         bt->last_x = bt->x;
         bt->last_y = bt->y;
     }
+   
+    bt->this_node->freshen_arrt = NORTHING;
 
 }
 
@@ -1101,6 +1111,8 @@ static void freshen_image_menu(void *data){
         bt->last_y = bt->y;
     }
 
+    bt->this_node->freshen_arrt = NORTHING;
+    
     return ;
        
 }

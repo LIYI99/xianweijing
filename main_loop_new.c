@@ -91,6 +91,40 @@ static  void  mouse_ldown_line_func_v2(void *data)
 }
 
 
+// chen hua memu
+
+
+static  void  mouse_offset_func_bian_meun(void *data){
+
+    window_node_menu_t *window = (window_node_menu_t *)data;
+
+    window->x = 1500;
+    window->y = 100;
+    window->h = 800;
+    window->w = 400;
+    window->this_node->freshen_arrt = NEED_FRESHEN;
+    
+    return;
+}
+
+  
+static  void  mouse_leave_func_bian_meun(void *data){
+
+    
+    window_node_menu_t *window = (window_node_menu_t *)data;
+    window->x = 1800;
+    window->y = 100;
+    window->h = 800;
+    window->w = 100;
+    window->this_node->freshen_arrt = NEED_CLEAR;
+    
+    return;
+}
+  
+
+
+
+
 int main(int argc,char **argv)
 {
     /*
@@ -114,19 +148,21 @@ int main(int argc,char **argv)
     memcpy(node_attr.node_id,"Aa",2);
     
     node_attr.en_node = 1;
-    node_attr.en_freshen = 1;
+    node_attr.en_freshen = 0;
     node_attr.move_arrt = 0;
 
 
-    bt.x = 700;
+    bt.x = 1800;
     bt.y = 100;
-    bt.w = 40;
-    bt.h = 40;
+    bt.w = 100;
+    bt.h = 800;
     bt.color = 0xf00f;
-    bt.video_set.mouse_offset = mouse_offset_botton_func;
-    bt.video_set.mouse_leave = mouse_leave_botton_func;
-    bt.video_set.mouse_left_down = mouse_ldown_botton_func;
-    bt.video_set.mouse_left_up = mouse_lup_botton_func;
+    
+    bt.video_set.mouse_offset =  mouse_offset_func_bian_meun;
+    bt.video_set.mouse_leave = mouse_leave_func_bian_menu;
+
+    bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
+    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     
     ret = Image_SDK_Create_Button( node_attr,bt);
 
