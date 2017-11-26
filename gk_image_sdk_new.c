@@ -557,7 +557,9 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         window_node_bar_t _bar)
 {
-     
+    
+    printf("create bar w:%d max_value:%d now_value:%d \n",_bar.w,
+            _bar.max_value,_bar.now_value);
     if(sdk_handle == NULL)
         return -2;
     
@@ -568,7 +570,7 @@ int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         return -3;
     }
    
-    window_node_bar_t * bar = NULL;
+    window_node_bar_t *     bar = NULL;
     bar = (window_node_bar_t *)object_pool_get(sdk_handle->object_pool);
     if(bar == NULL){
         object_pool_free(sdk_handle->window_node_pool,lq);
@@ -604,7 +606,7 @@ int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
     lq->win_type = OBJECT_BAR;
     lq->window = (void *)bar;
     lq->mouse_garp_reflect = attr.mouse_garp_reflect;
-
+    printf("bar->now_value:%d _bar.now_value:%d\n",bar->now_value,_bar.now_value);
     return 0;
 
 
@@ -760,10 +762,13 @@ static inline int image_bar_xy_analysis(void *data,
     
     GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
-    if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->w  
-            && mdata.y >= bt->y  && mdata.y <= bt->y+bt->h){
+    if( (mdata.x + MOUSE_SIZE /2)  >= bt->x  && (mdata.x + MOUSE_SIZE/2) <= bt->x + bt->w  
+            && (mdata.y + MOUSE_SIZE /2) >= bt->y - 2  && (mdata.y+ MOUSE_SIZE/2) <= (bt->y+bt->h+2)){
+        //add mouse data
         
-         return 1;
+        bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
+        printf("check bar \n"); 
+        return 1;
     }
     else 
         return 0;
@@ -889,8 +894,8 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
     {
         
         node = save_node[k];
-        printf("xxxx node:%p ,node->f_node:%p,node->f_node->s_head :%p\n",
-                node,node->f_node,node->f_node->s_head); 
+        //printf("xxxx node:%p ,node->f_node:%p,node->f_node->s_head :%p\n",
+          //      node,node->f_node,node->f_node->s_head); 
         if(node == node->f_node->s_head)
             continue;
         node->prev->next = node->next;
@@ -966,7 +971,7 @@ static void  _image_window_func_run(void *data)
             continue;
             
         node = sdk_handle->last_check_node[k];
-        printf("node->chcek_node:%d\n",node->check_node);
+        //printf("node->chcek_node:%d\n",node->check_node);
         
         if(node->check_node)
             continue;
@@ -1052,14 +1057,15 @@ static void freshen_image_buttion(void *data){
 
     window_node_button_t *bt =  (window_node_button_t *)data;
 
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    
     if(bt->user_video_freshen){
 
-        bt->user_video_freshen(data);
-
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
+        bt->this_node->freshen_arrt = NORTHING;
         return;
     }
 
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
 
     int k,i;
     //
@@ -1095,14 +1101,15 @@ static void freshen_image_buttion(void *data){
 static void freshen_image_menu(void *data){
     
     window_node_menu_t *bt =  (window_node_menu_t *)data;
-       if(bt->user_video_freshen){
+    
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    
+    if(bt->user_video_freshen){
 
-        bt->user_video_freshen(data);
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
 
         return;
     }
-
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
 
     int k,i ,s;
     //
@@ -1114,7 +1121,7 @@ static void freshen_image_menu(void *data){
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
-
+        printf("push mune video \n");
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
             for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
@@ -1150,14 +1157,14 @@ static void freshen_image_line(void *data){
     
     window_node_line_t *bt =  (window_node_line_t *)data;
     
+   int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    
     if(bt->user_video_freshen){
 
-        bt->user_video_freshen(data);
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
 
         return;
     }
-
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
     int k,i;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
@@ -1191,14 +1198,14 @@ static void freshen_image_bar(void *data){
     
     window_node_bar_t *bt =  (window_node_bar_t *)data;
     
+   int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    
     if(bt->user_video_freshen){
 
-        bt->user_video_freshen(data);
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
 
         return;
     }
-
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
     int k,i;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
@@ -1209,18 +1216,22 @@ static void freshen_image_bar(void *data){
         }
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
 
-        for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
-            for(i = bt->last_x ;  i < (bt->last_x +bt->w) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = 0;    
-        }
-
         for(k = bt->y ; k < (bt->h + bt->y) ;k++){
-            for(i = bt->x ;  i < ( bt->x + (bt->w*bt->now_value/bt->max_value))  ; i++ )
+            for(i = bt->x ;  i < (bt->x +bt->w) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = 0xFFFF;    
+        }
+        int vl = bt->w * bt->now_value/bt->max_value;
+        printf("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
+                bt->bar_color);
+        for(k = bt->y ; k < (bt->h + bt->y) ;k++){
+            for(i = bt->x ;  i < ( bt->x + vl )  ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = bt->bar_color;    
         }
         bt->last_x = bt->x;
         bt->last_y = bt->y;
+        
 
+        bt->this_node->freshen_arrt = NORTHING;
 
     }
     
@@ -1238,14 +1249,15 @@ static void freshen_image_text(void *data){
 
     window_node_text_t *bt =  (window_node_text_t *)data;
 
+    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    
     if(bt->user_video_freshen){
 
-        bt->user_video_freshen(data);
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
 
         return;
     }
-
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p,*text_bit = NULL; 
+    int16_t  *text_bit = NULL; 
 
     int k,i;
     //

@@ -29,8 +29,8 @@ int  gk_mouse_open(char *path,unsigned int scree_w,unsigned int scree_h,unsigned
     mouse_t.scree_h = scree_h;
     mouse_t.scree_w = scree_w;
 
-    mouse_t.mouse_step_h = speed * MOUSE_STEP;
-    mouse_t.mouse_step_w = mouse_t.mouse_step_h *mouse_t.scree_w / mouse_t.scree_h;
+    mouse_t.mouse_step_h =  speed * MOUSE_STEP;
+    mouse_t.mouse_step_w =  mouse_t.mouse_step_h *mouse_t.scree_w / mouse_t.scree_h;
     mouse_t.speed = speed;
     mouse_t.mouse_size = mouse_size;
     s_event.x = 0;
@@ -96,11 +96,15 @@ int  gk_mouse_read_data(int fd,GK_MOUSE_DATA *data)
     data->x = (1 > data->x) ? 0 : data->x;
     data->y = (1 > data->y) ? 0 : data->y;
     
+    // 
+    
     data->x = ((mouse_t.scree_w - mouse_t.mouse_size) <= 
             data->x) ? (mouse_t.scree_w - mouse_t.mouse_size) : data->x;
     
     data->y = ((mouse_t.scree_h - mouse_t.mouse_size) <= 
             data->y) ? (mouse_t.scree_h - mouse_t.mouse_size) : data->y;
+    
+   
     
     if( type == 0)
     {
@@ -119,7 +123,7 @@ int  gk_mouse_read_data(int fd,GK_MOUSE_DATA *data)
         
         data->event = GK_MOUSE_RIGHT_DOWN;
     }
-    s_event =  *data;
+        s_event =  *data;
 #ifdef DEBUG_
     printf(" sencod:events type:%d x:%d y:%d  x->bu[1]:%d,y->buf[2]\n",data->event,data->x,data->y,buf[1],buf[2]);
 #endif

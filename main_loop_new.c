@@ -15,19 +15,6 @@ static  void  mouse_leave_botton_func_v2(void *data)
     bt->color = 0xFF80;
 }
 
-static  void  mouse_leave_botton_func(void *data)
-{
-    
-    window_node_button_t *bt  =  (window_node_button_t*)(data);
-    bt->color = 0xF00F;
-}
-
-static  void  mouse_offset_botton_func(void *data)
-{
-    
-    window_node_button_t *bt  =  (window_node_button_t*)(data);
-    bt->color = 0xBBCA;
-}
 
 static  void  mouse_rdown_botton_func(void *data)
 {
@@ -92,18 +79,16 @@ static  void  mouse_ldown_line_func_v2(void *data)
 
 
 // chen hua memu
-
-
 static  void  mouse_offset_func_bian_meun(void *data){
 
     window_node_menu_t *window = (window_node_menu_t *)data;
 
-    if(window->x != 1500){
+    if(window->x != 1600){
         window->this_node->freshen_arrt = NEED_FRESHEN;
-        window->x = 1500;
+        window->x = 1600;
         window->y = 100;
         window->h = 800;
-        window->w = 400;
+        window->w = 300;
         window->this_node->en_submenu = 1;
     }
     
@@ -125,9 +110,72 @@ static  void  mouse_leave_func_bian_meun(void *data){
     
     return;
 }
-  
+
+// record snap button 
+static  void  mouse_leave_button_func_v1(void *data)
+{
+    
+    window_node_button_t *bt  =  (window_node_button_t*)(data);
+    bt->color = 0xF00F;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+}
+
+static  void  mouse_offset_button_func_v1(void *data)
+{
+    
+    window_node_button_t *bt  =  (window_node_button_t*)(data);
+    bt->color = 0xBBCA;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+}
+
+static void usr_push_video_button(void *data ,uint16_t *fbbuf,int scree_w ,int scree_h)
+{
+
+    window_node_button_t *bt =  (window_node_button_t *)data;
+    printf(" video push bt->color:%x\n",bt->color); 
+    //top w line
+    int i ,k ;
+    for(i = bt->y; i < (bt->y+bt->size) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    //low w line
+    for(i = bt->y+bt->h - bt->size; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // l h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < ( bt->x + bt->size) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // r h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x + bt->w - bt->size; k  < ( bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+
+}
+
+//bar func 
+
+static  void  mouse_check_bar_func_v1(void *data)
+{
+    
+    window_node_bar_t *bt  =  (window_node_bar_t*)(data);
+    
+    if(bt->this_node->mouse_data.x < bt->x)
+        return;
+   
+    printf(" check bar value \n");
+
+    bt->now_value = (bt->this_node->mouse_data.x - bt->x)*bt->max_value/bt->w;
 
 
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+}
 
 
 int main(int argc,char **argv)
@@ -166,7 +214,7 @@ int main(int argc,char **argv)
     mt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     ret = Image_SDK_Create_Menu( node_attr,mt);
 
-    //button
+    // three button
     window_node_button_t    bt;
     memset(&bt,0x0,sizeof(window_node_button_t));
     
@@ -174,15 +222,19 @@ int main(int argc,char **argv)
     node_attr.en_node = 1;
     node_attr.en_freshen = 1;
     node_attr.move_arrt = 0;
-    bt.x = 1520;
+    
+    bt.size =  2;
+    bt.x = 1620;
     bt.y = 120;
     bt.w = 50;
     bt.h = 50;
-    bt.color = 0xFE41;
-    bt.video_set.mouse_offset =  NULL;
-    bt.video_set.mouse_leave =   NULL;
+    bt.color = 0xf00f;
+    bt.video_set.mouse_offset =  mouse_offset_button_func_v1;
+    bt.video_set.mouse_leave =    mouse_leave_button_func_v1;
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
+    bt.user_video_freshen = usr_push_video_button;
+
     ret = Image_SDK_Create_Button( node_attr,bt);
     
     //
@@ -190,13 +242,11 @@ int main(int argc,char **argv)
     node_attr.en_node = 1;
     node_attr.en_freshen = 1;
     node_attr.move_arrt = 0;
-    bt.x = 1600;
+    bt.x = 1725;
     bt.y = 120;
     bt.w = 50;
     bt.h = 50;
-    bt.color = 0xFE41;
-    bt.video_set.mouse_offset =  NULL;
-    bt.video_set.mouse_leave =   NULL;
+    bt.color = 0xf00f;
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     ret = Image_SDK_Create_Button( node_attr,bt);
@@ -205,21 +255,33 @@ int main(int argc,char **argv)
     node_attr.en_node = 1;
     node_attr.en_freshen = 1;
     node_attr.move_arrt = 0;
-    bt.x = 1700;
+    bt.x = 1830;
     bt.y = 120;
     bt.w = 50;
     bt.h = 50;
-    bt.color = 0xFE41;
-    bt.video_set.mouse_offset =  NULL;
-    bt.video_set.mouse_leave =   NULL;
+    bt.color = 0xf00f;
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     ret = Image_SDK_Create_Button( node_attr,bt);
     
 
     
-    //memcpy(node_attr.node_id,"Ab",2);
+    //test bar
+    memcpy(node_attr.node_id,"Aad",3);
 
+    window_node_bar_t   _bar;
+    memset(&_bar,0x0 ,sizeof(window_node_bar_t));
+    _bar.x = 1620;
+    _bar.y = 800;
+    _bar.w = 260;
+    _bar.h = 5;
+    _bar.bar_color = 0x3A39; 
+    _bar.max_value = 100;
+    _bar.now_value = 30;
+    _bar.video_set.mouse_left_down = mouse_check_bar_func_v1;
+    ret = Image_SDK_Create_Bar(node_attr,_bar);
+
+    
     
     
     Image_SDK_Run();

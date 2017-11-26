@@ -51,6 +51,7 @@ struct window_node{
     window_node_t   *s_head;
     window_node_t   *s_end;
     window_node_t   *f_node;
+    GK_MOUSE_DATA    mouse_data;
     GK_MOUSE_EVENT   last_event; 
     uint8_t         en_node;
     uint8_t         check_node;
@@ -72,6 +73,8 @@ struct window_node{
 
 typedef void  (*win_func)(void *data);
 
+typedef void  (*win_func_usr)(void *data,uint16_t *fbbuf,
+        int scree_w,int scree_h);
 
 
 typedef struct window_func{
@@ -99,7 +102,7 @@ typedef struct window_node_button{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func        user_video_freshen; 
+    win_func_usr        user_video_freshen; 
 
 }window_node_button_t;
 
@@ -118,7 +121,7 @@ typedef struct window_node_menu{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func        user_video_freshen; 
+    win_func_usr        user_video_freshen; 
 }window_node_menu_t;
 
 typedef struct window_node_line{
@@ -134,7 +137,7 @@ typedef struct window_node_line{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func        user_video_freshen; 
+    win_func_usr    user_video_freshen; 
 }window_node_line_t;
 
 typedef struct window_node_text{
@@ -150,7 +153,7 @@ typedef struct window_node_text{
     uint32_t        text_color;
     char            *text_cache;
     window_func_t   video_set;
-    win_func        user_video_freshen; 
+    win_func_usr    user_video_freshen; 
 }window_node_text_t;
 
 typedef struct window_node_bar{
@@ -165,8 +168,9 @@ typedef struct window_node_bar{
     uint16_t        max_value;
     uint16_t        now_value;
     uint32_t        bar_color;
+    //GK_MOUSE_DATA   mouse_data;
     window_func_t   video_set;
-    win_func        user_video_freshen; 
+    win_func_usr    user_video_freshen; 
 }window_node_bar_t;
 
 typedef struct window_node_mouse{
