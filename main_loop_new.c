@@ -104,6 +104,7 @@ static  void  mouse_offset_func_bian_meun(void *data){
         window->y = 100;
         window->h = 800;
         window->w = 400;
+        window->this_node->en_submenu = 1;
     }
     
     
@@ -120,6 +121,7 @@ static  void  mouse_leave_func_bian_meun(void *data){
     window->h = 800;
     window->w = 40;
     window->this_node->freshen_arrt = NEED_CLEAR;
+    window->this_node->en_submenu = 0;
     
     return;
 }
@@ -141,10 +143,10 @@ int main(int argc,char **argv)
     start_read_venc_thread(); //ok 
     
     Image_SDK_Init();
-    window_node_menu_t    bt;
-    struct user_set_node_atrr  node_attr;
     
-    memset(&bt,0x0,sizeof(window_node_menu_t));
+    window_node_menu_t    mt;
+    struct user_set_node_atrr  node_attr;
+    memset(&mt,0x0,sizeof(window_node_menu_t));
     
     memset(&node_attr,0x0,sizeof(struct user_set_node_atrr));
     
@@ -153,63 +155,73 @@ int main(int argc,char **argv)
     node_attr.en_node = 1;
     node_attr.en_freshen = 0;
     node_attr.move_arrt = 0;
+    mt.x = 1880;
+    mt.y = 100;
+    mt.w = 100;
+    mt.h = 800;
+    mt.color = 0xf00f;
+    mt.video_set.mouse_offset =  mouse_offset_func_bian_meun;
+    mt.video_set.mouse_leave =   mouse_leave_func_bian_meun;
+    mt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
+    mt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
+    ret = Image_SDK_Create_Menu( node_attr,mt);
 
-
-    bt.x = 1800;
-    bt.y = 100;
-    bt.w = 100;
-    bt.h = 800;
-    bt.color = 0xf00f;
+    //button
+    window_node_button_t    bt;
+    memset(&bt,0x0,sizeof(window_node_button_t));
     
-    bt.video_set.mouse_offset =  mouse_offset_func_bian_meun;
-    bt.video_set.mouse_leave =   mouse_leave_func_bian_meun;
-
+    memcpy(node_attr.node_id,"Aaa",3);
+    node_attr.en_node = 1;
+    node_attr.en_freshen = 1;
+    node_attr.move_arrt = 0;
+    bt.x = 1520;
+    bt.y = 120;
+    bt.w = 50;
+    bt.h = 50;
+    bt.color = 0xFE41;
+    bt.video_set.mouse_offset =  NULL;
+    bt.video_set.mouse_leave =   NULL;
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
+    ret = Image_SDK_Create_Button( node_attr,bt);
     
-    ret = Image_SDK_Create_Menu( node_attr,bt);
-
-    memcpy(node_attr.node_id,"Ab",2);
-
-#if 0
-    bt.video_set.mouse_leave = mouse_leave_botton_func_v2; 
-    bt.x = 750;
-    bt.y = 450;
-    bt.w = 120;
-    bt.h = 120;
-    bt.color = 0xFF80;
-    ret = Image_SDK_Create_Button(node_attr ,bt);
-
-
-
-
-  
-
-       
-    memcpy(node_attr.node_id,"Ac",2);
-
-    node_attr.move_arrt = 1;
-
-    window_node_line_t    lt;
-
-    memset(&lt,0x0,sizeof(window_node_line_t));
-
-    lt.start_x = 20;
-    lt.start_y = 800;
-    lt.end_y = 800;
-    lt.end_x = 1900;
-    lt.size = 1;
-    lt.color = 0xf00f;
-    lt.video_set.mouse_left_down = mouse_ldown_line_func_v2;
-    lt.video_set.mouse_left_up = mouse_lup_line_func_v2;
+    //
+    memcpy(node_attr.node_id,"Aab",3);
+    node_attr.en_node = 1;
+    node_attr.en_freshen = 1;
+    node_attr.move_arrt = 0;
+    bt.x = 1600;
+    bt.y = 120;
+    bt.w = 50;
+    bt.h = 50;
+    bt.color = 0xFE41;
+    bt.video_set.mouse_offset =  NULL;
+    bt.video_set.mouse_leave =   NULL;
+    bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
+    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
+    ret = Image_SDK_Create_Button( node_attr,bt);
+    
+    memcpy(node_attr.node_id,"Aac",3);
+    node_attr.en_node = 1;
+    node_attr.en_freshen = 1;
+    node_attr.move_arrt = 0;
+    bt.x = 1700;
+    bt.y = 120;
+    bt.w = 50;
+    bt.h = 50;
+    bt.color = 0xFE41;
+    bt.video_set.mouse_offset =  NULL;
+    bt.video_set.mouse_leave =   NULL;
+    bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
+    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
+    ret = Image_SDK_Create_Button( node_attr,bt);
     
 
-    ret = Image_SDK_Create_Line(node_attr,lt);
-#endif
+    
+    //memcpy(node_attr.node_id,"Ab",2);
 
-
-
-
+    
+    
     Image_SDK_Run();
 
     //

@@ -838,32 +838,40 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
             
             node->check_node = 1;
             save_node[check_cnt] = node;
-                        check_cnt++;
+            check_cnt++;
         }
+        //printf("__func__:%s Line:%d  check_cnt:%d root:%p node:%p node->ft:%p stat_cnt:%d\n",__func__,__LINE__,check_cnt,
+          //      sdk_handle->root,node,node->f_node,stack_cnt);
         // if check node dont have childe node ,so travle end
         if(ret > 0  && node->s_head == NULL ){
             break;
+        
         }
+
         // if check node have childe node ,than tarlve the son node 
         // else tarvle bother node
         if( ret > 0  && node->s_head != NULL){
-            node = node->s_head;
+
+       //     printf("pop statck node:%p node->s_head:%p\n",node,node->s_head);
             ft_stack[stack_cnt] = node;
             stack_cnt++;
+            node = node->s_head;
 
         }else{
             node = node->next;
         }
         if(node == NULL ){
             stack_cnt--;
+     //       printf("quit stack top fnode:%p fndoe->next:%p\n",ft_stack[stack_cnt],ft_stack[stack_cnt]->next);
             node = ft_stack[stack_cnt]->next;
+
         }
     
     }
     
     //
 
-#if 1
+
     if( check_cnt != 0 )
     {
         if(save_node[check_cnt -1]->last_event == sdk_handle->mouse_new_data.event
@@ -873,14 +881,16 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }
     }
      
-#endif
 
-    printf("check_cnt:%d \n",check_cnt);
+    //printf("test check_cnt:%d node:%p\n",check_cnt,save_node[check_cnt -1]);
     //move top
     int  k;
-    for (k  =  0 ; k < check_cnt ; node = save_node[k],k++)
+    for (k  =  0 ; k < check_cnt ; k++)
     {
         
+        node = save_node[k];
+        printf("xxxx node:%p ,node->f_node:%p,node->f_node->s_head :%p\n",
+                node,node->f_node,node->f_node->s_head); 
         if(node == node->f_node->s_head)
             continue;
         node->prev->next = node->next;
@@ -894,13 +904,14 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         node->next = node->f_node->s_head;
         node->f_node->s_head = node;
     }
-    
+   //printf("line:%d test \n",__LINE__); 
     sdk_handle->check_level_cnt = check_cnt;
     //save now mouse check node
     for (k  =  0 ; k < check_cnt ; k++){
         sdk_handle->check_node[k] = save_node[k];
         sdk_handle->check_node[k]->last_event = sdk_handle->mouse_new_data.event;
     }
+   // printf("xy func quit \n");
     return  ;
 
  }
@@ -1298,7 +1309,7 @@ static void freshen_image_mouse(void)
     //reset data
     //clear
 #if 1
-    printf("frensh mouse \n");
+  //  printf("frensh mouse \n");
     //1.reset data  2.save data 3.push data
     
     uint16_t *savebuf ;
@@ -1438,9 +1449,8 @@ static void  _image_freshen_video(void)
         }
         
         if(node->en_submenu && node->s_end != NULL){
-            
-            node = node->s_end;
             ft_stack[stack_cnt] = node;
+            node = node->s_end;
             stack_cnt++;
         }else{
             node = node->prev;
