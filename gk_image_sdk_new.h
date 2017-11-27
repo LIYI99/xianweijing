@@ -147,7 +147,8 @@ typedef struct window_node_text{
     uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
-    uint16_t        size;
+    uint8_t         font_size;
+    uint8_t         asc_width;
     uint16_t        lens;
     uint32_t        win_color;
     uint32_t        text_color;
@@ -168,9 +169,10 @@ typedef struct window_node_bar{
     uint16_t        max_value;
     uint16_t        now_value;
     uint32_t        bar_color;
-    //GK_MOUSE_DATA   mouse_data;
     window_func_t   video_set;
-    win_func_usr    user_video_freshen; 
+    win_func_usr    user_video_freshen;
+    
+    char            text_id[MENU_LEVEL];   //be related text windows
 }window_node_bar_t;
 
 typedef struct window_node_mouse{
@@ -245,14 +247,14 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text);
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
-        window_node_bar_t _text);
+        window_node_bar_t _bar);
 
 
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
 int     Image_SDK_Set_Node_En(char *node_id,uint8_t en);
 int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
 
-
+int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
 
 
 

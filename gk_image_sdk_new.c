@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #include"gk_image_sdk_new.h"
-
+#include"image_text_put.h"
 //device info set 
 #define     VO_SCREE_W          1920
 #define     VO_SCREE_H          1080
@@ -23,8 +23,14 @@
 
 //image disp info set
 #define     DISP_OBJ_MAX        100
-
 #define     MOUSE_SIZE          30
+
+//font set
+
+#define     FONT_SIZE_T         16
+#define     FONT_PATH_T         "/usr/local/bin/font/asc16"
+
+
 
 
 static      image_sdk_t         *sdk_handle = NULL;
@@ -190,6 +196,12 @@ void    Image_SDK_Init(void){
     //en sdk handle
     sdk_handle->en = 1;
     
+    //load font lib
+    int ret = 0; 
+    ret = image_text_lib_init(FONT_SIZE_T,FONT_PATH_T);
+    if(ret < 0)
+        printf("load font lib fail ret:%d\n",ret);
+
     return;
 
 ERR3:
@@ -504,7 +516,17 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
     
     if(sdk_handle == NULL)
         return -2;
-    
+
+    if(image_text_get_font_width() <= 0){
+        
+        printf("text lib not load \n");
+        return -9;
+    }
+    uint8_t asc_width = image_text_get_font_width();
+    uint8_t font_size = image_text_get_font_size();
+
+          
+
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
@@ -529,17 +551,25 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
     }
 
     *text =  _text;
-     text->this_node = lq;
+    text->this_node = lq;
+       text->asc_width = asc_width;
+    text->font_size = font_size;
+
+    //need change mem pool;
+#if 1
+    text->text_cache = (char *)malloc(text->lens +1); //save text 
+    memset(text->text_cache,0x0,text->lens + 1);
+#endif
 
     if(_text.video_set.data == NULL)
         text->video_set.data  = (void *)text;
 
     if(text->x > sdk_handle->scree_w){
-        text->x = sdk_handle->scree_w - text->lens *text->size;
+        text->x = sdk_handle->scree_w - text->lens *text->asc_width;
         printf("you set x > srcee_w\n");
     }
     if(text->y > sdk_handle->scree_h){
-        text->y = sdk_handle->scree_h -text->size;
+        text->y = sdk_handle->scree_h -text->asc_width;
         printf("you set y > srcee_h\n");
     }
    
@@ -675,6 +705,34 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id, NODE_FRESHEN_ARRT en_freshe
 
 }
 
+int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
+{
+
+    
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+        return -2;
+    if(temp->win_type != OBJECT_TEXT_WIN)
+        return -3;
+
+    window_node_text_t *tt = (window_node_text_t *)temp->window;
+    
+    if(tt->lens < size)
+        return -5;
+
+    memcpy(tt->text_cache,text,size);
+    
+    tt->text_cache[size] = '\0';
+    temp->freshen_arrt = NEED_FRESHEN;
+    
+    return 0;
+
+}
+
+
 
 
 static inline int image_buttont_xy_analysis(void *data,window_func_t *set)
@@ -741,8 +799,8 @@ static inline int image_text_xy_analysis(void *data,
     
     GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
-    if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->size * bt->lens 
-            && mdata.y >= bt->y  && mdata.y <= bt->y+bt->size){
+    if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->asc_width * bt->lens 
+            && mdata.y >= bt->y  && mdata.y <= bt->y+bt->font_size){
         
          return 1;
     }
@@ -1194,6 +1252,7 @@ static void freshen_image_line(void *data){
     return ;
 }
 
+
 static void freshen_image_bar(void *data){
     
     window_node_bar_t *bt =  (window_node_bar_t *)data;
@@ -1229,8 +1288,7 @@ static void freshen_image_bar(void *data){
         }
         bt->last_x = bt->x;
         bt->last_y = bt->y;
-        
-
+                
         bt->this_node->freshen_arrt = NORTHING;
 
     }
@@ -1257,21 +1315,21 @@ static void freshen_image_text(void *data){
 
         return;
     }
-    int16_t  *text_bit = NULL; 
+    uint8_t  *text_bit = NULL; 
 
     int k,i;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
 
-        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
-            for(i = bt->last_x ;  i < (bt->size *bt->lens + bt->last_x) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
         }
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
 
-        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
-            for(i = bt->last_x ;  i < (bt->size *bt->lens + bt->last_x) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+        for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
+            for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ )
+                *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
         }
 
         char  s;
@@ -1279,16 +1337,19 @@ static void freshen_image_text(void *data){
 
         for(nums = 0; nums < bt->lens; nums++){
             s = bt->text_cache[k];
-            text_bit = image_text_get_bit(&s);
+            if(s == '\0')
+                break;
+
+            text_bit = image_text_lib_put_pixl(&s);
 
             if(text_bit == NULL)
                 break;
             int j = 0; 
-            for(k = bt->y ; k < (bt->size + bt->y) ;k++){
-                for(i = bt->x + nums*bt->size ;  i < (bt->size + bt->x + nums*bt->size) ; i++,j++ )
+            for(k = bt->y ; k < (bt->font_size + bt->y) ;k++){
+                for(i = bt->x + nums*bt->asc_width ;  i < (bt->font_size + bt->x + nums*bt->font_size) ; i++,j++ )
                 {
                     if(text_bit[j] == 0)
-                        *(buf+ sdk_handle->scree_w*k + i) = 0;    
+                        *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
                     else
                         *(buf+ sdk_handle->scree_w*k + i) = bt->text_color;  
                 }

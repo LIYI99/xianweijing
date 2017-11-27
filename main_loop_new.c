@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdlib.h>
 #include "gk_device_init.h"
 #include "gk_image_sdk_new.h"
 
@@ -171,9 +172,16 @@ static  void  mouse_check_bar_func_v1(void *data)
     printf(" check bar value \n");
 
     bt->now_value = (bt->this_node->mouse_data.x - bt->x)*bt->max_value/bt->w;
-
-
     bt->this_node->freshen_arrt = NEED_FRESHEN;
+    
+
+    //text window
+    char text[5];
+    sprintf( text,"%d",bt->now_value);
+    Image_SDK_Set_Text_Node_Text(bt->text_id, text,2);
+
+    return;
+
 
 }
 
@@ -263,7 +271,9 @@ int main(int argc,char **argv)
     bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
     bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
     ret = Image_SDK_Create_Button( node_attr,bt);
-    
+   
+  
+
 
     
     //test bar
@@ -273,17 +283,29 @@ int main(int argc,char **argv)
     memset(&_bar,0x0 ,sizeof(window_node_bar_t));
     _bar.x = 1620;
     _bar.y = 800;
-    _bar.w = 260;
+    _bar.w = 200;
     _bar.h = 5;
     _bar.bar_color = 0x3A39; 
     _bar.max_value = 100;
     _bar.now_value = 30;
     _bar.video_set.mouse_left_down = mouse_check_bar_func_v1;
     ret = Image_SDK_Create_Bar(node_attr,_bar);
+    memcpy(_bar.text_id,"Aae",3);
 
-    
-    
-    
+    // test add text put
+    memcpy(node_attr.node_id,"Aae",3);
+
+    window_node_text_t _text;
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1830;
+    _text.y = 800;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+    ret = Image_SDK_Set_Text_Node_Text("Aae", "30",2);
+
+
     Image_SDK_Run();
 
     //

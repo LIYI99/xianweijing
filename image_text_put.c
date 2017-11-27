@@ -20,6 +20,7 @@ struct  text_lib_handle{
     int     text_size;
     size_t  asc_width;
     size_t  gb2312_width;
+    uint8_t *put_buf;
     char*   lib_ptr;
 };
 
@@ -73,9 +74,15 @@ int     image_text_lib_init(int text_size,char* text_path)
             _text_handle->asc_width = -1;
             break;
     }
+    printf("test text init _text_handle->asc_width:%d,size:%d\n",_text_handle->asc_width,text_size);
 
     if(_text_handle->asc_width < 0)
         goto ERR1;
+    //malloc put buf
+    _text_handle->put_buf =  (uint8_t *)malloc(_text_handle->text_size * _text_handle->asc_width +1);
+    if(_text_handle->put_buf == NULL)
+        goto ERR1;
+    memset(_text_handle->put_buf,0x0,_text_handle->text_size * _text_handle->asc_width +1);
 
     //load lib 
     struct stat text_stat = {0};
@@ -109,6 +116,7 @@ ERR2:
 ERR1:
     
     free(_text_handle);
+    _text_handle = NULL;
     return -5;
 }
 
@@ -124,19 +132,22 @@ int     image_text_lib_deinit(void){
 }
 
 //only suport  enlish
-int     image_text_lib_put_pixl(char *text, uint8_t *buf){
+uint8_t *   image_text_lib_put_pixl(char *text){
 
     
     if(text == NULL)
-        return -1;
+        return NULL;
     if(*text >= 0x7f)
-        return -2;
-    
+        return NULL;
+    if(_text_handle == NULL)
+        return NULL;
 
-    int const stride_bytes =  (_text_handle->asc_width +7)/8;
-    int const asc_code = *text;
+    int stride_bytes =  (_text_handle->asc_width +7)/8;
+    int asc_code = *text;
     
-    int i,ii,iii;
+    printf("put text c:%c uint8_t:%x stride_bytes :%d,_text_handle->asc_width:%d\n", *text,*text,stride_bytes,
+            _text_handle->asc_width);
+    int i,ii,iii,k = 0 ;
 
     for(i = 0 ; i < _text_handle->text_size;i++)
     {
@@ -152,19 +163,49 @@ int     image_text_lib_put_pixl(char *text, uint8_t *buf){
 						uint8_t const actived_px = 0x80>>iii;//(1<<(8-1-iii));
 				        //1 is font,o is back	
                         if(_text_handle->lib_ptr[offset_byte] & actived_px){
-                             *buf =  1;
+                             _text_handle->put_buf[k] =  1;
                         }else{
                             
-                             *buf = 2;
+                             _text_handle->put_buf[k]  = 0;
                         }
                         ++stride_pixel;
-                        buf++;
+                        k++;
 
 			}
         }
     }
-    
-    return 0; 
+#if 1  //test
+    iii = 0;
+    printf("\n");
+    for(i = 0; i < _text_handle->text_size ;i++){
+        for(ii = 0 ; ii < _text_handle->asc_width; ii++,iii++)
+            printf("%d",_text_handle->put_buf[iii]);
+        
+        printf("\n");
+    }
+
+
+#endif
+
+    return _text_handle->put_buf; 
 
 }
+
+int     image_text_get_font_size(void){
+    
+    if(_text_handle)
+        return _text_handle->text_size;
+    
+    return 0;
+
+}
+
+int     image_text_get_font_width(void)
+{
+    if(_text_handle)
+        return _text_handle->asc_width;
+    return 0;
+}
+
+
 
