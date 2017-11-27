@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <time.h>
+
 #include "gk_device_init.h"
 #include "gk_image_sdk_new.h"
 
@@ -178,10 +180,129 @@ static  void  mouse_check_bar_func_v1(void *data)
     //text window
     char text[5];
     sprintf( text,"%d",bt->now_value);
+    printf("text set %s\n",text);
     Image_SDK_Set_Text_Node_Text(bt->text_id, text,2);
 
     return;
 
+
+}
+
+
+static void* time_thread_start(void *data){
+    
+    
+    struct user_set_node_atrr  node_attr;
+    int ret = 0;
+
+    
+    node_attr.en_node = 1;
+    node_attr.en_freshen = 1;
+    node_attr.move_arrt = 0;
+
+    memcpy(node_attr.node_id,"Aaf",3);
+    //year
+    window_node_text_t _text;
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1630;
+    _text.y = 700;
+    _text.lens = 4;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+    //ret = Image_SDK_Set_Text_Node_Text("Aae", "30",2);
+    
+    //moon
+    memcpy(node_attr.node_id,"Aag",3);
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1670;
+    _text.y = 700;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+
+    //day
+    memcpy(node_attr.node_id,"Aah",3);
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1700;
+    _text.y = 700;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+    
+    //housr
+    memcpy(node_attr.node_id,"Aaj",3);
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1730;
+    _text.y = 700;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+
+    //minues
+    memcpy(node_attr.node_id,"Aak",3);
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1760;
+    _text.y = 700;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+    //sec
+    memcpy(node_attr.node_id,"Aam",3);
+    memset(&_text,0x0 ,sizeof(window_node_text_t));
+    _text.x = 1790;
+    _text.y = 700;
+    _text.lens = 2;
+    _text.win_color = 0xf00f;
+    _text.text_color = 0x3A39; 
+    ret = Image_SDK_Create_Text(node_attr,_text);
+
+    //get time and push
+    time_t  tp =0 ;
+    
+    struct  tm  *time_now,last_time;
+    
+    memset(&last_time,0x0,sizeof(struct tm));
+
+    char *year = (char *)malloc(128);
+    
+
+    while(1){
+
+        time(&tp);
+        time_now = localtime(&tp);
+        if(last_time.tm_year != time_now->tm_year){
+            sprintf(year,"%d",time_now->tm_year+1900);
+            ret = Image_SDK_Set_Text_Node_Text("Aaf", year,4);
+        }
+        if(last_time.tm_mon != time_now->tm_mon){
+            sprintf(year,"%d",time_now->tm_mon);
+            ret = Image_SDK_Set_Text_Node_Text("Aag", year,2);
+        }
+        if(last_time.tm_mday != time_now->tm_mday){   
+            sprintf(year,"%d",time_now->tm_mday);
+            ret = Image_SDK_Set_Text_Node_Text("Aah", year,2);
+        }
+        if(last_time.tm_hour != time_now->tm_hour){
+            sprintf(year,"%d",time_now->tm_hour);
+            ret = Image_SDK_Set_Text_Node_Text("Aaj", year,2);
+        }
+        if(last_time.tm_min != time_now->tm_min){
+            sprintf(year,"%d",time_now->tm_min);
+            ret = Image_SDK_Set_Text_Node_Text("Aak", year,2);
+        }
+        if(last_time.tm_sec != time_now->tm_sec){
+            sprintf(year,"%d",time_now->tm_sec);
+            ret = Image_SDK_Set_Text_Node_Text("Aam", year,2);
+        }
+        last_time = *time_now;
+        usleep(800000);
+    }
+    
 
 }
 
@@ -289,8 +410,9 @@ int main(int argc,char **argv)
     _bar.max_value = 100;
     _bar.now_value = 30;
     _bar.video_set.mouse_left_down = mouse_check_bar_func_v1;
-    ret = Image_SDK_Create_Bar(node_attr,_bar);
+    
     memcpy(_bar.text_id,"Aae",3);
+    ret = Image_SDK_Create_Bar(node_attr,_bar);
 
     // test add text put
     memcpy(node_attr.node_id,"Aae",3);
@@ -298,13 +420,17 @@ int main(int argc,char **argv)
     window_node_text_t _text;
     memset(&_text,0x0 ,sizeof(window_node_text_t));
     _text.x = 1830;
-    _text.y = 800;
+    _text.y = 795;
     _text.lens = 2;
     _text.win_color = 0xf00f;
     _text.text_color = 0x3A39; 
     ret = Image_SDK_Create_Text(node_attr,_text);
     ret = Image_SDK_Set_Text_Node_Text("Aae", "30",2);
 
+    
+    pthread_t    time_id;
+    
+    pthread_create(&time_id,NULL,time_thread_start,NULL);
 
     Image_SDK_Run();
 

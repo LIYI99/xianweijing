@@ -145,8 +145,8 @@ uint8_t *   image_text_lib_put_pixl(char *text){
     int stride_bytes =  (_text_handle->asc_width +7)/8;
     int asc_code = *text;
     
-    printf("put text c:%c uint8_t:%x stride_bytes :%d,_text_handle->asc_width:%d\n", *text,*text,stride_bytes,
-            _text_handle->asc_width);
+//    printf("put text c:%c uint8_t:%x stride_bytes :%d,_text_handle->asc_width:%d\n", *text,*text,stride_bytes,
+  //          _text_handle->asc_width);
     int i,ii,iii,k = 0 ;
 
     for(i = 0 ; i < _text_handle->text_size;i++)
@@ -174,7 +174,7 @@ uint8_t *   image_text_lib_put_pixl(char *text){
 			}
         }
     }
-#if 1  //test
+#if 0  //test
     iii = 0;
     printf("\n");
     for(i = 0; i < _text_handle->text_size ;i++){

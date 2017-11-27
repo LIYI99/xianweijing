@@ -458,7 +458,7 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
         
         return -3;
     }
-    printf("linenode:%p \n",lq);
+   // printf("linenode:%p \n",lq);
 
     window_node_line_t * line = NULL;
     line = (window_node_line_t *)object_pool_get(sdk_handle->object_pool);
@@ -713,19 +713,24 @@ int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
     level = node_id_level_re(node_id);
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
-    if(temp == NULL)
+    if(temp == NULL){
+ //       printf("not find node_id\n");
         return -2;
+    }
+    //printf("win_type:%d\n",temp->win_type);
     if(temp->win_type != OBJECT_TEXT_WIN)
         return -3;
 
     window_node_text_t *tt = (window_node_text_t *)temp->window;
-    
+     
+  //  printf("find node:%p tt->lens:%d\n",temp,tt->lens);
     if(tt->lens < size)
         return -5;
 
     memcpy(tt->text_cache,text,size);
     
     tt->text_cache[size] = '\0';
+//    printf("set char tt->text:%s\n",tt->text_cache);
     temp->freshen_arrt = NEED_FRESHEN;
     
     return 0;
@@ -1296,12 +1301,6 @@ static void freshen_image_bar(void *data){
     return ;
 }
 //need wirte text load lib
-static int16_t  *image_text_get_bit(char *s){
-    
-    printf("not load text lib \n");
-
-    return NULL;
-}
 
 static void freshen_image_text(void *data){
 
@@ -1336,17 +1335,17 @@ static void freshen_image_text(void *data){
         int   nums = 0 ;
 
         for(nums = 0; nums < bt->lens; nums++){
-            s = bt->text_cache[k];
+            s = bt->text_cache[nums];
             if(s == '\0')
                 break;
-
+            //printf("freshen put c:%c \n",s);
             text_bit = image_text_lib_put_pixl(&s);
 
             if(text_bit == NULL)
                 break;
             int j = 0; 
             for(k = bt->y ; k < (bt->font_size + bt->y) ;k++){
-                for(i = bt->x + nums*bt->asc_width ;  i < (bt->font_size + bt->x + nums*bt->font_size) ; i++,j++ )
+                for(i = bt->x + nums*bt->asc_width ;  i < (bt->x + nums*bt->asc_width+bt->asc_width) ; i++,j++ )
                 {
                     if(text_bit[j] == 0)
                         *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
@@ -1356,6 +1355,7 @@ static void freshen_image_text(void *data){
             }
         }
 
+        bt->this_node->freshen_arrt = NORTHING;
 
         bt->last_x = bt->x;
         bt->last_y = bt->y;
@@ -1372,6 +1372,10 @@ static void freshen_image_mouse(void)
     
     
     
+    if(!sdk_handle->mouse_data_updated)
+        return 0;
+
+
     sdk_handle->mouse->x = sdk_handle->mouse_new_data.x;
     sdk_handle->mouse->y = sdk_handle->mouse_new_data.y;
     window_node_mouse_t *bt = sdk_handle->mouse;
@@ -1613,7 +1617,7 @@ static void* _image_sdk_handle_data_process_thread(void *data)
             _image_analysis_mdata(sdk_handle->mouse_new_data);
             _image_window_func_run(NULL);
           
-            _image_freshen_video();
+            //_image_freshen_video();
 
             if(_ldata.x == sdk_handle->mouse_new_data.x &&
                     _ldata.y == sdk_handle->mouse_new_data.y &&
@@ -1625,7 +1629,7 @@ static void* _image_sdk_handle_data_process_thread(void *data)
             usleep(wait_times);
         } 
          
-        //_image_freshen_video();
+        _image_freshen_video();
     }
     
        return NULL;
