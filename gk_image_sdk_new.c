@@ -1193,8 +1193,8 @@ static void freshen_image_menu(void *data){
             }
         }
         
-        for(k = bt->y ; k < (bt->h + bt->y) ;k++) {
-            for(s = 0,i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
+        for(s = 0 ,k = bt->y ; k < (bt->h + bt->y) ;k++) {
+            for(i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
             {
                
                 if(bt->image_cache){

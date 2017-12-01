@@ -65,7 +65,7 @@
 
 //
 #define XW_FILCKER_50H_WINDOW_ID            "AaG"
-#define XW_FILCKER_50H_WINDOW_ID            "AaF"
+#define XW_FILCKER_60H_WINDOW_ID            "AaF"
 #define XW_AUTO_WHITE_BALANCE_WINDOW_ID     "AaE"
 #define XW_AE_TARGET_WINDOW_ID              "AaD"
 #define XW_AUTO_EXPOUSURE_WINDOW_ID         "AaC"
