@@ -77,6 +77,18 @@ int     xw_png_load_all(void)
 
 }
 
+void   xw_png_destory(void)
+{
+    
+    if(png_t)
+        free(png_t);
+    png_t = NULL;
+    return;
+
+}
+
+
+
 uint16_t *get_window_png_mem(char *window_id)
 {
     int i  =0 ;

@@ -107,7 +107,7 @@
 #define XW_DATE_SEC_WINDOW_Y                XW_MAIN_WINDOW_Y + 0
 
 #define XW_DATE_SET_UP_WINDOW_X            XW_MAIN_WINDOW_X + 0
-#define XW_DATE_SET_UP_WINDOW_X            XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_SET_UP_WINDOW_Y            XW_MAIN_WINDOW_Y + 0
 
 
 #define XW_DATE_SET_DOWN_WINDOW_X          XW_MAIN_WINDOW_X + 0
