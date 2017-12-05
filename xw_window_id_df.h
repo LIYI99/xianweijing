@@ -24,14 +24,14 @@
 #define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
 
 //define video advanced settings
-#define XW_VIDEO_ZOOZ_LESSEN_WINDOW_ID      "Aan"
-#define XW_VIDEO_ZOOZ_BOOST_WINDOW_ID       "Aam"
+//#define XW_VIDEO_ZOOZ_LESSEN_WINDOW_ID      "Aan" //del
+//#define XW_VIDEO_ZOOZ_BOOST_WINDOW_ID       "Aam"  //del
 #define XW_VIDEO_FILP_WINDOW_ID             "Aal"
 #define XW_VIDEO_MIRROR_WINDOW_ID           "Aak"
 #define XW_VIDEO_NIGHGT_WINDOW_ID           "Aaj"
 #define XW_VIDEO_DAY_WINDOW_ID              "Aai"
 #define XW_VIDEO_HDR_WINDOW_ID              "Aah"
-#define XW_VIDEO_UNLOCK_WINDOW_ID           "Aag"
+//#define XW_VIDEO_UNLOCK_WINDOW_ID           "Aag"
 
 //define date text window id 
 #define XW_DATE_YEAR_WINDOW_ID              "Aaf"
@@ -40,6 +40,7 @@
 #define XW_DATE_HOUR_WINDOW_ID              "Aac"
 #define XW_DATE_MIN_WINDOW_ID               "Aab"
 #define XW_DATE_SEC_WINDOW_ID               "Aaa"
+#define XW_DATE_SET_WINDOW_ID               "Aan"
 #define XW_DATE_SET_UP_WINDOW_ID            "AaZ"
 #define XW_DATE_SET_DOWN_WINDOW_ID          "AaY"
 

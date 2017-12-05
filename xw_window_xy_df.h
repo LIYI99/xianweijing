@@ -113,6 +113,11 @@
 #define XW_DATE_SET_DOWN_WINDOW_X          XW_MAIN_WINDOW_X + 0
 #define XW_DATE_SET_DOWN_WINDOW_Y          XW_MAIN_WINDOW_Y + 0
 
+#define XW_DATE_SET_WINDOW_X          XW_MAIN_WINDOW_X + 0
+#define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 0
+
+
+
 
 
 //define isp set window id
