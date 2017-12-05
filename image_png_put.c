@@ -116,18 +116,18 @@ print_pixel(png_structp png_ptr, png_infop info_ptr, png_const_bytep row,
 struct  rgba8888{
     
     uint8_t     r;
-    uint8_t     g;
     uint8_t     b;
+    uint8_t     g;
     uint8_t     a;
 
 };
 
-struct  rgba4444{
+struct  argb4444{
     
-    uint8_t     r:4;
-    uint8_t     g:4;
-    uint8_t     b:4;
-    uint8_t     a:4;
+    uint16_t     r:4;
+    uint16_t     b:4;
+    uint16_t     g:4;
+    uint16_t     a:4;
 
 };
 
@@ -138,21 +138,59 @@ void inline   rgba8888_to_rgba4444(uint32_t *in, uint16_t *put)
 {
     
     struct rgba8888 *x =  (struct rgba8888 *)in;
-    struct rgba4444 *y =  (struct rgba4444 *)put;
+    struct argb4444 *y =  (struct argb4444 *)put;
+#if 0
+    uint32_t xx =  *in;
+    uint16_t test = 0;
+
+    test = ((xx << 24) >> 28) << 12 ;
+    test  = test | ((xx >>28) << 8) | (((xx << 8 )>>28) << 4) | ((xx << 16)>>28) ;  
     
-    y->r = x->r;
-    y->g = x->g;
-    y->b = x->b;
-    y->a = x->a;
+    *put = test;
+#endif
+
+
+#if 1
+    y->r = x->r >> 4;
+    y->g = x->g >> 4;
+    y->b = x->b >> 4;
+    y->a = x->a >> 4;
+#endif
+    return ;
+
+}
+
+void inline   rgba8888_to_rgba4444_test(uint32_t *in, uint16_t *put)
+{
     
+    struct rgba8888 *x =  (struct rgba8888 *)in;
+    struct argb4444 *y =  (struct argb4444 *)put;
+    
+    printf("in :%d \n",*in);
+#if 1
+    y->r = x->r >> 4;
+    y->g = x->g >> 4;
+    y->b = x->b >> 4;
+    y->a = x->a >> 4;
+#endif
+
+    uint32_t xx =  *in;
+    uint16_t test = 0;
+
+    test = ((xx << 24) >> 28) << 12 ;
+    printf("1test:%x\n",test);
+    test  = test | ((xx >>28) << 8) | (((xx << 8 )>>28) << 4) | ((xx << 16)>>28) ;  
+        
+    printf("16bit xr:%d  g:%d b:%d a:%d y:%x test:%x in 32:%x\n",y->r,y->g,y->b,y->a,*put,test,*in); 
     return ;
 
 }
 
 
+
 int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
 {
-
+    
     if(path == NULL ||  mem == NULL)
         return -1;
 
@@ -161,7 +199,9 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
     if(fp == NULL)
         return -2;
     
-    volatile int result = 1/*fail*/;
+    uint16_t *getp = mem;
+
+    volatile int result = 0/*fail*/;
     volatile png_bytep row = NULL;
     
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL, NULL, NULL);
@@ -248,14 +288,31 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
                 png_uint_32 px, ppx;
                 //get line;
                 png_read_row(png_ptr, row_tmp, NULL);
-                
+                if(py == 629)
+                    printf("py:%d,px:%d\n",py,px);
+
                 for (px = xstart, ppx = 0; px < width; px += xstep, ++ppx)
                 {
                     //rgba8888 to rbga4444
                     
-                    rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, mem);
- 
-                    // print_pixel(png_ptr, info_ptr, row_tmp, ppx);
+                    rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, getp);
+                    getp++;
+                    if(py == 590 && px == 30){
+                            
+                            struct  rgba8888 *testy = NULL ;
+                            uint32_t testx  = 0;
+
+
+                            testx = *((uint32_t*)row_tmp+ppx);
+                            testy = (struct rgba8888 *)&testx;
+                            printf("rgba testy.r:%d testy.g:%d testy.b:%d a:%d getp:%x\n",testy->r,testy->g,testy->b,testy->a,*(getp-1));
+                            uint16_t testz =0;
+                            rgba8888_to_rgba4444_test(&testx, &testz);
+
+
+                            print_pixel(png_ptr, info_ptr, row_tmp, ppx);
+                    }
+                    result++; 
                 } 
             } 
         } 
