@@ -46,7 +46,9 @@
 #define XW_LINE_CHANGE_COLOR_WINDOW_Y    XW_MAIN_WINDOW_Y + 0 
 
 #define XW_LINE_SET_SIZE_WINDOW_X    XW_MAIN_WINDOW_X + 0 
-#define XW_LINE_SET_SIZE_WINDOW_Y     XW_MAIN_WINDOW_Y + 0 
+#define XW_LINE_SET_SIZE_WINDOW_Y     XW_MAIN_WINDOW_Y + 0
+
+
 
 //define video advanced settings
 #define XW_VIDEO_ZOOZ_LESSEN_WINDOW_X   XW_MAIN_WINDOW_X + 0 
@@ -209,6 +211,10 @@
 #define XW_AUTO_EXPOUSURE_WINDOW_X        XW_MAIN_WINDOW_X + 0
 #define XW_AUTO_EXPOUSURE_WINDOW_Y         XW_MAIN_WINDOW_Y + 0
 
+//line menu window xy def
+
+#define XW_LINE_RARR_WINDOW_X               10
+#define XW_LINE_RARR_WINDOW_Y               10
 
 
 

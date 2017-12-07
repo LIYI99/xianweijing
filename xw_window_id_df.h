@@ -7,12 +7,6 @@
 #define XW_MAIN_WINDOW_ID       "Aa"
 
 
-//#define   snap recod set perview
-#define XW_SNAP_WINDOW_ID           "Aaz"
-#define XW_RECOD_WINDOW_ID          "Aay"
-#define XW_SET_WINDOW_ID            "Aax"
-#define XW_PERVIEW_WINDOW_ID        "Aaw"
-
 //deinfine line set button
 #define XW_LINE_SHOW_WINDOW_ID              "Aav"
 #define XW_LINE_CLOSE_WINDOW_ID             "Aau"
@@ -73,6 +67,7 @@
 
 //line manager 
 #define XW_LINE_RARR_WINDOW_ID               "Ab"
+
 #define XW_LINE_H1_WINDOW_ID                "Aba"
 #define XW_LINE_H2_WINDOW_ID                "Abb"
 #define XW_LINE_H3_WINDOW_ID                "Abc"
@@ -92,6 +87,18 @@
 #define XW_LINE_W7_WINDOW_ID                "Abq"
 #define XW_LINE_W8_WINDOW_ID                "Abr"
 #define XW_LINE_W9_WINDOW_ID                "Abs"
+
+
+
+//#define   snap recod set perview
+#define XW_TOP_MENU_WINDOW_ID               "Ac"
+
+#define XW_SNAP_WINDOW_ID                   "Acz"
+#define XW_RECOD_WINDOW_ID                  "Acy"
+#define XW_SET_WINDOW_ID                    "Acx"
+#define XW_PERVIEW_WINDOW_ID                "Acw"
+
+
 
 
 
