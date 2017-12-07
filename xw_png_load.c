@@ -5,6 +5,7 @@
 #include "xw_png_load.h"
 #include "image_png_put.h"
 #include "xw_window_id_df.h"
+#define  PNG_LOAD_ALIGN             4
 
 typedef struct  xw_window_png{
     char        window_id[10];
@@ -51,7 +52,7 @@ static int xw_window_png_add(char *png_path,char *window_id)
             png_t[png_cnts].w,ret); 
     strcpy(png_t[png_cnts].window_id,window_id);
     png_t[png_cnts].p = offset_p;
-    offset_p+=ret;
+    offset_p += ret;
     png_cnts++;
     return 0;
 
@@ -61,6 +62,7 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_PNG_NUMS     100
 
 
+#define     WINDOW_TOP_MENU_PATH    "/usr/local/bin/png/top.png"
 #define     WINDOW_MAIN_MENU_PATH   "/usr/local/bin/png/main.png"
 
 
@@ -72,6 +74,9 @@ int     xw_png_load_all(void)
         return -1;
     //add main menue
     ret = xw_window_png_add(WINDOW_MAIN_MENU_PATH,XW_MAIN_WINDOW_ID );
+    //add top menu
+    ret = xw_window_png_add(WINDOW_TOP_MENU_PATH,XW_TOP_MENU_WINDOW_ID);
+
 
     return ret;
 

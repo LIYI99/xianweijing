@@ -8,19 +8,6 @@
 
 
 
-//#define   snap recod set perview
-#define XW_SNAP_WINDOW_X            XW_MAIN_WINDOW_X + 10
-#define XW_SNAP_WINDOW_Y            XW_MAIN_WINDOW_Y + 10
-
-#define XW_RECOD_WINDOW_X           XW_MAIN_WINDOW_X + 50
-#define XW_RECOD_WINDOW_Y           XW_MAIN_WINDOW_Y + 10
-
-#define XW_SET_WINDOW_X             XW_MAIN_WINDOW_X + 100
-#define XW_SET_WINDOW_Y             XW_MAIN_WINDOW_Y + 10
-
-#define XW_PERVIEW_WINDOW_X         XW_MAIN_WINDOW_X + 150
-#define XW_PERVIEW_WINDOW_Y         XW_MAIN_WINDOW_Y + 10
-
 //deinfine line set button
 #define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X + 10
 #define XW_LINE_SHOW_WINDOW_Y       XW_MAIN_WINDOW_Y + 850
@@ -215,6 +202,24 @@
 
 #define XW_LINE_RARR_WINDOW_X               10
 #define XW_LINE_RARR_WINDOW_Y               10
+
+//top MENU window xy def
+#define XW_TOP_MENU_WINDOW_X                1504
+#define XW_TOP_MENU_WINDOW_Y                50
+
+//#define   snap recod set perview
+#define XW_SNAP_WINDOW_X            XW_TOP_MENU_WINDOW_X + 10
+#define XW_SNAP_WINDOW_Y            XW_TOP_MENU_WINDOW_Y + 10
+
+#define XW_RECOD_WINDOW_X           XW_TOP_MENU_WINDOW_X + 50
+#define XW_RECOD_WINDOW_Y           XW_TOP_MENU_WINDOW_Y + 10
+
+#define XW_SET_WINDOW_X             XW_TOP_MENU_WINDOW_X + 100
+#define XW_SET_WINDOW_Y             XW_TOP_MENU_WINDOW_Y + 10
+
+#define XW_PERVIEW_WINDOW_X         XW_TOP_MENU_WINDOW_X + 150
+#define XW_PERVIEW_WINDOW_Y         XW_TOP_MENU_WINDOW_Y + 10
+
 
 
 

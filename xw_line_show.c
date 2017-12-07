@@ -8,7 +8,7 @@
 #include "xw_window_xy_df.h"
 
 #define     XW_LINE_NUMS_MAX            16   //H:8 w:8    
-
+#define     XW_LINE_CONF_NUMS           8
 
 #define     XW_LINE_SIZE_MAX            3
 #define     XW_LINE_SIZE_DEUFALT        1
@@ -88,7 +88,7 @@ static  void mouse_offset_theline(void *data)
 
 static int  xw_line_t_init(void){
 
-    xw_lt = (xw_line_data_t *)malloc(sizeof(xw_line_data_t)*XW_LINE_NUMS_MAX);
+    xw_lt = (xw_line_data_t *)malloc(sizeof(xw_line_data_t)*XW_LINE_NUMS_MAX *XW_LINE_CONF_NUMS);
     if(xw_lt == NULL)
         return -1;
     memset(xw_lt,0x0,sizeof(xw_line_data_t)*XW_LINE_NUMS_MAX);
