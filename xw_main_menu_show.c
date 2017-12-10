@@ -14,8 +14,9 @@
 static void mouse_offset_main_menu_func(void *data)
 {
     window_node_menu_t *mt  = (window_node_menu_t *)data;
-    mt->this_node->freshen_arrt = NEED_CLEAR;
-    mt->this_node->en_node = 0;
+    //mt->this_node->freshen_arrt = NEED_CLEAR;
+    //mt->this_node->en_node = 0;
+    //printf("func:%s line:%d\n",__func__,__LINE__);
     return ;
 }
 
@@ -26,7 +27,8 @@ int xw_main_menu_show(void *data)
     struct user_set_node_atrr _attr;
     memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     memcpy(_attr.node_id,XW_MAIN_WINDOW_ID,strlen(XW_MAIN_WINDOW_ID ));
-    
+    _attr.en_freshen = NEED_FRESHEN;
+
     window_node_menu_t  mt;
     memset(&mt,0x0,sizeof(window_node_menu_t));
     
@@ -34,12 +36,12 @@ int xw_main_menu_show(void *data)
     mt.y    = XW_MAIN_WINDOW_Y;
     
     xw_get_png_hw(XW_MAIN_WINDOW_ID,&mt.w,&mt.h);
-    
+    printf("main menu w:%d ,h:%d\n",mt.w,mt.h); 
     mt.image_cache = xw_get_window_png(XW_MAIN_WINDOW_ID);
     mt.video_set.mouse_offset = mouse_offset_main_menu_func;
     int ret = 0;
     ret = Image_SDK_Create_Menu(_attr,mt);
-    
+    printf("create main menu show ret:%d\n",ret); 
     return ret ;
 
 }

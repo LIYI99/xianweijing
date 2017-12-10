@@ -35,12 +35,27 @@ typedef enum {
     MOVE_NUMS,
 }NODE_MOVE_ARRT;
 
+// V,freshen 
 typedef enum{
     NORTHING,
     NEED_FRESHEN,
     NEED_CLEAR,
+    NEED_SYNC_FATHER, //not use
     FRESHEN_NUMS,
 }NODE_FRESHEN_ARRT;
+
+// V,node disp set
+typedef enum{
+    OPEN_DISP,
+    CLOSE_DISP,
+}NODE_VIDEO_ATTR;
+
+//V,now video disp state
+typedef enum{
+    CLEAR_STATE,
+    VIDEO_STATE,
+}NODE_VIDEO_STATE;
+
 
 struct window_node{
 
@@ -57,8 +72,10 @@ struct window_node{
     uint8_t         check_node;
     uint8_t         en_submenu;
     NODE_FRESHEN_ARRT   freshen_arrt;
+    NODE_VIDEO_ATTR     video_attr;
+    NODE_VIDEO_STATE    video_state;
 
-#define         CLOSE_REFLECT       0
+   #define         CLOSE_REFLECT       0
 #define         OFFSET_REFLECT      1
 #define         LDOWN_REFLECT       2
 #define         LUP_REFLECT         4
@@ -171,7 +188,13 @@ typedef struct window_node_bar{
     uint32_t        bar_color;
     window_func_t   video_set;
     win_func_usr    user_video_freshen;
-    
+            //if(node->f_node->disp_state == DISP_STATE)
+#if 0
+        if(node->en_node && node->freshen_arrt != NORTHING ){
+             _image_freshen(node);
+        }
+#endif   
+
     char            text_id[MENU_LEVEL];   //be related text windows
 }window_node_bar_t;
 
@@ -248,6 +271,9 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text);
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         window_node_bar_t _bar);
+
+int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt);
+
 
 
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
