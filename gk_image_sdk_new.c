@@ -1807,15 +1807,13 @@ static void* _image_sdk_handle_data_process_thread(void *data)
     
     while(1)
     {
-        
+
         if(sdk_handle->mouse_data_updated){
-            
+
             _ldata = sdk_handle->mouse_new_data;
-            
+
             _image_analysis_mdata(sdk_handle->mouse_new_data);
             _image_window_func_run(NULL);
-          
-            //_image_freshen_video();
 
             if(_ldata.x == sdk_handle->mouse_new_data.x &&
                     _ldata.y == sdk_handle->mouse_new_data.y &&
@@ -1823,14 +1821,14 @@ static void* _image_sdk_handle_data_process_thread(void *data)
                 sdk_handle->mouse_data_updated = 0;
 
         }else{
-            
+
             usleep(wait_times);
         } 
-         
+
         _image_freshen_video();
     }
-    
-       return NULL;
+
+    return NULL;
 
 }
 

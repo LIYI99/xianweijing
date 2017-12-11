@@ -56,35 +56,51 @@ typedef enum{
     VIDEO_STATE,
 }NODE_VIDEO_STATE;
 
+typedef enum{
+    FREE_ORDER,         //maybe free move order
+    FIXD_ORDER,         //not move order
+} NODE_ORDER_ATTR;
 
 struct window_node{
 
 #define     MENU_LEVEL              5
-    char            node_id[MENU_LEVEL]; // ever level A -z sum 52 level 
-    window_node_t   *prev;
-    window_node_t   *next;
-    window_node_t   *s_head;
-    window_node_t   *s_end;
-    window_node_t   *f_node;
-    GK_MOUSE_DATA    mouse_data;
-    GK_MOUSE_EVENT   last_event; 
-    uint8_t         en_node;
-    uint8_t         check_node;
-    uint8_t         en_submenu;
-    NODE_FRESHEN_ARRT   freshen_arrt;
-    NODE_VIDEO_ATTR     video_attr;
-    NODE_VIDEO_STATE    video_state;
+    // window id save 
+    char                node_id[MENU_LEVEL]; // ever level A -z sum 52 level 
+    // father sub window list
+    window_node_t       *prev;
+    window_node_t       *next;
+    window_node_t       *s_head;
+    window_node_t       *s_end;
+    window_node_t       *f_node;   
+    
+    //window func flags 
+    uint8_t             en_node;            // the node is close or open
+    uint8_t             check_node;         // the node 
 
-   #define         CLOSE_REFLECT       0
+#define         CLOSE_REFLECT       0
 #define         OFFSET_REFLECT      1
 #define         LDOWN_REFLECT       2
 #define         LUP_REFLECT         4
 #define         RDOWN_REFLECT       8
 #define         RUP_REFLECT         16
-    uint8_t         mouse_garp_reflect;
-    NODE_MOVE_ARRT  move_arrt;
-    WIN_TYPE_S      win_type;
-    void            *window;
+    uint8_t             mouse_garp_reflect;
+    uint8_t             en_intersection; 
+    uint8_t             en_submenu;         // 0: 
+    uint8_t             sub_intersenction;   // 0: sub menu not intersenction
+    
+    NODE_ORDER_ATTR     order_attr;
+    NODE_FRESHEN_ARRT   freshen_arrt;
+    NODE_VIDEO_ATTR     video_attr;
+    NODE_VIDEO_STATE    video_state;
+    NODE_MOVE_ARRT      move_arrt;
+    
+    //mouse check event data recod
+    GK_MOUSE_DATA       mouse_data;
+    GK_MOUSE_EVENT      last_event; 
+    
+    //window info and data 
+    WIN_TYPE_S          win_type;
+    void                *window;
 };
 
 
@@ -119,7 +135,7 @@ typedef struct window_node_button{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func_usr        user_video_freshen; 
+    win_func_usr    user_video_freshen; 
 
 }window_node_button_t;
 
@@ -138,7 +154,7 @@ typedef struct window_node_menu{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func_usr        user_video_freshen; 
+    win_func_usr    user_video_freshen; 
 }window_node_menu_t;
 
 typedef struct window_node_line{
@@ -188,12 +204,6 @@ typedef struct window_node_bar{
     uint32_t        bar_color;
     window_func_t   video_set;
     win_func_usr    user_video_freshen;
-            //if(node->f_node->disp_state == DISP_STATE)
-#if 0
-        if(node->en_node && node->freshen_arrt != NORTHING ){
-             _image_freshen(node);
-        }
-#endif   
 
     char            text_id[MENU_LEVEL];   //be related text windows
 }window_node_bar_t;
