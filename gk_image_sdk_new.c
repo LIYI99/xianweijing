@@ -891,7 +891,18 @@ static inline int image_bar_xy_analysis(void *data,
 
 
 
+static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
+{   
+    window_node_t *temp = head;
+    
+    for(;temp != NULL; temp =  temp->next){
+        if(temp->order_attr == FREE_ORDER)
+            break;
+    }
+    
+    return temp;
 
+}
 
 
 static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
@@ -903,7 +914,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
    
     int ks;
     
-    //clear sdk hanlde node buf
+    //clear sdk hanlde save mouse check node buf
     for(ks = 0 ; ks < MENU_LEVEL ; ks++)
         sdk_handle->check_node[ks] = NULL;
     
@@ -924,42 +935,41 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
     node = sdk_handle->root->s_head;
      
     while ( node  ){
-         
-        if(node->win_type == OBJECT_BUTTION)
-        {
-            ret = image_buttont_xy_analysis(node->window,NULL);
-             
-        }else if(node->win_type == OBJECT_MENU)
-        {
-            ret = image_menu_xy_analysis(node->window,NULL);
         
-        }else if (node->win_type == OBJECT_LINE){
-            
-            ret = image_line_xy_analysis(node->window,NULL);
-        
-        }else if(node->win_type == OBJECT_TEXT_WIN){
-            
-            ret  = image_text_xy_analysis(node->window,NULL);
+        if(node->en_node){
 
-        }else if(node->win_type == OBJECT_BAR){
-            
-            ret  = image_bar_xy_analysis(node->window,NULL);
+            switch(node->win_type)
+            {
+                case OBJECT_BUTTION:
 
-        }else{
-            printf("erro ,the node not use\n");
+                    ret = image_buttont_xy_analysis(node->window,NULL);
+                    break;
+                case OBJECT_MENU:
+                    ret = image_menu_xy_analysis(node->window,NULL);
+                    break;
+                case OBJECT_LINE:
+                    ret = image_line_xy_analysis(node->window,NULL);
+                    break;
+                case OBJECT_TEXT_WIN:
+                    ret  = image_text_xy_analysis(node->window,NULL);
+                    break;
+                case OBJECT_BAR:
+                    ret  = image_bar_xy_analysis(node->window,NULL);
+                    break;
+                default:
+                    break;
+            }
         }
-    
+
+
         if(ret > 0){
-            
             node->check_node = 1;
             save_node[check_cnt] = node;
             check_cnt++;
             printf("check node_id:%c%c%c\n",node->node_id[0],node->node_id[1],
                     node->node_id[2]);
         }
-        //printf("__func__:%s Line:%d  check_cnt:%d root:%p node:%p node->ft:%p stat_cnt:%d\n",__func__,__LINE__,check_cnt,
-          //      sdk_handle->root,node,node->f_node,stack_cnt);
-        // if check node dont have childe node ,so travle end
+        
         if(ret > 0  && node->s_head == NULL ){
             break;
         
@@ -967,9 +977,8 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
 
         // if check node have childe node ,than tarlve the son node 
         // else tarvle bother node
-        if( ret > 0  && node->s_head != NULL){
+        if( ret > 0  && node->s_head != NULL && node->en_submenu != 0 ){
 
-       //     printf("pop statck node:%p node->s_head:%p\n",node,node->s_head);
             ft_stack[stack_cnt] = node;
             stack_cnt++;
             node = node->s_head;
@@ -977,59 +986,66 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             node = node->next;
         }
-        if(node == NULL ){
+        
+        if(node == NULL && stack_cnt > 0 ){
             stack_cnt--;
-     //       printf("quit stack top fnode:%p fndoe->next:%p\n",ft_stack[stack_cnt],ft_stack[stack_cnt]->next);
             node = ft_stack[stack_cnt]->next;
 
         }
     
     }
     
-    //
-
-
+    // there have a bug ,now the mouse data get a pthread ,poces s another thread 
     if( check_cnt != 0 )
     {
         if(save_node[check_cnt -1]->last_event == sdk_handle->mouse_new_data.event
                 &&save_node[check_cnt - 1]->move_arrt == NOT_MOVE )
         {
-            //printf("func:%s line:%d\n",__func__,__LINE__);
             check_cnt = 0;
         }
     }
      
-
-    //printf("test check_cnt:%d node:%p\n",check_cnt,save_node[check_cnt -1]);
     //move top
+    window_node_t *temp = NULL;
     int  k;
+
     for (k  =  0 ; k < check_cnt ; k++)
     {
         
         node = save_node[k];
-        //printf("xxxx node:%p ,node->f_node:%p,node->f_node->s_head :%p\n",
-          //      node,node->f_node,node->f_node->s_head); 
-        if(node == node->f_node->s_head)
+        // the node is head or FIXD node ,not need move 
+        if(node == node->f_node->s_head || node->order_attr == FIXD_ORDER )
             continue;
+        
         node->prev->next = node->next;
         if(node->next){
             node->next->prev = node->prev;
         }else{ //is end
             node->f_node->s_end = node->prev;
         }
-        node->f_node->s_head->prev = node;
-        node->prev = NULL;
-        node->next = node->f_node->s_head;
-        node->f_node->s_head = node;
+        //need find free fisrt node 
+        temp = find_frist_free_node(node->f_node->s_head);
+        if(temp == NULL)
+            continue;
+        
+        node->prev = temp->prev;
+        node->next = temp;
+        temp->prev = node;
+        if(node->prev)
+            node->prev->next = node;
+        else{ 
+            node->f_node->s_head = node;
+        }
+
     }
-   //printf("line:%d test \n",__LINE__); 
+    
     sdk_handle->check_level_cnt = check_cnt;
     //save now mouse check node
     for (k  =  0 ; k < check_cnt ; k++){
         sdk_handle->check_node[k] = save_node[k];
         sdk_handle->check_node[k]->last_event = sdk_handle->mouse_new_data.event;
     }
-   // printf("xy func quit \n");
+    
     return  ;
 
  }
@@ -1076,7 +1092,7 @@ static void  _image_window_func_run(void *data)
         return;
     window_node_t  *node = NULL ;
     int k = 0;
-    //leave event
+    //build leave event and run
     window_func_t *funcs = NULL;
     for(k = MENU_LEVEL -1  ; k >= 0; k--){
         
