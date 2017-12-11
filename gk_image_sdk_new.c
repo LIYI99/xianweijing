@@ -1700,6 +1700,150 @@ static  void image_freshen_func(void)
 
 }
 #endif
+static inline void image_set_bother_freshen(window_node_t *head)
+{
+   
+    window_node_t *f_node = head->f_node;
+    
+    if(f_node->video_attr == OPEN_DISP && f_node != sdk_handle->root)
+    {
+        
+        f_node->freshen_arrt = NEED_FRESHEN;
+        for(;head != NULL;head = head->next)
+        {
+            if(head->freshen_arrt == NEED_CLEAR)
+                head->freshen_arrt =  NORTHING;
+            else 
+                head->freshen_arrt = NEED_FRESHEN;
+        }
+        return;
+    }
+
+    for(;head != NULL;head = head->next)
+    {
+            if(head->en_intersection && head->freshen_arrt != NEED_CLEAR)
+            {
+                head->freshen_arrt = NEED_FRESHEN;
+            }
+    }
+    return;
+
+}
+
+static void image_clear_video(void)
+{
+
+    //clear biggan the head  
+    if(sdk_handle->root->s_head == NULL)
+        return ;
+
+
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*clear_stack[100];
+    int stack_cnt = 1,clear_cnt = 0;
+    ft_stack[0] = sdk_handle->root;
+
+    node = sdk_handle->root->h_head;
+    //set attr
+    while ( node  )
+    {
+
+        if( node->freshen_arrt == NEED_CLEAR)
+        {
+
+            if(node->en_intersection){
+                image_set_bother_freshen(node->f_node->s_head); 
+            }
+            clear_stack[clear_cnt] = node;
+            clear_cnt++;
+        }
+
+        if(node->en_submenu && node->s_head != NULL){
+            ft_stack[stack_cnt] = node;
+            node = node->s_head;
+            stack_cnt++;
+        }else{
+            node = node->next;
+        }
+        if(node == NULL){
+            stack_cnt--;
+            node = ft_stack[stack_cnt]->next;
+        }         
+
+    }
+    //clear
+    int i = 0 ;
+    for(i = 0 ; i < clear_cnt ; i++)
+    {
+        if(clear_stack[i]->freshen_arrt == NEED_CLEAR)
+             _image_freshen(node);
+    }
+
+    
+    return;
+
+}
+
+static void  _image_put_video(void)
+{
+    
+    if(sdk_handle->root->s_end == NULL)
+        return ;
+    
+  
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
+    int stack_cnt = 1;
+    ft_stack[0] = sdk_handle->root;
+    
+    node = sdk_handle->root->s_end;
+   
+    while ( node  ){
+      
+        if(node->en_node && node->freshen_arrt != NORTHING)\
+        {
+           
+            if(node->video_attr != CLOSE_DISP){
+                printf("func:%s line:%d need :%d A%c\n",
+                        __func__,__LINE__,node->freshen_arrt,node->node_id[1]);
+                _image_freshen(node);
+            }
+            
+            if(node->freshen_arrt == NEED_FRESHEN && node->s_head != NULL)
+            {
+               image_freshen_set_sub(node,NEED_FRESHEN); 
+            
+            }else if(node->freshen_arrt == NEED_CLEAR && node->s_head != NULL &&
+                    node->video_attr == CLOSE_DISP)
+            {
+                //set sub window
+                image_freshen_set_sub(node,NEED_CLEAR); 
+
+            }
+
+        }
+        
+        if(node->en_submenu && node->s_end != NULL){
+            ft_stack[stack_cnt] = node;
+            node = node->s_end;
+            stack_cnt++;
+        }else{
+            node = node->prev;
+        }
+
+        if(node == NULL){
+            stack_cnt--;
+            node = ft_stack[stack_cnt]->prev;
+        }         
+           
+    }
+
+    freshen_image_mouse();
+    
+    
+    return ;
+
+}
+
+
 
 static void  _image_freshen_video(void)
 {
