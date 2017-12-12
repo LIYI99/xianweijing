@@ -1576,60 +1576,6 @@ static inline void _image_freshen(window_node_t *node)
 
 }
 
-struct  update_param_save{
-
-    uint16_t    x;
-    uint16_t    y;
-    uint16_t    w;
-    uint16_t    h;
-    uint16_t    size;
-    WIN_TYPE_S  win_type; 
-};
-
-static  int update_param_get(window_node_t *node,struct update_param_save *data)
-{
-    data->win_type = node->win_type;
-    switch(node->win_type){
-        
-        case OBJECT_BUTTION:
-            data->x = ((window_node_button_t *)(node->window))->x;
-            data->y = ((window_node_button_t *)(node->window))->y;
-            data->w = ((window_node_button_t *)(node->window))->w;
-            data->h = ((window_node_button_t *)(node->window))->h;
-            
-            break;
-        case OBJECT_MENU:
-            data->x = ((window_node_menu_t *)(node->window))->x;
-            data->y = ((window_node_menu_t *)(node->window))->y;
-            data->w = ((window_node_menu_t *)(node->window))->w;
-            data->h = ((window_node_menu_t *)(node->window))->h;
-            break;
-        case OBJECT_LINE:
-            data->x = ((window_node_line_t *)(node->window))->start_x;
-            data->y = ((window_node_line_t *)(node->window))->start_y;
-            data->w = ((window_node_line_t *)(node->window))->end_x;
-            data->h = ((window_node_line_t *)(node->window))->end_y;
-            data->size = ((window_node_line_t *)(node->window))->size;
-            break;
-        case OBJECT_TEXT_WIN:
-            data->x = ((window_node_text_t *)(node->window))->x;
-            data->y = ((window_node_text_t *)(node->window))->y;
-            data->w = ((window_node_text_t *)(node->window))->lens;
-            data->h = ((window_node_text_t *)(node->window))->asc_width;
-
-            break;
-        case OBJECT_BAR:
-            data->x = ((window_node_bar_t *)(node->window))->x;
-            data->y = ((window_node_bar_t *)(node->window))->y;
-            data->w = ((window_node_bar_t *)(node->window))->w;
-            data->h = ((window_node_bar_t *)(node->window))->h;
-            break;
-        default:
-            break;
-    }
- 
-    return 0;
-}
 
 static  void image_clear_set(void)
 {
@@ -1638,93 +1584,46 @@ static  void image_clear_set(void)
 }
 
 
-static void image_freshen_set_sub(window_node_t *node,NODE_FRESHEN_ARRT _attr)
+static void image_freshen_set_sub_freshen(window_node_t *node)
 {
     window_node_t  *temp = node->s_head;
     for(;temp != NULL;temp = temp->next){
-        temp->freshen_arrt = _attr; 
+        if(temp->video_state == VIDEO_STATE && temp->freshen_arrt ==  NORTHING)
+            temp->freshen_arrt = NEED_FRESHEN; 
     }
     return;
 
 } 
-#if 0
-static  void image_freshen_func(void)
-{
-    
-    if(sdk_handle->root->s_end == NULL)
-        return ;
-    
-    struct update_param_save    _sadata,_newdata;
-    memset(&_newdata,0x0,sizeof(struct update_param_save));
-    memset(&_sadata,0x0,sizeof(struct update_param_save));
 
-
-    //trlave
-    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
-    int stack_cnt = 1;
-    ft_stack[0] = sdk_handle->root;
-    node = sdk_handle->root->s_end;
-   
-    while ( node  ){
-        
-        if(node->en_node && node->freshen_arrt == NEED_FRESHEN )
-        {
-             _image_freshen(node);
-            //set sub window is need_freshen
-            if(node->en_submenu && node->s_head != NULL)
-            {
-               image_freshen_set_sub(node,NEED_FRESHEN); 
-            }
-            //dec windows intersention ,and set frenshen attr
-            if(node->prev){
-                image_freshen_intersection_dec(node &_sadata);
-            }
-
-        }
-        
-        if(node->en_submenu && node->s_end != NULL){
-            ft_stack[stack_cnt] = node;
-            node = node->s_end;
-            stack_cnt++;
-        }else{
-            node = node->prev;
-        }
-
-        if(node == NULL){
-            stack_cnt--;
-            node = ft_stack[stack_cnt]->prev;
-        }         
-           
-    }
-
-
-}
-#endif
-static inline void image_set_bother_freshen(window_node_t *head)
+static inline void image_set_bother_clear_freshen(window_node_t *head)
 {
    
     window_node_t *f_node = head->f_node;
-    
+    // if father menu is need disp 
     if(f_node->video_attr == OPEN_DISP && f_node != sdk_handle->root)
     {
         
         f_node->freshen_arrt = NEED_FRESHEN;
         for(;head != NULL;head = head->next)
         {
-            if(head->freshen_arrt == NEED_CLEAR)
+            
+            if( head->freshen_arrt == NEED_CLEAR || (head->video_state == CLEAR_STATE
+                    && head->freshen_arrt != NEED_FRESHEN))
+            {
                 head->freshen_arrt =  NORTHING;
-            else 
+            }else{  
                 head->freshen_arrt = NEED_FRESHEN;
+            }
         }
         return;
     }
-
+    // father menu is not disp
     for(;head != NULL;head = head->next)
     {
-            if(head->en_intersection && head->freshen_arrt != NEED_CLEAR)
-            {
+        if(head->en_intersection){
+            if(head->video_state == VIDEO_STATE && head->freshen_arrt != NEED_CLEAR)
                 head->freshen_arrt = NEED_FRESHEN;
-            }
+        }    
     }
     return;
 
@@ -1742,7 +1641,7 @@ static void image_clear_video(void)
     int stack_cnt = 1,clear_cnt = 0;
     ft_stack[0] = sdk_handle->root;
 
-    node = sdk_handle->root->h_head;
+    node = sdk_handle->root->s_head;
     //set attr
     while ( node  )
     {
@@ -1751,7 +1650,7 @@ static void image_clear_video(void)
         {
 
             if(node->en_intersection){
-                image_set_bother_freshen(node->f_node->s_head); 
+                image_set_bother_clear_freshen(node->f_node->s_head); 
             }
             clear_stack[clear_cnt] = node;
             clear_cnt++;
@@ -1770,7 +1669,7 @@ static void image_clear_video(void)
         }         
 
     }
-    //clear
+    //clear not user order
     int i = 0 ;
     for(i = 0 ; i < clear_cnt ; i++)
     {
@@ -1783,42 +1682,65 @@ static void image_clear_video(void)
 
 }
 
-static void  _image_put_video(void)
+static inline void image_set_bother_put_freshen(window_node_t *node)
+{
+    node = node->prev; 
+    for( ; node != NULL; node = node->prev)
+    {
+        if(node->en_intersection){
+            if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR)
+                node->freshen_arrt = NEED_FRESHEN;
+        }    
+    }
+    return;
+
+}
+static inline int  find_set_freshen_fnode(window_node_t **savebuf,window_node_t *fnode,int cnt)
 {
     
+    int i = 0;
+    for(i  = 0 ; i < cnt ;i++)
+        if(savebuf[i] == fnode)
+            return 1;
+    
+    return 0;
+}
+
+static void  image_put_video(void)
+{
+    //tarlve list set all  ,very level only set one times
     if(sdk_handle->root->s_end == NULL)
         return ;
     
   
-    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
-    int stack_cnt = 1;
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*save_set[100];
+    memset(save_set,0x0,sizeof(void *)* 100);
+
+    int stack_cnt = 1,save_cnt = 0;
     ft_stack[0] = sdk_handle->root;
     
     node = sdk_handle->root->s_end;
-   
+    //set freshen attr
     while ( node  ){
       
-        if(node->en_node && node->freshen_arrt != NORTHING)\
+        if(node->en_node && node->freshen_arrt == NEED_FRESHEN )
         {
-           
-            if(node->video_attr != CLOSE_DISP){
-                printf("func:%s line:%d need :%d A%c\n",
-                        __func__,__LINE__,node->freshen_arrt,node->node_id[1]);
+            
+            //the every level only set one times the fshen attr ,becares the image put run before,compler the all
+            //window intersection attr,and set flags
+            if(node->en_intersection && !find_set_freshen_fnode(save_set,node->f_node,save_cnt))
+            {
+                image_set_bother_put_freshen(node);
+                save_set[save_cnt] = node->f_node;
+                save_cnt++;
+            }
+
+            //freshen now node
+            if(node->video_attr == OPEN_DISP)
                 _image_freshen(node);
-            }
-            
-            if(node->freshen_arrt == NEED_FRESHEN && node->s_head != NULL)
-            {
-               image_freshen_set_sub(node,NEED_FRESHEN); 
-            
-            }else if(node->freshen_arrt == NEED_CLEAR && node->s_head != NULL &&
-                    node->video_attr == CLOSE_DISP)
-            {
-                //set sub window
-                image_freshen_set_sub(node,NEED_CLEAR); 
-
-            }
-
+            // if have sub window set sub window freshen
+            if(node->en_submenu && node->s_head != NULL)
+                image_freshen_set_sub_freshen(node);
         }
         
         if(node->en_submenu && node->s_end != NULL){
@@ -1828,7 +1750,6 @@ static void  _image_put_video(void)
         }else{
             node = node->prev;
         }
-
         if(node == NULL){
             stack_cnt--;
             node = ft_stack[stack_cnt]->prev;
@@ -1836,7 +1757,6 @@ static void  _image_put_video(void)
            
     }
 
-    freshen_image_mouse();
     
     
     return ;
@@ -1847,60 +1767,10 @@ static void  _image_put_video(void)
 
 static void  _image_freshen_video(void)
 {
-    
-    if(sdk_handle->root->s_end == NULL)
-        return ;
-    
-  
-    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
-    int stack_cnt = 1;
-    ft_stack[0] = sdk_handle->root;
-    
-    node = sdk_handle->root->s_end;
    
-    while ( node  ){
-      
-        if(node->en_node && node->freshen_arrt != NORTHING ||
-                node->freshen_arrt == NEED_CLEAR){
-           
-            if(node->video_attr != CLOSE_DISP){
-                printf("func:%s line:%d need :%d A%c\n",
-                        __func__,__LINE__,node->freshen_arrt,node->node_id[1]);
-                _image_freshen(node);
-            }
-            
-            if(node->freshen_arrt == NEED_FRESHEN && node->s_head != NULL)
-            {
-               image_freshen_set_sub(node,NEED_FRESHEN); 
-            
-            }else if(node->freshen_arrt == NEED_CLEAR && node->s_head != NULL &&
-                    node->video_attr == CLOSE_DISP)
-            {
-                //set sub window
-                image_freshen_set_sub(node,NEED_CLEAR); 
-
-            }
-
-        }
-        
-        if(node->en_submenu && node->s_end != NULL){
-            ft_stack[stack_cnt] = node;
-            node = node->s_end;
-            stack_cnt++;
-        }else{
-            node = node->prev;
-        }
-
-        if(node == NULL){
-            stack_cnt--;
-            node = ft_stack[stack_cnt]->prev;
-        }         
-           
-    }
-
+    image_clear_video();
+    image_put_video();
     freshen_image_mouse();
-    
-    
     return ;
 
 }
@@ -1962,8 +1832,7 @@ static void* _image_sdk_handle_data_process_thread(void *data)
     int wait_times = 1000*1000 / sdk_handle->disp_fps;
 
     GK_MOUSE_DATA _ldata;
-
-
+    
     
     while(1)
     {
@@ -1992,14 +1861,180 @@ static void* _image_sdk_handle_data_process_thread(void *data)
 
 }
 
+struct  update_param_save{
+
+    uint16_t    x;
+    uint16_t    y;
+    uint16_t    end_x;
+    uint16_t    end_y;
+    WIN_TYPE_S  win_type; 
+};
+
+static  int update_param_get(window_node_t *node,struct update_param_save *data)
+{
+    data->win_type = node->win_type;
+    switch(node->win_type){
+        
+        case OBJECT_BUTTION:
+            data->x         = ((window_node_button_t *)(node->window))->x;
+            data->y         = ((window_node_button_t *)(node->window))->y;
+            data->end_x     = ((window_node_button_t *)(node->window))->w + data->x;
+            data->end_y     = ((window_node_button_t *)(node->window))->h + data->y;
+            
+            break;
+        case OBJECT_MENU:
+            data->x         = ((window_node_menu_t *)(node->window))->x;
+            data->y         = ((window_node_menu_t *)(node->window))->y;
+            data->end_x     = ((window_node_menu_t *)(node->window))->w + data->x;
+            data->end_y     = ((window_node_menu_t *)(node->window))->h + data->y;
+            break;
+
+        case OBJECT_LINE:
+            
+            data->x         = ((window_node_line_t *)(node->window))->start_x;
+            data->y         = ((window_node_line_t *)(node->window))->start_y;
+            data->end_x     = ((window_node_line_t *)(node->window))->end_x;
+            data->end_y     = ((window_node_line_t *)(node->window))->end_y;
+            if(data->x == data->end_x){ // line
+                data->end_x = ((window_node_line_t *)(node->window))->size;
+
+            }else{  // row line
+               data->end_y = ((window_node_line_t *)(node->window))->size;
+
+            }
+            break;
+        case OBJECT_TEXT_WIN:
+            data->x = ((window_node_text_t *)(node->window))->x;
+            data->y = ((window_node_text_t *)(node->window))->y;
+            data->end_x = ((window_node_text_t *)(node->window))->lens;
+            data->end_x = data->end_x * ((window_node_text_t *)(node->window))->asc_width;
+            data->end_y = ((window_node_text_t *)(node->window))->font_size;
+
+            break;
+        case OBJECT_BAR:
+            data->x = ((window_node_bar_t *)(node->window))->x;
+            data->y = ((window_node_bar_t *)(node->window))->y;
+            data->end_x = ((window_node_bar_t *)(node->window))->w;
+            data->end_y = ((window_node_bar_t *)(node->window))->h;
+            break;
+        default:
+            break;
+    }
+ 
+    return 0;
+}
+
+static inline int ab_abs(int a,int b)
+{
+    
+    return a > b ? a - b : b - a;
+
+}
+
+static int compler_image(window_node_t *node,window_node_t *temp)
+{
+        
+    struct  update_param_save   data_s,data_n;
+    update_param_get(node,&data_n);
+    update_param_get(node,&data_s);
+    int x1,y1,x2,y2,w1,w2,h1,h2;
+    
+    x1 = (data_s.x - data_s.end_x)/2 + data_s.x;
+    x2 = (data_n.x - data_n.end_x)/2 + data_n.x;
+
+    y1 = (data_s.y - data_s.end_y)/2 + data_s.y;
+    y2 = (data_n.y - data_n.end_y)/2 + data_n.y;
+
+    if((ab_abs(x1 , x2) < (data_s.end_x - data_s.x + data_n.end_x - data_n.x)/2) &&
+            (ab_abs(y1 , y2) < (data_s.end_y - data_s.y + data_n.end_y - data_n.y)/2)){
+        
+        node->en_intersection = 1;
+        temp->en_intersection = 1;
+        return 1;
+    }
+
+}
+
+
+static void  compler_intersection_attr(window_node_t *node)
+{
+    window_node_t *temp ,*savenode = node;
+
+    for(; node!= NULL; node = node->next )
+    {
+        if(node->en_intersection == 0)
+        {
+            for(temp =  savenode ; temp  != NULL ; temp =  temp->next)
+            {
+                if(temp == node)
+                    continue;
+                compler_image(node,temp); 
+            }    
+        }    
+
+    }
+    
+    return ;
+
+}
+
+
+
+static void  _image_all_window_comper_intersection_attr(void)
+{
+    
+    
+    
+    if(sdk_handle->root->s_head == NULL)
+        return ;
+
+
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
+    int stack_cnt = 1,clear_cnt = 0;
+    ft_stack[0] = sdk_handle->root;
+
+    node = sdk_handle->root->s_head;
+    //set attr
+    while ( node  )
+    {
+        if(node  == node->f_node->s_head){
+            
+            compler_intersection_attr(node); 
+        
+        }
+        if(node->en_submenu && node->s_head != NULL){
+            ft_stack[stack_cnt] = node;
+            node = node->s_head;
+            stack_cnt++;
+        }else{
+            node = node->next;
+        }
+        if(node == NULL){
+            stack_cnt--;
+            node = ft_stack[stack_cnt]->next;
+        }         
+
+    }
+       
+    return;
+
+
+}
 
 
 static  pthread_t   mouse_thread_id, process_thread_id;
 void    Image_SDK_Run(void)
 {
-    
+   
+
+
+
    pthread_create(&mouse_thread_id,NULL,
             _image_mouse_event_read_thread,NULL);
+    
+    //set all window intersction attr
+    
+   _image_all_window_comper_intersection_attr();
 
     pthread_create(&process_thread_id,NULL,
             _image_sdk_handle_data_process_thread,NULL);
