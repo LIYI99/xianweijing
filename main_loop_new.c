@@ -10,6 +10,8 @@
 #include "gk_device_init.h"
 #include "gk_image_sdk_new.h"
 #include "xw_png_load.h"
+#include "xw_main_menu_show.h"
+#include "xw_top_menu_show.h"
 
 static  void  mouse_leave_botton_func_v2(void *data)
 {
@@ -337,141 +339,22 @@ int main(int argc,char **argv)
      *  other = 'A.....'
      *
      * */
-    
+    //devcie init 
     int ret = 0;
     ret = gk_device_init(NULL); //ok
     start_read_venc_thread(); //ok 
-   
-    //////////load all png///////////
     
+    //////////load all png///////////
     xw_png_load_all();
-
-
+    
     //////////init image handle//////
     Image_SDK_Init();
    
-    //create Main Muen
-    window_node_menu_t    mt;
-    struct user_set_node_atrr  node_attr;
-    memset(&mt,0x0,sizeof(window_node_menu_t));
-    
-    memset(&node_attr,0x0,sizeof(struct user_set_node_atrr));
-    
-    memcpy(node_attr.node_id,"Aa",2);
-    
-    node_attr.en_node = 1;
-    node_attr.en_freshen = 0;
-    node_attr.move_arrt = 0;
-    mt.x = 1880;
-    mt.y = 100;
-    mt.w = 100;
-    mt.h = 800;
-    mt.color = 0x78ef;
-    mt.image_cache = get_window_png_mem("Aa");
-    
-    if(mt.image_cache != NULL){
-        printf("mt.image_cache:%p\n",mt.image_cache);
-
-    } 
-
-    mt.video_set.mouse_offset =  mouse_offset_func_bian_meun;
-    mt.video_set.mouse_leave =   mouse_leave_func_bian_meun;
-    mt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
-    mt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
-
-    ret = Image_SDK_Create_Menu( node_attr,mt);
-    
-
-    // create 
-    window_node_button_t    bt;
-    memset(&bt,0x0,sizeof(window_node_button_t));
-    
-    memcpy(node_attr.node_id,"Aaa",3);
-    node_attr.en_node = 1;
-    node_attr.en_freshen = 1;
-    node_attr.move_arrt = 0;
-    
-    bt.size =  2;
-    bt.x = 1512;
-    bt.y = 51;
-    bt.w = 76;
-    bt.h = 50;
-    bt.color = 0xeeef;
-    bt.video_set.mouse_offset =  mouse_offset_button_func_v1;
-    bt.video_set.mouse_leave =    mouse_leave_button_func_v1;
-    bt.video_set.mouse_left_down = mouse_ldown_button_func_v1; // NULL;//mouse_ldown_botton_func;
-    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
-    bt.user_video_freshen = usr_push_video_button;
-
-    ret = Image_SDK_Create_Button( node_attr,bt);
-#if 0    
-    //
-    memcpy(node_attr.node_id,"Aab",3);
-    node_attr.en_node = 1;
-    node_attr.en_freshen = 1;
-    node_attr.move_arrt = 0;
-    bt.x = 1725;
-    bt.y = 120;
-    bt.w = 50;
-    bt.h = 50;
-    bt.color = 0xf00f;
-    bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
-    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
-    ret = Image_SDK_Create_Button( node_attr,bt);
-    
-    memcpy(node_attr.node_id,"Aac",3);
-    node_attr.en_node = 1;
-    node_attr.en_freshen = 1;
-    node_attr.move_arrt = 0;
-    bt.x = 1830;
-    bt.y = 120;
-    bt.w = 50;
-    bt.h = 50;
-    bt.color = 0xf00f;
-    bt.video_set.mouse_left_down = NULL;//mouse_ldown_botton_func;
-    bt.video_set.mouse_left_up = NULL;//mouse_lup_botton_func;
-    ret = Image_SDK_Create_Button( node_attr,bt);
-   
-#endif
-
-
-#if 1 
-    //test bar
-    memcpy(node_attr.node_id,"Aad",3);
-
-    window_node_bar_t   _bar;
-    memset(&_bar,0x0 ,sizeof(window_node_bar_t));
-    _bar.x = 1705;
-    _bar.y = 575;
-    _bar.w = 120;
-    _bar.h = 4;
-    _bar.bar_color = 0xF00F; 
-    _bar.max_value = 100;
-    _bar.now_value = 30;
-    _bar.video_set.mouse_left_down = mouse_check_bar_func_v1;
-    
-    memcpy(_bar.text_id,"Aae",3);
-    ret = Image_SDK_Create_Bar(node_attr,_bar);
-
-    // test add text put
-    memcpy(node_attr.node_id,"Aae",3);
-
-    window_node_text_t _text;
-    memset(&_text,0x0 ,sizeof(window_node_text_t));
-    _text.x = 1865;
-    _text.y = 570;
-    _text.lens = 2;
-    _text.win_color = 0xf00f;
-    _text.text_color = 0x3A39; 
-    ret = Image_SDK_Create_Text(node_attr,_text);
-    ret = Image_SDK_Set_Text_Node_Text("Aae", "30",2);
-#endif
-
-    
-    pthread_t    time_id;
-    
-    pthread_create(&time_id,NULL,time_thread_start,NULL);
-
+    //create top menu
+    ret = xw_top_menu_show(NULL); 
+    //create main menu
+    ret = xw_main_menu_show(NULL);
+    // 
     Image_SDK_Run();
 
     //

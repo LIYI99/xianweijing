@@ -778,11 +778,12 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
 
 
 
-static inline int image_buttont_xy_analysis(void *data,window_func_t *set)
+static inline int image_buttont_xy_analysis(void *data,window_func_t *set,
+        GK_MOUSE_DATA mdata)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data;
-    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //mdata.x = x + 
 
     if( (mdata.x  >= bt->x || mdata.x+ MOUSE_SIZE >= bt->x)  && mdata.x <= bt->x+bt->w 
@@ -799,10 +800,10 @@ static inline int image_buttont_xy_analysis(void *data,window_func_t *set)
 }
 
 static inline int image_menu_xy_analysis(void *data,
-        window_func_t *set){
+        window_func_t *set,GK_MOUSE_DATA mdata){
     
     window_node_menu_t *bt = (window_node_menu_t *)data;
-    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     
     if( mdata.x  >= bt->x  && mdata.x <= bt->x+bt->w 
             && mdata.y >= bt->y && mdata.y <= bt->y+bt->h)
@@ -818,12 +819,12 @@ static inline int image_menu_xy_analysis(void *data,
 }
 
 static inline int image_line_xy_analysis(void *data,
-        window_func_t *set){
+        window_func_t *set,GK_MOUSE_DATA mdata){
     
     
     window_node_line_t *bt = (window_node_line_t *)data;
     
-    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+ //   GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( mdata.x  >= bt->start_x  && mdata.x <= bt->end_x 
             && mdata.y >= bt->start_y-5 && mdata.y <= bt->start_y+bt->size+5){
@@ -842,12 +843,12 @@ static inline int image_line_xy_analysis(void *data,
 
 
 static inline int image_text_xy_analysis(void *data,
-        window_func_t *set){
+        window_func_t *set,GK_MOUSE_DATA mdata){
     
     
     window_node_text_t *bt = (window_node_text_t *)data;
     
-    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->asc_width * bt->lens 
             && mdata.y >= bt->y  && mdata.y <= bt->y+bt->font_size){
@@ -865,12 +866,12 @@ static inline int image_text_xy_analysis(void *data,
 }
 
 static inline int image_bar_xy_analysis(void *data,
-        window_func_t *set){
+        window_func_t *set,GK_MOUSE_DATA mdata){
     
     
     window_node_bar_t *bt = (window_node_bar_t *)data;
     
-    GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( (mdata.x + MOUSE_SIZE /2)  >= bt->x  && (mdata.x + MOUSE_SIZE/2) <= bt->x + bt->w  
             && (mdata.y + MOUSE_SIZE /2) >= bt->y - 2  && (mdata.y+ MOUSE_SIZE/2) <= (bt->y+bt->h+2)){
@@ -930,8 +931,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
     int check_cnt = 0,ret = 0,stack_cnt = 1;
     
     ft_stack[0] = sdk_handle->root;
-    
-
+       
     node = sdk_handle->root->s_head;
      
     while ( node  ){
@@ -942,32 +942,36 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
             {
                 case OBJECT_BUTTION:
 
-                    ret = image_buttont_xy_analysis(node->window,NULL);
+                    ret = image_buttont_xy_analysis(node->window,NULL,mdata);
                     break;
                 case OBJECT_MENU:
-                    ret = image_menu_xy_analysis(node->window,NULL);
+                    ret = image_menu_xy_analysis(node->window,NULL,mdata);
                     break;
                 case OBJECT_LINE:
-                    ret = image_line_xy_analysis(node->window,NULL);
+                    ret = image_line_xy_analysis(node->window,NULL,mdata);
                     break;
                 case OBJECT_TEXT_WIN:
-                    ret  = image_text_xy_analysis(node->window,NULL);
+                    ret  = image_text_xy_analysis(node->window,NULL,mdata);
                     break;
                 case OBJECT_BAR:
-                    ret  = image_bar_xy_analysis(node->window,NULL);
+                    ret  = image_bar_xy_analysis(node->window,NULL,mdata);
                     break;
                 default:
                     break;
             }
         }
 
-
-        if(ret > 0){
-            node->check_node = 1;
-            save_node[check_cnt] = node;
-            check_cnt++;
-            printf("check node_id:%c%c%c\n",node->node_id[0],node->node_id[1],
-                    node->node_id[2]);
+        // 
+        if(ret > 0)
+        {
+            if( check_cnt == 0 || (check_cnt > 0 && node->f_node == save_node[check_cnt - 1])){
+                node->check_node = 1;
+                save_node[check_cnt] = node;
+                check_cnt++;
+            
+                printf("check node_id:%c%c%c node:%p check_cnt:%d\n\n",node->node_id[0],node->node_id[1],
+                    node->node_id[2],node,check_cnt);
+            }
         }
         
         if(ret > 0  && node->s_head == NULL ){
@@ -1118,17 +1122,29 @@ static void  _image_window_func_run(void *data)
     
     if(sdk_handle->check_level_cnt == 0)
         return;
+    //clear save buf
+    for(k = 0; k < MENU_LEVEL ; k++){
+        sdk_handle->last_check_node[k] = NULL;
+    }
+    //clear flag and save
+    for(k = 0 ;k < sdk_handle->check_level_cnt; k++){
+        sdk_handle->check_node[k]->check_node = 0;
+        sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
+    }
+    
 
-         //only run top event 
+    //get top event,and only run top window event 
     node = sdk_handle->check_node[sdk_handle->check_level_cnt -1];
+    
+    //clear levevl save 
+    sdk_handle->check_level_cnt = 0; 
+    
     if(!node->en_node)
         return;
     
     funcs = get_window_func(node);
     if(funcs == NULL)
         return;
-    
-   
     switch(sdk_handle->mouse_new_data.event)
 
     {
@@ -1167,7 +1183,7 @@ static void  _image_window_func_run(void *data)
         default:
             break;
     }
-
+#if 0
     //clear buf
     for(k = 0; k < MENU_LEVEL ; k++){
         sdk_handle->last_check_node[k] = NULL;
@@ -1178,6 +1194,7 @@ static void  _image_window_func_run(void *data)
         sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
     }
     sdk_handle->check_level_cnt = 0; 
+#endif
     return ;
 
 }
@@ -1446,7 +1463,7 @@ static void freshen_image_mouse(void)
     
     
     if(!sdk_handle->mouse_data_updated)
-        return 0;
+        return  ;
 
 
     sdk_handle->mouse->x = sdk_handle->mouse_new_data.x;
@@ -1577,11 +1594,6 @@ static inline void _image_freshen(window_node_t *node)
 }
 
 
-static  void image_clear_set(void)
-{
-    
-    return;
-}
 
 
 static void image_freshen_set_sub_freshen(window_node_t *node)
@@ -1743,7 +1755,7 @@ static void  image_put_video(void)
                 image_freshen_set_sub_freshen(node);
         }
         
-        if(node->en_submenu && node->s_end != NULL){
+        if(/*node->en_submenu &&*/ node->s_end != NULL){
             ft_stack[stack_cnt] = node;
             node = node->s_end;
             stack_cnt++;

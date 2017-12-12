@@ -36,7 +36,7 @@ int xw_main_menu_show(void *data)
     mt.y    = XW_MAIN_WINDOW_Y;
     
     xw_get_png_hw(XW_MAIN_WINDOW_ID,&mt.w,&mt.h);
-    printf("main menu w:%d ,h:%d\n",mt.w,mt.h); 
+    //printf("main menu w:%d ,h:%d\n",mt.w,mt.h); 
     mt.image_cache = xw_get_window_png(XW_MAIN_WINDOW_ID);
     mt.video_set.mouse_offset = mouse_offset_main_menu_func;
     int ret = 0;
