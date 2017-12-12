@@ -1565,7 +1565,7 @@ static void freshen_image_mouse(void)
 
 static inline void _image_freshen(window_node_t *node)
 {
-    
+   
     switch(node->win_type){
         
         case OBJECT_BUTTION:
@@ -1683,10 +1683,11 @@ static void image_clear_video(void)
     }
     //clear not user order
     int i = 0 ;
+
     for(i = 0 ; i < clear_cnt ; i++)
     {
         if(clear_stack[i]->freshen_arrt == NEED_CLEAR)
-             _image_freshen(node);
+             _image_freshen(clear_stack[i]);
     }
 
     
