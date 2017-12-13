@@ -12,14 +12,15 @@
 
 //
 #define FONT_SIZE                   16
-#define FONT_WIN_COLOR              0xf00f
-#define FONT_COLOR                  0x3A39
+#define FONT_WIN_COLOR              0xefee
+#define FONT_COLOR                  0xf00f
 
 //
-#define DATE_SET_UP_WINDOW_H        20
-#define DATE_SET_UP_WINDOW_W        200
-#define DATE_SET_DOWN_WINDOW_H      20
-#define DATE_SET_DOWN_WINDOW_W      200
+#define DATE_SET_UP_WINDOW_H        30
+#define DATE_SET_UP_WINDOW_W        260
+#define DATE_SET_DOWN_WINDOW_H      30
+#define DATE_SET_DOWN_WINDOW_W      260
+
 #define DATE_SET_WINDOW_W             80
 #define DATE_SET_WINDOW_H             80
 
@@ -32,7 +33,7 @@ typedef enum{
    DATE_WINDOW_SET,
 } DATE_WINDOW_RUN_STATE;
 
-static void  mouse_ldown_botton_setdown(void *data);
+static void  mouse_ldown_button_setdown(void *data);
 static void  mouse_ldown_button_setup(void *data);
 static void  mouse_ldown_button_settime(void *data);
 
@@ -43,6 +44,12 @@ static  struct  tm  set_time;
 
 static  void  mouse_ldown_button_settime(void *data)
 {
+    
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color =0xf00f;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+
     if(_state == DATE_WINDOW_RUNING ){
         _state = DATE_WINDOW_SET;
         return;
@@ -60,24 +67,41 @@ static  void  mouse_ldown_button_settime(void *data)
     return ;
 }
 
+static void mouse_offset_settime_func(void *data){
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color =0xf0f0;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    return;
+}
 
-#define YEAR_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 2
-#define YEAR_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 2
+static void mouse_leave_settime_func(void *data){
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = 0xefee;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    return;
+}
 
-#define MON_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 98
-#define MON_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 98
 
-#define DAY_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 162
-#define DAY_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 162
 
-#define HOUR_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 194
-#define HOUR_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 194
 
-#define MIN_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 258
-#define MIN_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 258
 
-#define SEC_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 322
-#define SEC_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 322
+#define YEAR_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 0
+#define YEAR_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 0
+
+#define MON_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 46
+#define MON_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 46
+
+#define DAY_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 82
+#define DAY_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 82
+
+#define HOUR_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 129
+#define HOUR_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 129
+
+#define MIN_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 175
+#define MIN_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 175
+
+#define SEC_SET_UP_X      XW_DATE_SET_UP_WINDOW_X + 216
+#define SEC_SET_DOWN_X    XW_DATE_SET_DOWN_WINDOW_X + 216
 
 static  void  mouse_ldown_button_setup(void *data)
 {
@@ -141,17 +165,46 @@ static  void  mouse_ldown_button_setdown(void *data)
     
 }
 
+static void usr_push_video_button_set(void *data ,uint16_t *fbbuf,int scree_w ,int scree_h)
+{
+
+    window_node_button_t *bt =  (window_node_button_t *)data;
+    printf(" video push bt->color:%x\n",bt->color); 
+    //top w line
+    int i ,k ;
+    for(i = bt->y; i < (bt->y+bt->size) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    //low w line
+    for(i = bt->y+bt->h - bt->size; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // l h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < ( bt->x + bt->size) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // r h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x + bt->w - bt->size; k  < ( bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+
+}
+
 
 
 //need thread mode run
-void    xw_date_show(void *data)
+void*   xw_date_show(void *data)
 {
     
     
     struct user_set_node_atrr  node_attr;
     
     node_attr.en_node       = 1;
-    node_attr.en_freshen    = 1;
+    node_attr.en_freshen    = 0;
     node_attr.move_arrt     = 0;
 
     //set English font size
@@ -239,18 +292,22 @@ void    xw_date_show(void *data)
     bt.w                =  DATE_SET_DOWN_WINDOW_W;
     bt.h                =  DATE_SET_DOWN_WINDOW_H;
     bt.color            =  0;
-    bt.video_set.mouse_left_down = mouse_ldown_botton_setdown;
+    bt.video_set.mouse_left_down = mouse_ldown_button_setdown;
     ret = Image_SDK_Create_Button(node_attr,bt);
     
     memcpy(node_attr.node_id,XW_DATE_SET_WINDOW_ID  ,strlen(XW_DATE_SET_WINDOW_ID));
-    node_attr.en_freshen = NORTHING;  
+    node_attr.en_freshen = NORTHING; //NEED_FRESHEN; // NORTHING;  
     memset(&bt,0x0,sizeof(window_node_button_t));
-    bt.x                =  XW_DATE_SEC_WINDOW_X ;
+    bt.x                =  XW_DATE_SET_WINDOW_X ;
     bt.y                =  XW_DATE_SET_WINDOW_Y ;
     bt.w                =  DATE_SET_WINDOW_W;
     bt.h                =  DATE_SET_WINDOW_H;
     bt.color            =  0;
+    bt.size             =  2;
+    bt.user_video_freshen = usr_push_video_button_set;
     bt.video_set.mouse_left_down = mouse_ldown_button_settime;
+    bt.video_set.mouse_leave = mouse_leave_settime_func;
+    bt.video_set.mouse_offset = mouse_offset_settime_func;
     ret = Image_SDK_Create_Button(node_attr,bt);
     
 
@@ -311,6 +368,18 @@ void    xw_date_show(void *data)
         usleep(500000);
     }
     
+    return;
+
+}
+
+pthread_t   xw_date_id;
+
+void  xw_date_show_thread(void )
+{
+    
+    pthread_create(&xw_date_id,NULL,
+            xw_date_show,NULL);
+
     return;
 
 }

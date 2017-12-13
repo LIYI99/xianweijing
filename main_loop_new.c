@@ -12,6 +12,8 @@
 #include "xw_png_load.h"
 #include "xw_main_menu_show.h"
 #include "xw_top_menu_show.h"
+#include "xw_date_show.h"
+
 #include "xw_test_freshen.h"
 static  void  mouse_leave_botton_func_v2(void *data)
 {
@@ -351,11 +353,13 @@ int main(int argc,char **argv)
     Image_SDK_Init();
    
     //create top menu
-    //ret = xw_top_menu_show(NULL); 
+    ret = xw_top_menu_show(NULL); 
     //create main menu
-    //ret = xw_main_menu_show(NULL);
-    //
-    xw_test_freshen_show();
+    ret = xw_main_menu_show(NULL);
+    
+    xw_date_show_thread();
+
+    //xw_test_freshen_show();
     Image_SDK_Run();
 
     //

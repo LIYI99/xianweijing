@@ -736,6 +736,27 @@ int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr){
 
 
 }
+int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en){
+    
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+    {
+        printf("not find this window :%s \n",node_id);
+
+        return -2;
+    }
+   // printf("find node id:%c%c%c level:%d in node_id:%s\n",
+     //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+    
+    temp->en_submenu = en;
+
+
+
+}
+
 
 
 int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
@@ -992,8 +1013,8 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
                 save_node[check_cnt] = node;
                 check_cnt++;
             
-                printf("check node_id:%c%c%c node:%p check_cnt:%d\n\n",node->node_id[0],node->node_id[1],
-                    node->node_id[2],node,check_cnt);
+                printf("check node_id:%c%c%c node:%p check_cnt:%d x:%d y;%d\n\n",node->node_id[0],node->node_id[1],
+                    node->node_id[2],node,check_cnt,mdata.x,mdata.y);
             }
         }
         
@@ -1073,10 +1094,13 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
             node->f_node->s_head = node;
         }
         //if the video state is put ,and the freshen not is clear than need update
-        if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR){
+        if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR
+                && node->en_intersection != 0 ){
             node->freshen_arrt = NEED_FRESHEN;
 
-            printf("##2######mdata.event:%d\n",mdata.event);
+            printf("##2######mdata.event:%d en_intersectio:%d node_id:%c%c%c \n\n",mdata.event,
+                    node->en_intersection,node->node_id[0],node->node_id[1],
+                    node->node_id[2]);
         }
     }
     
@@ -1148,9 +1172,9 @@ static void  _image_window_func_run(void *data)
 
         funcs = get_window_func(node);
         if(funcs->mouse_leave){
-            printf("func:%s line:%d run leave func %c%c%c \n",
-                    __func__,__LINE__,node->node_id[0],node->node_id[1],
-                    node->node_id[2]); 
+             //printf("func:%s line:%d run leave func %c%c%c \n",
+               //     __func__,__LINE__,node->node_id[0],node->node_id[1],
+                //    node->node_id[2]); 
             funcs->mouse_leave(funcs->data);
         }
         node->last_event = 0;
@@ -1441,7 +1465,7 @@ static void freshen_image_text(void *data){
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
-
+        bt->this_node->video_state = VIDEO_STATE;
         return;
     }
     uint8_t  *text_bit = NULL; 
@@ -1454,6 +1478,7 @@ static void freshen_image_text(void *data){
             for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
         }
+        bt->this_node->video_state = CLEAR_STATE;
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
 
         for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
@@ -1486,7 +1511,7 @@ static void freshen_image_text(void *data){
         }
 
         bt->this_node->freshen_arrt = NORTHING;
-
+        bt->this_node->video_state = VIDEO_STATE;
         bt->last_x = bt->x;
         bt->last_y = bt->y;
     }
@@ -1805,8 +1830,11 @@ static void  image_put_video(void)
             }
 
             //freshen now node
-            if(node->video_attr == OPEN_DISP)
+            if(node->video_attr == OPEN_DISP && node->f_node == sdk_handle->root)
                 _image_freshen(node);
+            else if(node->video_attr == OPEN_DISP && node->f_node->en_node == 1){
+                 _image_freshen(node);
+            }
             // if have sub window set sub window freshen
             if(node->en_submenu && node->s_head != NULL)
                 image_freshen_set_sub_freshen(node);
@@ -2007,20 +2035,22 @@ static int compler_image(window_node_t *node,window_node_t *temp)
     update_param_get(temp,&data_n);
     update_param_get(node,&data_s);
     int x1,y1,x2,y2;
-    x1 = (data_s.x - data_s.end_x)/2 + data_s.x;
-    x2 = (data_n.x - data_n.end_x)/2 + data_n.x;
+    x1 = (data_s.end_x - data_s.x)/2 + data_s.x;
+    x2 = (data_n.end_x - data_n.x)/2 + data_n.x;
 
-    y1 = (data_s.y - data_s.end_y)/2 + data_s.y;
-    y2 = (data_n.y - data_n.end_y)/2 + data_n.y;
+    y1 = (data_s.end_y - data_s.y)/2 + data_s.y;
+    y2 = (data_n.end_y - data_n.y)/2 + data_n.y;
     
-    printf("x1:%d y1:%d x2:%d y2:%d \n",x1,y1,x2,y2); 
+    //printf("x1:%d y1:%d x2:%d y2:%d \n",x1,y1,x2,y2); 
 
     if((ab_abs(x1 , x2) < (data_s.end_x - data_s.x + data_n.end_x - data_n.x)/2) &&
             (ab_abs(y1 , y2) < (data_s.end_y - data_s.y + data_n.end_y - data_n.y)/2)){
         
         node->en_intersection = 1;
         temp->en_intersection = 1;
-        printf("%s:line:%d node:%p temp:%p\n",__func__,__LINE__,node,temp);
+        printf("XXXX%s:line:%d node_id:%c%c%c  temp_id:%c%c%c\n",__func__,__LINE__,
+                node->node_id[0],node->node_id[1],node->node_id[2],
+                temp->node_id[0],temp->node_id[1],temp->node_id[2] );
         return 1;
     }
 

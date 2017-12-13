@@ -2,29 +2,29 @@
 #define __XW_WINDOW_XY_DF_H__
 
 //dedfine   main menu window
-#define XW_MAIN_WINDOW_X           1550             
+#define XW_MAIN_WINDOW_X           1504             
 #define XW_MAIN_WINDOW_Y           150
 
 
 
 
 //deinfine line set button
-#define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X + 10
-#define XW_LINE_SHOW_WINDOW_Y       XW_MAIN_WINDOW_Y + 850
+#define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X + 98
+#define XW_LINE_SHOW_WINDOW_Y       XW_MAIN_WINDOW_Y + 515
 
 #define XW_LINE_CLOSE_WINDOW_X      XW_MAIN_WINDOW_X + 50
-#define XW_LINE_CLOSE_WINDOW_Y      XW_MAIN_WINDOW_Y + 850
+#define XW_LINE_CLOSE_WINDOW_Y      XW_MAIN_WINDOW_Y + 515
 
 
 #define XW_LINE_RESET_WINDOW_X      XW_MAIN_WINDOW_X + 100   
-#define XW_LINE_RESET_WINDOW_Y      XW_MAIN_WINDOW_Y + 850
+#define XW_LINE_RESET_WINDOW_Y      XW_MAIN_WINDOW_Y + 515
        
 
 #define XW_LINE_SAVE_WINDOW_X       XW_MAIN_WINDOW_X + 150   
-#define XW_LINE_SAVE_WINDOW_Y       XW_MAIN_WINDOW_Y + 150   
+#define XW_LINE_SAVE_WINDOW_Y       XW_MAIN_WINDOW_Y + 515   
 
-#define XW_LINE_CHECK_WINDOW_X      XW_MAIN_WINDOW_X + 0 
-#define XW_LINE_CHECK_WINDOW_Y      XW_MAIN_WINDOW_Y + 0  
+#define XW_LINE_CHECK_WINDOW_X      XW_MAIN_WINDOW_X + 96 
+#define XW_LINE_CHECK_WINDOW_Y      XW_MAIN_WINDOW_Y + 485  
 
 #define XW_LINE_ONLY_WINDOW_X        XW_MAIN_WINDOW_X + 0        
 #define XW_LINE_ONLY_WINDOW_Y          XW_MAIN_WINDOW_Y + 0    
@@ -71,39 +71,39 @@
 
 
 //define date text window id 
-#define XW_DATE_YEAR_WINDOW_X        XW_MAIN_WINDOW_X + 0 
-#define XW_DATE_YEAR_WINDOW_Y        XW_MAIN_WINDOW_Y + 0 
+#define XW_DATE_YEAR_WINDOW_X        XW_MAIN_WINDOW_X + 116  
+#define XW_DATE_YEAR_WINDOW_Y        XW_MAIN_WINDOW_Y + 498
 
 
 
-#define XW_DATE_MONN_WINDOW_X         XW_MAIN_WINDOW_X + 0       
-#define XW_DATE_MONN_WINDOW_Y          XW_MAIN_WINDOW_Y + 0      
+#define XW_DATE_MONN_WINDOW_X         XW_MAIN_WINDOW_X + 173       
+#define XW_DATE_MONN_WINDOW_Y          XW_MAIN_WINDOW_Y + 498     
 
 
-#define XW_DATE_DAY_WINDOW_X            XW_MAIN_WINDOW_X + 0
-#define XW_DATE_DAY_WINDOW_Y            XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_DAY_WINDOW_X            XW_MAIN_WINDOW_X + 212
+#define XW_DATE_DAY_WINDOW_Y            XW_MAIN_WINDOW_Y + 498
 
 
-#define XW_DATE_HOUR_WINDOW_X               XW_MAIN_WINDOW_X + 0
-#define XW_DATE_HOUR_WINDOW_Y               XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_HOUR_WINDOW_X               XW_MAIN_WINDOW_X + 264
+#define XW_DATE_HOUR_WINDOW_Y               XW_MAIN_WINDOW_Y + 498
 
 
-#define XW_DATE_MIN_WINDOW_X               XW_MAIN_WINDOW_X + 0
-#define XW_DATE_MIN_WINDOW_Y              XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_MIN_WINDOW_X               XW_MAIN_WINDOW_X + 303
+#define XW_DATE_MIN_WINDOW_Y              XW_MAIN_WINDOW_Y + 498
 
 
-#define XW_DATE_SEC_WINDOW_X               XW_MAIN_WINDOW_X + 0
-#define XW_DATE_SEC_WINDOW_Y                XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_SEC_WINDOW_X               XW_MAIN_WINDOW_X + 341
+#define XW_DATE_SEC_WINDOW_Y                XW_MAIN_WINDOW_Y + 498
 
-#define XW_DATE_SET_UP_WINDOW_X            XW_MAIN_WINDOW_X + 0
-#define XW_DATE_SET_UP_WINDOW_Y            XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_SET_UP_WINDOW_X            XW_MAIN_WINDOW_X + 116 
+#define XW_DATE_SET_UP_WINDOW_Y            XW_MAIN_WINDOW_Y + 479
 
 
-#define XW_DATE_SET_DOWN_WINDOW_X          XW_MAIN_WINDOW_X + 0
-#define XW_DATE_SET_DOWN_WINDOW_Y          XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_SET_DOWN_WINDOW_X          XW_MAIN_WINDOW_X + 116
+#define XW_DATE_SET_DOWN_WINDOW_Y          XW_MAIN_WINDOW_Y + 539
 
-#define XW_DATE_SET_WINDOW_X          XW_MAIN_WINDOW_X + 0
-#define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 0
+#define XW_DATE_SET_WINDOW_X          XW_MAIN_WINDOW_X + 3
+#define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 479
 
 
 
@@ -211,14 +211,14 @@
 #define XW_SNAP_WINDOW_X            XW_TOP_MENU_WINDOW_X + 0
 #define XW_SNAP_WINDOW_Y            XW_TOP_MENU_WINDOW_Y + 1
 
-#define XW_RECOD_WINDOW_X           XW_TOP_MENU_WINDOW_X + 50
-#define XW_RECOD_WINDOW_Y           XW_TOP_MENU_WINDOW_Y + 0
+#define XW_RECOD_WINDOW_X           XW_TOP_MENU_WINDOW_X + 107
+#define XW_RECOD_WINDOW_Y           XW_TOP_MENU_WINDOW_Y + 1
 
-#define XW_SET_WINDOW_X             XW_TOP_MENU_WINDOW_X + 100
-#define XW_SET_WINDOW_Y             XW_TOP_MENU_WINDOW_Y + 0
+#define XW_PERVIEW_WINDOW_X         XW_TOP_MENU_WINDOW_X + 214
+#define XW_PERVIEW_WINDOW_Y         XW_TOP_MENU_WINDOW_Y + 1
 
-#define XW_PERVIEW_WINDOW_X         XW_TOP_MENU_WINDOW_X + 150
-#define XW_PERVIEW_WINDOW_Y         XW_TOP_MENU_WINDOW_Y + 0
+#define XW_SET_WINDOW_X             XW_TOP_MENU_WINDOW_X + 321
+#define XW_SET_WINDOW_Y             XW_TOP_MENU_WINDOW_Y + 1
 
 
 
