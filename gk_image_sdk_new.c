@@ -715,6 +715,29 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id, NODE_FRESHEN_ARRT en_freshe
 
 }
 
+int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr){
+
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL)
+    {
+        printf("not find this window :%s \n",node_id);
+
+        return -2;
+    }
+   // printf("find node id:%c%c%c level:%d in node_id:%s\n",
+     //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+    
+    temp->order_attr = _attr;
+    
+    return 0;
+
+
+}
+
+
 int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
 {
 
@@ -790,8 +813,8 @@ static inline int image_buttont_xy_analysis(void *data,window_func_t *set,
             && (mdata.y >= bt->y || mdata.y + MOUSE_SIZE >= bt->y)&& mdata.y <= bt->y+bt->h){
          
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        printf("mouse check mouse.x:%d mouse.y:%d button.x:%d button.y:%d\n",mdata.x,mdata.y,
-                bt->x,bt->y);
+        //printf("mouse check mouse.x:%d mouse.y:%d button.x:%d button.y:%d\n",mdata.x,mdata.y,
+          //      bt->x,bt->y);
         return 1;
     }
     else 
@@ -1009,18 +1032,27 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }
     }
      
+    //printf("########mdata.event:%d\n",mdata.event);
     //move top
     window_node_t *temp = NULL;
     int  k;
 
     for (k  =  0 ; k < check_cnt ; k++)
     {
-        
+        // ****** #### *****
+        // if the mouse is offset event ,is not need move node,but maybe ....
+        // some scene have bugs.....
+        if(mdata.event == GK_MOUSE_OFFSET)
+            break;
+
         node = save_node[k];
         // the node is head or FIXD node ,not need move 
         if(node == node->f_node->s_head || node->order_attr == FIXD_ORDER )
             continue;
-        
+        //if it is perv node is fixd node ,not need move
+        if(node->prev->order_attr == FIXD_ORDER)
+            continue;
+
         node->prev->next = node->next;
         if(node->next){
             node->next->prev = node->prev;
@@ -1040,7 +1072,12 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         else{ 
             node->f_node->s_head = node;
         }
+        //if the video state is put ,and the freshen not is clear than need update
+        if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR){
+            node->freshen_arrt = NEED_FRESHEN;
 
+            printf("##2######mdata.event:%d\n",mdata.event);
+        }
     }
     
     sdk_handle->check_level_cnt = check_cnt;
@@ -1205,12 +1242,13 @@ static void freshen_image_buttion(void *data){
 
     window_node_button_t *bt =  (window_node_button_t *)data;
 
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
-    
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
+
     if(bt->user_video_freshen){
       //  printf("__freshen_image_buttion__\n");
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
         bt->this_node->freshen_arrt = NORTHING;
+        bt->this_node->video_state = VIDEO_STATE;
         return;
     }
 
@@ -1223,6 +1261,7 @@ static void freshen_image_buttion(void *data){
             for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
+        bt->this_node->video_state = CLEAR_STATE;
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
     
         printf("freshen button\n");
@@ -1240,6 +1279,7 @@ static void freshen_image_buttion(void *data){
         }
         bt->last_x = bt->x;
         bt->last_y = bt->y;
+        bt->this_node->video_state = VIDEO_STATE;
     }
    
     bt->this_node->freshen_arrt = NORTHING;
@@ -1250,7 +1290,7 @@ static void freshen_image_menu(void *data){
     
     window_node_menu_t *bt =  (window_node_menu_t *)data;
     
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     
     if(bt->user_video_freshen){
 
@@ -1310,7 +1350,7 @@ static void freshen_image_line(void *data){
     
     window_node_line_t *bt =  (window_node_line_t *)data;
     
-   int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+   uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     
     if(bt->user_video_freshen){
 
@@ -1352,7 +1392,7 @@ static void freshen_image_bar(void *data){
     
     window_node_bar_t *bt =  (window_node_bar_t *)data;
     
-   int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+   uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     
     if(bt->user_video_freshen){
 
@@ -1396,7 +1436,7 @@ static void freshen_image_text(void *data){
 
     window_node_text_t *bt =  (window_node_text_t *)data;
 
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     
     if(bt->user_video_freshen){
 
@@ -1469,7 +1509,7 @@ static void freshen_image_mouse(void)
     sdk_handle->mouse->x = sdk_handle->mouse_new_data.x;
     sdk_handle->mouse->y = sdk_handle->mouse_new_data.y;
     window_node_mouse_t *bt = sdk_handle->mouse;
-    int16_t *buf = (int16_t *)sdk_handle->mmap_p; 
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     int k,i;
  
 #define  MOUSE_LINE_SIZE    2
@@ -1485,14 +1525,28 @@ static void freshen_image_mouse(void)
     //reset data 
     for(k = bt->y_last + bt->size/2; k < (MOUSE_LINE_SIZE + bt->y_last+bt->size/2) ; k++)
     {
-        for(i = bt->x_last ;  i < (bt->size + bt->x_last) ; i++)
-            *(buf+ sdk_handle->scree_w*k + i) = *savebuf++;
+        for(i = bt->x_last ;  i < (bt->size + bt->x_last) ; i++){
+            if( *(buf+ sdk_handle->scree_w*k + i) == bt->color )  //if mouse use image ,this need change
+                    *(buf+ sdk_handle->scree_w*k + i) = *savebuf++;
+            else
+            {
+                    savebuf++; 
+                    //printf(" W :srcecc buf x,y peixl:%u,mouse color:%u\n",*(buf + sdk_handle->scree_w*k +i),bt->color);
+            }
+        }
     }
     
     for(k = bt->x_last + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->x_last+bt->size/2) ; k++)
     {
-        for(i = bt->y_last ;  i < (bt->size + bt->y_last) ; i++)
-            *(buf+ sdk_handle->scree_w*i + k) = *savebuf++;
+        for(i = bt->y_last ;  i < (bt->size + bt->y_last) ; i++){
+            if(*(buf+ sdk_handle->scree_w*i + k) == bt->color) //if mouse use image ,this need change        
+                *(buf+ sdk_handle->scree_w*i + k) = *savebuf++;
+            else{
+              //  printf("H:srecc buf,x,y peixl:%u,mouse color:%u\n",
+                //               *(buf + sdk_handle->scree_w*i + k),bt->color);
+                savebuf++;
+            }
+        }
     }
     //save data;
     savebuf =  (uint16_t *)bt->save_cache;
@@ -1511,8 +1565,10 @@ static void freshen_image_mouse(void)
     //pushdata
     for(k = bt->y + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->y+bt->size/2) ; k++)
     {
-        for(i = bt->x ;  i < (bt->size + bt->x) ; i++ )
-            *(buf+ sdk_handle->scree_w*k + i) = bt->color;;
+        for(i = bt->x ;  i < (bt->size + bt->x) ; i++ ){
+            *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+           // printf("mem :%d \n",*(buf + sdk_handle->scree_w*k +i));
+        }
     }
     for(k = bt->x + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->x + bt->size/2) ; k++)
     {
@@ -1948,21 +2004,23 @@ static int compler_image(window_node_t *node,window_node_t *temp)
 {
         
     struct  update_param_save   data_s,data_n;
-    update_param_get(node,&data_n);
+    update_param_get(temp,&data_n);
     update_param_get(node,&data_s);
-    int x1,y1,x2,y2,w1,w2,h1,h2;
-    
+    int x1,y1,x2,y2;
     x1 = (data_s.x - data_s.end_x)/2 + data_s.x;
     x2 = (data_n.x - data_n.end_x)/2 + data_n.x;
 
     y1 = (data_s.y - data_s.end_y)/2 + data_s.y;
     y2 = (data_n.y - data_n.end_y)/2 + data_n.y;
+    
+    printf("x1:%d y1:%d x2:%d y2:%d \n",x1,y1,x2,y2); 
 
     if((ab_abs(x1 , x2) < (data_s.end_x - data_s.x + data_n.end_x - data_n.x)/2) &&
             (ab_abs(y1 , y2) < (data_s.end_y - data_s.y + data_n.end_y - data_n.y)/2)){
         
         node->en_intersection = 1;
         temp->en_intersection = 1;
+        printf("%s:line:%d node:%p temp:%p\n",__func__,__LINE__,node,temp);
         return 1;
     }
 
