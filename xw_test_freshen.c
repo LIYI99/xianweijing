@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <time.h>
+#include "xw_window_id_df.h"
 #include "gk_image_sdk_new.h"
 #include "xw_test_freshen.h"
 
@@ -62,6 +63,30 @@ static void  test_conorl_button_ldown(void *data)
     
     
 }
+
+
+static int lines_state = 0;
+
+static void cnt_lines_button_ldow(void *data)
+{
+    window_node_button_t *bt = (window_node_button_t *)data;
+    bt->color = 0xeeee;
+
+    if(lines_state == 0){
+        Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID ,1);
+        Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,1);
+        Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
+
+        lines_state = 1;
+    }else{
+        Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
+        Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
+        Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
+        lines_state = 0;
+        bt->color = 0xff00;
+    }
+
+}
 void  xw_test_freshen_show(void)
 
 {
@@ -86,10 +111,10 @@ void  xw_test_freshen_show(void)
     //
     _button.video_set.mouse_left_down = NULL;
 
-    _button.x = 600;
-    _button.y = 100;
-    _button.w = 380;
-    _button.h = 750;
+    _button.x = 550;
+    _button.y = 700;
+    _button.w = 80;
+    _button.h = 80;
     _button.color = 0xff00;
    
     //create 1
@@ -98,9 +123,9 @@ void  xw_test_freshen_show(void)
 
 
     _button.x = 650;
-    _button.y = 150;
-    _button.w = 380;
-    _button.h = 750;
+    _button.y = 700;
+    _button.w = 80;
+    _button.h = 80;
     _button.color = 0xf0f0;
    
     //create 1
@@ -108,9 +133,9 @@ void  xw_test_freshen_show(void)
     Image_SDK_Create_Button(  node_attr,_button);
 
      _button.x = 750;
-    _button.y = 170;
-    _button.w = 380;
-    _button.h = 750;
+    _button.y = 700;
+    _button.w = 80;
+    _button.h = 80;
     _button.color = 0xf00f;
    
     //create 1
@@ -118,11 +143,11 @@ void  xw_test_freshen_show(void)
     Image_SDK_Create_Button(  node_attr,_button);
 
      _button.x = 850;
-    _button.y = 200;
-    _button.w = 380;
-    _button.h = 750;
+    _button.y = 700;
+    _button.w = 80;
+    _button.h = 80;
     _button.color = 0xff00;
-   
+    _button.video_set.mouse_left_down = cnt_lines_button_ldow; 
     //create 1
     //node_attr. = 
     memcpy(node_attr.node_id,"Ah",2);

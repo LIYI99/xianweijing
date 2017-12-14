@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stlib.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "xw_line_show.h"
@@ -44,7 +44,7 @@ static  int  xw_save_line_data(char *path,xw_lines_t *lt);
 
 //line  set add update
 static  int  xw_lines_arry_set_order(uint16_t set_order);
-static  int  xw_lines_line_set_order(uint16_t set_order,uint16_t color,uint16_t size)
+static  int  xw_lines_line_set_order(uint16_t set_order,uint16_t color,uint16_t size);
 
 
 
@@ -108,7 +108,7 @@ static int  xw_line_t_init(void){
         return -1;
     memset(xw_lt,0x0,sizeof(xw_lines_t));
     
-    int ret = 0;
+    int ret = -1;
 
     if(XW_LINE_T_SAVEFILE_PATH != NULL)
     {
@@ -127,7 +127,7 @@ static int  xw_line_t_init(void){
         for(i = 0; i < XW_LINE_NUMS_MAX; i++)
         {
             xw_lt->lines[k][i]._attr.en_node              = 1;
-            xw_lt->lines[k][i]._attr.en_freshen           = NEED_FRESHEN;
+            xw_lt->lines[k][i]._attr.en_freshen           = 0;
             xw_lt->lines[k][i]._attr.mouse_garp_reflect   = OFFSET_REFLECT | LDOWN_REFLECT|LUP_REFLECT;
             xw_lt->lines[k][i]._attr.move_arrt            = MOUSE_LDOWN_MOVE;
         }
@@ -188,7 +188,8 @@ static int  xw_line_t_init(void){
 
 }
 
-void xw_line_rarr_create(void *data){
+void xw_line_show_all(void *data)
+{
 
     //init xw line data
 
@@ -201,8 +202,7 @@ void xw_line_rarr_create(void *data){
     struct user_set_node_atrr _attr;
     memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     memcpy(_attr.node_id,XW_LINE_RARR_WINDOW_ID,strlen(XW_LINE_RARR_WINDOW_ID ));
-    _attr.en_node = 0;
-    
+    _attr.en_node = 0; 
     //ceater line father menu
     window_node_menu_t mt;
     memset(&mt,0x0,sizeof(window_node_menu_t));
@@ -211,12 +211,15 @@ void xw_line_rarr_create(void *data){
     mt.h =   XW_LINE_RARR_WINDOW_H;
     mt.w =   XW_LINE_RARR_WINDOW_W;
     ret  = Image_SDK_Create_Menu(_attr,mt);
+    ret =  Image_SDK_Set_Node_Disp(XW_LINE_RARR_WINDOW_ID,CLOSE_DISP);
+
 
 
     //ceate all line 
     int  i = 0;
     for(i = 0 ; i < XW_LINE_NUMS_MAX ; i++ ){
         ret = Image_SDK_Create_Line(xw_lt->lines[xw_lt->now_order][i]._attr,xw_lt->lines[xw_lt->now_order][i].line);
+        printf("xw_lt now_order:%d \n",xw_lt->now_order);
     }
     
     return;

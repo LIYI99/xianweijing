@@ -52,6 +52,7 @@ typedef enum{
 
 //V,now video disp state
 typedef enum{
+    NOR_STATE,
     CLEAR_STATE,
     VIDEO_STATE,
 }NODE_VIDEO_STATE;
@@ -289,7 +290,9 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt);
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
 int     Image_SDK_Set_Node_En(char *node_id,uint8_t en);
 int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr);
+int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en);
 
+int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr);
 
 int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
 

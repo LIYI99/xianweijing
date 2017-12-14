@@ -50,6 +50,15 @@ static void*    _image_mouse_event_read_thread(void *data);
 static void*    _image_sdk_handle_data_process(void *data);
 
 
+static inline void      debug_node_id(window_node_t *node){
+    
+    int i;
+    for(i = 0; i < MENU_LEVEL ; i++)
+        if(node->node_id[i] >= 'A' && node->node_id[i] <=  'z')
+            printf("%c",node->node_id[i]);
+    printf("\n");
+}
+
 static void     _image_mouse_image_load(window_node_mouse_t *mouse)
 {
 
@@ -285,7 +294,8 @@ static int  window_node_inster(window_node_t *node){
     //get window level
     level = node_id_level_re(node->node_id);
     if(level < 2){
-        printf(" node_id wirte erro \n");
+        printf(" node_id write erro node->node_id:%c%c%c\n",node->node_id[0],
+                node->node_id[1],node->node_id[2]);
         return -1;
     }
 
@@ -819,6 +829,24 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
 
 }
 
+int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr)
+{
+    if(node_id == NULL)
+        return -1;
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL){
+        return -2;
+    }
+  
+       
+    temp->video_attr = _attr;
+        
+    return 0;
+
+}
 
 
 
@@ -1038,6 +1066,13 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         if(node == NULL && stack_cnt > 0 ){
             stack_cnt--;
             node = ft_stack[stack_cnt]->next;
+            
+            //if sub windows not check ,than those tarlve mouse envet eof       
+            if(check_cnt != 0 && node){
+                printf("quit tarlve mouse decitc\n");
+                debug_node_id(node);
+                break;
+            }
 
         }
     
@@ -1065,8 +1100,12 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         // some scene have bugs.....
         if(mdata.event == GK_MOUSE_OFFSET)
             break;
+        
+    
 
         node = save_node[k];
+        
+
         // the node is head or FIXD node ,not need move 
         if(node == node->f_node->s_head || node->order_attr == FIXD_ORDER )
             continue;
@@ -1084,6 +1123,8 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         temp = find_frist_free_node(node->f_node->s_head);
         if(temp == NULL)
             continue;
+        printf("move window order\n"); 
+        debug_node_id(node);
         
         node->prev = temp->prev;
         node->next = temp;
@@ -1093,6 +1134,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         else{ 
             node->f_node->s_head = node;
         }
+        
         //if the video state is put ,and the freshen not is clear than need update
         if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR
                 && node->en_intersection != 0 ){
@@ -1289,6 +1331,7 @@ static void freshen_image_buttion(void *data){
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
     
         printf("freshen button\n");
+
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
             for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
@@ -1379,35 +1422,53 @@ static void freshen_image_line(void *data){
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
-
-        return;
+                
+        bt->this_node->freshen_arrt = NORTHING;
+        bt->this_node->video_state = VIDEO_STATE;
+        return ;
     }
-    int k,i;
-    //
+
+    int k,i,h,w;
+    if(bt->start_x  == bt->end_x){
+        h = bt->end_y - bt->start_y;
+        w = bt->size;
+    }else{
+        
+        w = bt->end_x - bt->start_x;
+        h = bt->size;
+    }
+
+
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
 
-        for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
-            for(i = bt->last_x ;  i < bt->end_x ; i++ )
+        for(k = bt->last_y ; k < bt->last_y + h ;k++){
+            for(i = bt->last_x ;  i < bt->last_x + w ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
+        
+        bt->this_node->video_state = CLEAR_STATE;
+
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
 
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
-            for(k = bt->last_y ; k < (bt->size + bt->last_y) ;k++){
-                for(i = bt->last_x ;  i < bt->end_x  ; i++ )
+            for(k = bt->last_y ; k < (h + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->last_x + w)  ; i++ )
                     *(buf+ sdk_handle->scree_w*k + i) = 0;    
             }
         }
 
-        for(k = bt->start_y ; k < (bt->size + bt->start_y) ;k++){
-            for(i = bt->start_x ;  i < bt->end_x  ; i++ )
+        for(k = bt->start_y ; k < (h + bt->start_y) ;k++){
+            for(i = bt->start_x ;  i < (bt->last_x + w)  ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
         }
+        
         bt->last_x = bt->start_x;
         bt->last_y = bt->start_y;
+        bt->this_node->video_state = VIDEO_STATE;
     }
     
+    bt->this_node->freshen_arrt = NORTHING;
     return ;
 }
 
@@ -1646,7 +1707,14 @@ static void freshen_image_mouse(void)
 
 static inline void _image_freshen(window_node_t *node)
 {
-   
+    
+    if(node->video_attr != OPEN_DISP)
+    {
+        node->freshen_arrt = NORTHING;
+        return;
+    }
+        
+
     switch(node->win_type){
         
         case OBJECT_BUTTION:
@@ -1681,8 +1749,19 @@ static void image_freshen_set_sub_freshen(window_node_t *node)
 {
     window_node_t  *temp = node->s_head;
     for(;temp != NULL;temp = temp->next){
-        if(temp->video_state == VIDEO_STATE && temp->freshen_arrt ==  NORTHING)
+        if(temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
             temp->freshen_arrt = NEED_FRESHEN; 
+    }
+    return;
+
+} 
+
+static void image_freshen_set_sub_clear(window_node_t *node)
+{
+    window_node_t  *temp = node->s_head;
+    for(;temp != NULL;temp = temp->next){
+       // if(temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
+            temp->freshen_arrt = NEED_CLEAR; 
     }
     return;
 
@@ -1730,11 +1809,11 @@ static void image_clear_video(void)
         return ;
 
 
-    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*clear_stack[100];
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*clear_stack[100],*last_set_inter = NULL;
     int stack_cnt = 1,clear_cnt = 0;
     ft_stack[0] = sdk_handle->root;
-
     node = sdk_handle->root->s_head;
+
     //set attr
     while ( node  )
     {
@@ -1743,10 +1822,24 @@ static void image_clear_video(void)
         {
 
             if(node->en_intersection){
-                image_set_bother_clear_freshen(node->f_node->s_head); 
+                  image_set_bother_clear_freshen(node->f_node->s_head); 
+#if 0
+                if( !node ){
+                    image_set_bother_clear_freshen(node->f_node->s_head); 
+                }else if( node && last_set_inter->f_node != node->f_node) 
+                    image_set_bother_clear_freshen(node->f_node->s_head); 
+                last_set_inter = node;
+#endif
+
             }
+            
             clear_stack[clear_cnt] = node;
             clear_cnt++;
+            
+            if(node->s_head != NULL)
+            {
+               // image_freshen_set_sub_clear(node);
+            }
         }
 
         if(node->en_submenu && node->s_head != NULL){
@@ -1822,19 +1915,25 @@ static void  image_put_video(void)
             
             //the every level only set one times the fshen attr ,becares the image put run before,compler the all
             //window intersection attr,and set flags
-            if(node->en_intersection && !find_set_freshen_fnode(save_set,node->f_node,save_cnt))
+            if(node->en_intersection  
+                    && !find_set_freshen_fnode(save_set,node->f_node,save_cnt))
             {
+               // printf("set bother freshen attr fathernode:%p\n",node->f_node);
+                //debug_node_id(node);
                 image_set_bother_put_freshen(node);
                 save_set[save_cnt] = node->f_node;
                 save_cnt++;
             }
 
             //freshen now node
-            if(node->video_attr == OPEN_DISP && node->f_node == sdk_handle->root)
-                _image_freshen(node);
-            else if(node->video_attr == OPEN_DISP && node->f_node->en_node == 1){
-                 _image_freshen(node);
-            }
+           // if(node->video_attr == OPEN_DISP && node->f_node == sdk_handle->root){
+               // debug_node_id(node);
+            _image_freshen(node);
+           // }
+          //  else if(node->video_attr == OPEN_DISP && node->f_node->en_node == 1)
+            //{
+              //   _image_freshen(node);
+           // }
             // if have sub window set sub window freshen
             if(node->en_submenu && node->s_head != NULL)
                 image_freshen_set_sub_freshen(node);
@@ -1993,10 +2092,10 @@ static  int update_param_get(window_node_t *node,struct update_param_save *data)
             data->end_x     = ((window_node_line_t *)(node->window))->end_x;
             data->end_y     = ((window_node_line_t *)(node->window))->end_y;
             if(data->x == data->end_x){ // line
-                data->end_x = ((window_node_line_t *)(node->window))->size;
+                data->end_x += ((window_node_line_t *)(node->window))->size;
 
             }else{  // row line
-               data->end_y = ((window_node_line_t *)(node->window))->size;
+               data->end_y += ((window_node_line_t *)(node->window))->size;
 
             }
             break;
@@ -2061,7 +2160,7 @@ static void  compler_intersection_attr(window_node_t *node)
 {
     window_node_t *temp ,*savenode = node;
 
-    for(; node!= NULL; node = node->next )
+    for(; node != NULL; node = node->next )
     {
         if(node->en_intersection == 0)
         {
@@ -2103,7 +2202,8 @@ static void  _image_all_window_comper_intersection_attr(void)
             compler_intersection_attr(node); 
         
         }
-        if(node->en_submenu && node->s_head != NULL){
+        // intersection compler all
+        if(/*node->en_submenu &&*/ node->s_head != NULL){
             ft_stack[stack_cnt] = node;
             node = node->s_head;
             stack_cnt++;
