@@ -247,8 +247,10 @@ void xw_line_show_all(void *data)
     mt.h =   XW_LINE_RARR_WINDOW_H;
     mt.w =   XW_LINE_RARR_WINDOW_W;
     ret  = Image_SDK_Create_Menu(_attr,mt);
+
     ret =  Image_SDK_Set_Node_Disp(XW_LINE_RARR_WINDOW_ID,CLOSE_DISP);
-    
+    ret =  Image_SDK_Set_Node_Order(XW_LINE_RARR_WINDOW_ID,FIXD_ORDER);
+
 
     
     window_node_text_t  _text;
@@ -347,6 +349,8 @@ int  xw_lines_arry_set_order(uint16_t set_order)
     
     if(set_order > XW_LINE_CONF_NUMS || xw_lt == NULL)
         return -1;
+    if(xw_lt->line_arry_state == 0 )
+        return -2;
     int k = 0,ret = 0;
     
     xw_lt->now_order = set_order;
@@ -367,6 +371,11 @@ int  xw_lines_arry_set_order(uint16_t set_order)
     if(set_order > XW_LINE_CONF_NUMS || xw_lt == NULL)
         return -1;
     
+    if(xw_lt->line_arry_state == 0 || xw_lt->line_state == 0)
+        
+        return -2;
+
+
     xw_lt->lines[xw_lt->now_order][set_order].line.color = color;
     xw_lt->lines[xw_lt->now_order][set_order].line.size =  size;
     int ret = 0;
@@ -386,12 +395,14 @@ int     xw_lines_cl_op_all(void *data)
         return -1;
 
      if(xw_lt->line_arry_state == 0){
+         //printf("open leins-------------\n");
         Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID ,1);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,1);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
 
         xw_lt->line_arry_state = 1;
     }else{
+       // printf("close_lines--------------\n");
         Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);

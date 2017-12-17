@@ -9,13 +9,13 @@
 
 //deinfine line set button
 #define XW_LINE_SHOW_WINDOW_ID              "Aav"
-#define XW_LINE_CLOSE_WINDOW_ID             "Aau"
-#define XW_LINE_RESET_WINDOW_ID             "Aat"
-#define XW_LINE_SAVE_WINDOW_ID              "Aas"
+#define XW_LINE_CHOICE_WINDOW_ID            "Aau"
+#define XW_LINE_SET_SIZE_WINDOW_ID          "Aat"
+#define XW_LINE_SET_COLOR_WINDOW_ID         "Aas"
 #define XW_LINE_CHECK_WINDOW_ID             "Aar"
 #define XW_LINE_ONLY_WINDOW_ID              "Aaq"
 #define XW_LINE_CHANGE_COLOR_WINDOW_ID      "Aap"
-#define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
+//#define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
 
 //define video advanced settings
 //#define XW_VIDEO_ZOOZ_LESSEN_WINDOW_ID      "Aan" //del
@@ -70,8 +70,11 @@
 
 #define XW_LINE_H1_WINDOW_ID                "Aba"
 #define XW_LINE_H2_WINDOW_ID                "Abb"
+
 #define XW_LINE_H3_WINDOW_ID                "Abc"
 #define XW_LINE_H4_WINDOW_ID                "Abd"
+
+
 #define XW_LINE_H5_WINDOW_ID                "Abe"
 #define XW_LINE_H6_WINDOW_ID                "Abf"
 #define XW_LINE_H7_WINDOW_ID                "Abg"
@@ -87,6 +90,28 @@
 #define XW_LINE_W7_WINDOW_ID                "Abq"
 #define XW_LINE_W8_WINDOW_ID                "Abr"
 #define XW_LINE_W9_WINDOW_ID                "Abs"
+
+#define XW_LINE_H1_TEXT_WINDOW_ID           "AbA"
+#define XW_LINE_H2_TEXT_WINDOW_ID           "AbB"
+#define XW_LINE_H3_TEXT_WINDOW_ID           "AbC"
+#define XW_LINE_H4_TEXT_WINDOW_ID           "AbD"
+#define XW_LINE_H5_TEXT_WINDOW_ID           "AbE"
+#define XW_LINE_H6_TEXT_WINDOW_ID           "AbF"
+#define XW_LINE_H7_TEXT_WINDOW_ID           "AbG"
+#define XW_LINE_H8_TEXT_WINDOW_ID           "AbH"
+#define XW_LINE_H9_TEXT_WINDOW_ID           "AbJ"
+
+#define XW_LINE_W1_TEXT_WINDOW_ID           "AbK"
+#define XW_LINE_W2_TEXT_WINDOW_ID           "AbL"
+#define XW_LINE_W3_TEXT_WINDOW_ID           "AbM"
+#define XW_LINE_W4_TEXT_WINDOW_ID           "AbN"
+#define XW_LINE_W5_TEXT_WINDOW_ID           "AbO"
+#define XW_LINE_W6_TEXT_WINDOW_ID           "AbP"
+#define XW_LINE_W7_TEXT_WINDOW_ID           "AbQ"
+#define XW_LINE_W8_TEXT_WINDOW_ID           "AbR"
+#define XW_LINE_W9_TEXT_WINDOW_ID           "AbS"
+
+
 
 
 

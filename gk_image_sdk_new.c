@@ -22,7 +22,7 @@
 #define     GK_MOUSE_SPEED      1
 
 //image disp info set
-#define     DISP_OBJ_MAX        100
+#define     DISP_OBJ_MAX        200
 #define     MOUSE_SIZE          30
 
 //font set
@@ -322,11 +322,18 @@ static int  window_node_inster(window_node_t *node){
         return 0;
     }
 
+    node->next = NULL;
+    node->prev = node->f_node->s_end;
+    node->prev->next = node;
+    node->f_node->s_end = node;
+
+#if 0
     node->next = ftemp->s_head;
     node->prev = NULL;
     ftemp->s_head->prev = node;
     ftemp->s_head = node;
     
+#endif
     return 0;
 }
 
@@ -1083,7 +1090,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
                 save_node[check_cnt] = node;
                 check_cnt++;
             
-               printf("check node_id:%c%c%c node:%p check_cnt:%d x:%d y;%d\n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
+             //  printf("check node_id:%c%c%c node:%p check_cnt:%d x:%d y;%d\n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
             }
         }
         
@@ -1360,7 +1367,7 @@ static void freshen_image_buttion(void *data){
     }
 
 
-    int k,i;
+    int k,i,s;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
         printf("button clear\n");
@@ -1380,10 +1387,13 @@ static void freshen_image_buttion(void *data){
                     *(buf+ sdk_handle->scree_w*k + i) = 0;    
             }
         }
-
-        for(k = bt->y ; k < (bt->h + bt->y) ;k++){
-            for(i = bt->x ;  i < (bt->w + bt->x) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
+        for(s = 0 ,k = bt->y ; k < (bt->h + bt->y) ;k++){
+            for(i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
+                if(bt->image_cache){
+                  *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
+                }else{
+                    *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+                }
         }
         bt->last_x = bt->x;
         bt->last_y = bt->y;
@@ -1404,6 +1414,7 @@ static void freshen_image_menu(void *data){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
         bt->this_node->video_state = VIDEO_STATE;
+        bt->this_node->freshen_arrt = NORTHING;
         return;
     }
 
@@ -1580,7 +1591,13 @@ static void freshen_image_text(void *data){
 
         for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
             for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;    
+            {
+                if(bt->this_node->move_arrt == NOT_MOVE)
+                    *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;  
+                else
+                     *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
+
+            }  
         }
         bt->this_node->video_state = CLEAR_STATE;
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
@@ -1766,8 +1783,14 @@ static inline void _image_freshen(window_node_t *node)
     
     if(node->video_attr != OPEN_DISP)
     {
+        if(node->freshen_arrt == NEED_CLEAR){
+            node->video_state = CLEAR_STATE;
+        }else{
+            node->video_state = VIDEO_STATE;
+        }
         node->freshen_arrt = NORTHING;
-        debug_node_id(node);
+        //debug_node_id(node);
+        
         return;
     }
         
@@ -1859,8 +1882,13 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
     {
         if(head->en_intersection){
             if(head->video_state == VIDEO_STATE && head->freshen_arrt != NEED_CLEAR)
+            {
                 head->freshen_arrt = NEED_FRESHEN;
-        }    
+                printf("++++++set clear ");
+                debug_node_id(head);
+            }
+        }
+    
     }
     return;
 
