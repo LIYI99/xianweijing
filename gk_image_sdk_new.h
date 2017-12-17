@@ -171,7 +171,9 @@ typedef struct window_node_line{
     uint32_t        color; 
     char            *image_cache;
     window_func_t   video_set;
-    win_func_usr    user_video_freshen; 
+    win_func_usr    user_video_freshen;
+    char            text_id[MENU_LEVEL];   //be related text windows
+
 }window_node_line_t;
 
 typedef struct window_node_text{
@@ -188,7 +190,8 @@ typedef struct window_node_text{
     uint32_t        text_color;
     char            *text_cache;
     window_func_t   video_set;
-    win_func_usr    user_video_freshen; 
+    win_func_usr    user_video_freshen;
+
 }window_node_text_t;
 
 typedef struct window_node_bar{
@@ -297,6 +300,10 @@ int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr);
 int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
 
 int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
+
+int     Image_SDK_Set_Text_Node_Xy(char *node_id,uint16_t x,uint16_t y);
+
+
 
 
 
