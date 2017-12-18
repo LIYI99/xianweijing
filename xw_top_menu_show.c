@@ -56,7 +56,7 @@ int  xw_top_menu_show(void *data)
     _mt.y = XW_TOP_MENU_WINDOW_Y;
     _mt.h = XW_TOP_MENU_H;
     _mt.w = XW_TOP_MENU_W;
-    _mt.image_cache = xw_get_window_png(XW_TOP_MENU_WINDOW_ID);
+    _mt.image_cache = (char *)xw_get_window_png(XW_TOP_MENU_WINDOW_ID);
     //printf("top image mem:%p\n",_mt.image_cache);
     _mt.video_set.mouse_offset = mouse_offset_top_menu;
     _mt.video_set.mouse_leave  = mouse_leave_top_menu;
@@ -66,40 +66,39 @@ int  xw_top_menu_show(void *data)
 
     //snap
     window_node_button_t    _bt;
+
     memcpy(_attr.node_id,XW_SNAP_WINDOW_ID,strlen(XW_SNAP_WINDOW_ID));
     memset(&_bt,0x0,sizeof(_bt));
     _bt.x       =   XW_SNAP_WINDOW_X;
     _bt.y       =   XW_SNAP_WINDOW_Y;
     _bt.h       =   XW_SNAP_BUTTON_H;
     _bt.w       =   XW_SNAP_BUTTON_W;
-    _bt.color   =   0;
+    _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
+;
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen          = usr_push_video_button;
     _bt.video_set.mouse_offset      = mouse_offset_button_snap;
     _bt.video_set.mouse_leave       = mouse_leave_button_snap;
     _bt.video_set.mouse_left_down   = mouse_ldown_button_snap;
+    _attr.en_freshen = 0;
     ret = Image_SDK_Create_Button(_attr,_bt); 
 
     //recod
     memcpy(_attr.node_id,XW_RECOD_WINDOW_ID,strlen(XW_RECOD_WINDOW_ID));
-    memset(&_bt,0x0,sizeof(_bt));
+    //memset(&_bt,0x0,sizeof(_bt));
     _bt.x       =   XW_RECOD_WINDOW_X;
     _bt.y       =   XW_RECOD_WINDOW_Y;
-    _bt.color   =   0;
+    _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
-    _bt.user_video_freshen = usr_push_video_button;
-    //_bt.video_set.mouse_offset      = mouse_offset_button_snap;
-    //_bt.video_set.mouse_leave       = mouse_leave_button_snap;
     _bt.video_set.mouse_left_down   = mouse_ldown_button_recod;
-
     ret = Image_SDK_Create_Button(_attr,_bt); 
-
-    //perivw
+    
     memcpy(_attr.node_id,XW_PERVIEW_WINDOW_ID,strlen(XW_PERVIEW_WINDOW_ID));
-    memset(&_bt,0x0,sizeof(_bt));
+    //memset(&_bt,0x0,sizeof(_bt));
     _bt.x       =   XW_PERVIEW_WINDOW_X;
     _bt.y       =   XW_PERVIEW_WINDOW_Y;
-    _bt.color   =   0;
+    _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
+
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen = usr_push_video_button;
     _bt.video_set.mouse_left_down = mouse_ldown_button_perview;
@@ -108,15 +107,16 @@ int  xw_top_menu_show(void *data)
     
     //set
     memcpy(_attr.node_id,XW_SET_WINDOW_ID,strlen(XW_SET_WINDOW_ID));
-    memset(&_bt,0x0,sizeof(_bt));
+    //memset(&_bt,0x0,sizeof(_bt));
     _bt.x       =   XW_SET_WINDOW_X;
     _bt.y       =   XW_SET_WINDOW_Y;
-    _bt.color   =   0;
+    _bt.color   =  XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen = usr_push_video_button;
     _bt.video_set.mouse_left_down = mouse_ldown_button_set;
-
-    ret = Image_SDK_Create_Button(_attr,_bt); 
+    ret = Image_SDK_Create_Button(_attr,_bt);
+    
+    return 0;
     
 }
 
@@ -157,8 +157,7 @@ static void mouse_offset_button_snap(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_OFFSET_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
-    printf("offset here \n");
-}
+   }
 static void mouse_leave_button_snap(void *data)
 
 {
@@ -189,12 +188,33 @@ static void mouse_ldown_button_recod(void *data)
     //send singed to main srv
 }
 
+static uint8_t main_window_state = 0;
+
 static void mouse_ldown_button_set(void *data)
 {
     
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
-    bt->this_node->freshen_arrt = NEED_FRESHEN; 
+    
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    if(main_window_state == 0){
+        Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,1);
+        Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_FRESHEN);
+        Image_SDK_Set_Node_Submenu(XW_MAIN_WINDOW_ID,1);
+
+ 
+        main_window_state = 1;
+    }else{
+        //printf("set here 0:\n");
+        Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,0);
+        Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_CLEAR);
+        Image_SDK_Set_Node_Submenu(XW_MAIN_WINDOW_ID,0);
+
+        main_window_state = 0;
+    }
+
+    //printf("set button  \n");
+
     //send signed to man srv
 }
 
@@ -211,13 +231,16 @@ static void mouse_offset_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
     mt->this_node->en_submenu = 1;
+    printf("%s line:%d  \n",__func__,__LINE__);
 
 }
 
 static void mouse_leave_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
-    mt->this_node->en_submenu = 1;
+    mt->this_node->en_submenu = 0;
+    printf("%s line:%d  \n",__func__,__LINE__);
+
 
 }
 
