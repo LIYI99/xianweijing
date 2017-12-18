@@ -304,6 +304,10 @@ int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
 int     Image_SDK_Set_Text_Node_Xy(char *node_id,uint16_t x,uint16_t y);
 
 
+//define debug 
+
+#define     Image_Dug_Info()
+
 
 
 

@@ -858,11 +858,11 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
         return -3;
 
     window_node_line_t *tt = (window_node_line_t *)temp->window;
-    
+    tt->start_x  = lt->start_x;
+    tt->end_x    = lt->end_x;
+    tt->size     = lt->size;
+    tt->color    = lt->color;
     temp->freshen_arrt = NEED_FRESHEN;
-    
-    *tt = *lt;
-    tt->this_node = temp;
     
     return 0;
 
@@ -2053,6 +2053,10 @@ static void  _image_freshen_video(void)
     return ;
 
 }
+
+
+//debug xy test
+
 
 static  void*   _image_mouse_event_read_thread(void *data)
 {
