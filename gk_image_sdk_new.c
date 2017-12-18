@@ -860,9 +860,12 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
     window_node_line_t *tt = (window_node_line_t *)temp->window;
     tt->start_x  = lt->start_x;
     tt->end_x    = lt->end_x;
+    tt->start_y  = lt->start_y;
+    tt->end_y    = lt->end_y;
     tt->size     = lt->size;
     tt->color    = lt->color;
-    temp->freshen_arrt = NEED_FRESHEN;
+    
+    temp->f_node->freshen_arrt = NEED_FRESHEN;
     
     return 0;
 
@@ -1480,21 +1483,25 @@ static void freshen_image_line(void *data){
         return ;
     }
 
-    int k,i,h,w;
+    int k,i,h,w,ho,wo;
     if(bt->start_x  == bt->end_x){
         h = bt->end_y - bt->start_y;
         w = bt->size;
+        ho = h;
+        wo = bt->last_size;
     }else{
         
         w = bt->end_x - bt->start_x;
         h = bt->size;
+        ho = bt->last_size;
+        wo = w;
     }
     //printf("line w:%d h:%d \n ",w,h);
 
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
 
-        for(k = bt->last_y ; k < bt->last_y + h ;k++){
-            for(i = bt->last_x ;  i < bt->last_x + w ; i++ )
+        for(k = bt->last_y ; k < bt->last_y + ho ;k++){
+            for(i = bt->last_x ;  i < bt->last_x + wo ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
         
@@ -1504,8 +1511,8 @@ static void freshen_image_line(void *data){
 
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
-            for(k = bt->last_y ; k < (h + bt->last_y) ;k++){
-                for(i = bt->last_x ;  i < (bt->last_x + w)  ; i++ )
+            for(k = bt->last_y ; k < (ho + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->last_x + wo)  ; i++ )
                     *(buf+ sdk_handle->scree_w*k + i) = 0;    
             }
         }
@@ -1517,7 +1524,12 @@ static void freshen_image_line(void *data){
         
         bt->last_x = bt->start_x;
         bt->last_y = bt->start_y;
+        bt->last_size = bt->size;
+
         bt->this_node->video_state = VIDEO_STATE;
+        //debug_node_id(bt->this_node);
+      //  printf("line w:%d h:%d color:%x\n ",w,h,bt->color);
+
     }
     
     bt->this_node->freshen_arrt = NORTHING;

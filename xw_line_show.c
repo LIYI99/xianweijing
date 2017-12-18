@@ -30,7 +30,7 @@ struct xw_line_s{
 
 typedef struct xw_lines_s{
     uint8_t             line_arry_state;    // o close 1 open
-    uint8_t             lock;         // 0 close 1 open
+    uint8_t             lock;               // 
     uint16_t            now_order;         //manger button check conf order
     uint16_t            line_order;         //manger button check line  order
     struct xw_line_s    lines[XW_LINE_CONF_NUMS][XW_LINE_NUMS_MAX];
@@ -71,6 +71,8 @@ static window_node_line_t*  find_line_for_array(char *node_id)
     return NULL;
 }
 
+
+
 //mouse active 
 static  void mouse_ldown_theline(void *data)
 {
@@ -89,9 +91,25 @@ static  void mouse_ldown_theline(void *data)
 
             }
             *sa = *lt;
-            lt->this_node->f_node->freshen_arrt = NEED_FRESHEN;
+
+        lt->this_node->f_node->freshen_arrt = NEED_FRESHEN;
         Image_SDK_Set_Text_Node_Xy(lt->text_id,lt->start_x,lt->start_y);
 
+        int i = 0;
+        for(i = 0 ;i < XW_LINE_NUMS_MAX;i++ )
+        {
+            //there .....is not good better
+            if(xw_lt->lines[xw_lt->now_order][i]._attr.node_id[2] == 
+                    sa->this_node->node_id[2])
+            {
+                xw_lt->lines[xw_lt->now_order][i].line.start_x = sa->start_x;
+                xw_lt->lines[xw_lt->now_order][i].line.start_y = sa->start_y;
+                xw_lt->lines[xw_lt->now_order][i].line.end_x = sa->end_x;
+                xw_lt->lines[xw_lt->now_order][i].line.end_y = sa->end_y;
+                break;
+            }
+        
+        }
         
     }
     

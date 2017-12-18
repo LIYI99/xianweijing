@@ -32,8 +32,8 @@ static void xw_line_show_button_ldow(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xf00f;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SHOW_WINDOW_ID,NEED_FRESHEN);
+    bt->color = 0xf0f0;
+    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
     xw_lines_cl_op_all(NULL);
     return;
     
@@ -44,7 +44,7 @@ static void xw_line_show_button_lup(void *data)
     
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->color = 0xfeee;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SHOW_WINDOW_ID,NEED_FRESHEN);
+    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
     return;
 
        
@@ -54,12 +54,27 @@ static void xw_line_show_button_offset(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xf0f0;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SHOW_WINDOW_ID,NEED_FRESHEN);
+    bt->color = 0xf00f;
+    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
     return;
 
        
 }
+
+static void xw_line_show_button_leave(void *data)
+{
+    
+    int ret = 0;
+    
+    window_node_button_t *bt = (window_node_button_t *)data; 
+    bt->color = 0xfeee;
+    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
+
+    return;
+}
+
+
+
 
 static void xw_line_setarry_button_ldow(void *data)
 {
@@ -75,7 +90,6 @@ static void xw_line_setarry_button_ldow(void *data)
         arry_now --;
         return;
     }
-    
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)arry_set[arry_now].png_p;
     Image_SDK_Set_Node_En_Freshen(XW_LINE_CHOICE_WINDOW_ID,NEED_FRESHEN);
@@ -91,8 +105,14 @@ static void xw_line_setsize_button_ldow(void *data)
     size_now ++;
     size_now =  size_now % SIZE_SET_NUMS;
     
-    xw_lines_line_set_param(0, colors[color_now],size_now);
-    
+    ret = xw_lines_line_set_param(0, colors[color_now],size_now + 1);
+    if(ret < 0){
+        if(size_now != 0)
+            size_now --;
+        return ;
+
+    }
+
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)size_set[size_now].png_p;
     Image_SDK_Set_Node_En_Freshen(XW_LINE_SET_SIZE_WINDOW_ID,NEED_FRESHEN);
@@ -109,8 +129,14 @@ static void xw_line_setcolor_button_ldow(void *data)
     color_now ++;
     color_now =  color_now % COLOR_SET_NUMS;
     
-    xw_lines_line_set_param(0, colors[color_now],size_now);
-    
+    ret = xw_lines_line_set_param(0, colors[color_now],size_now + 1);
+    if(ret < 0){
+        if(color_now != 0)
+            color_now--;
+        return ;
+    }
+
+
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)color_set[color_now].png_p;
     Image_SDK_Set_Node_En_Freshen(XW_LINE_SET_COLOR_WINDOW_ID,NEED_FRESHEN);
@@ -134,7 +160,7 @@ static void xw_line_select_line_button_ldow(void *data)
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)select_set[select_now].png_p;
     Image_SDK_Set_Node_En_Freshen(XW_LINE_SELECT_LINE_WINDOW_ID,NEED_FRESHEN);
-    
+    printf("select now:%d imagep:%p\n",select_now,bt->image_cache);
     return;
 }
 
@@ -151,19 +177,6 @@ static void xw_line_lock_button_ldow(void *data)
 
     return;
 }
-
-static void xw_line_lock_button_leave(void *data)
-{
-    
-    int ret = 0;
-    
-    window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xfeee;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_LOCK_WINDOW_ID,NEED_FRESHEN);
-
-    return;
-}
-
 
 
 
@@ -289,7 +302,7 @@ int  xw_main_line_manger_show(void *data)
     _button.h     = 45;
     _button.size  = 2;
     _button.video_set.mouse_left_down   = xw_line_show_button_ldow;
-    _button.video_set.mouse_left_up     = xw_line_show_button_lup;
+    _button.video_set.mouse_leave     =    xw_line_show_button_leave;
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
     _button.user_video_freshen          = usr_push_video_button_line;
 
@@ -305,7 +318,7 @@ int  xw_main_line_manger_show(void *data)
     _button.w     = 45;
     _button.h     = 45;
     _button.video_set.mouse_left_down   = xw_line_lock_button_ldow;
-    _button.video_set.mouse_leave       = xw_line_lock_button_leave; 
+    _button.video_set.mouse_leave       = xw_line_show_button_leave; 
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
     _button.user_video_freshen          = usr_push_video_button_line;
     memcpy(node_attr.node_id,XW_LINE_LOCK_WINDOW_ID,strlen(XW_LINE_LOCK_WINDOW_ID));
@@ -323,7 +336,9 @@ int  xw_main_line_manger_show(void *data)
     _button.video_set.mouse_left_down   =   xw_line_setarry_button_ldow;
     _button.video_set.mouse_offset      =   NULL; 
     _button.video_set.mouse_left_up     =   NULL;
+    _button.video_set.mouse_leave       =   NULL;
     _button.user_video_freshen          =   NULL;// usr_push_video_button_line;
+    
     memcpy(node_attr.node_id,XW_LINE_CHOICE_WINDOW_ID,strlen(XW_LINE_SHOW_WINDOW_ID));
     Image_SDK_Create_Button(node_attr,_button);
    
@@ -348,20 +363,21 @@ int  xw_main_line_manger_show(void *data)
     _button.x    =  XW_LINE_SET_COLOR_WINDOW_X ;
     _button.y     =  XW_LINE_SET_COLOR_WINDOW_Y ;
     _button.color =  0xfeee;
-    _button.size  =  2;
+    _button.size  =  1;
     _button.image_cache = (char *)color_set[color_now].png_p;
     _button.w     = color_set[color_now].w;
     _button.h     = color_set[color_now].h;
     _button.video_set.mouse_left_down = xw_line_setcolor_button_ldow;
     memcpy(node_attr.node_id,XW_LINE_SET_COLOR_WINDOW_ID,strlen(XW_LINE_SHOW_WINDOW_ID));
     Image_SDK_Create_Button(  node_attr,_button);
-     
+    
+    //return 0; 
    //select line
     _button.x    =  XW_LINE_SELECT_LINE_WINDOW_X ;
     _button.y     =  XW_LINE_SELECT_LINE_WINDOW_Y ;
     _button.color =  0xfeee;
-    _button.size  =  2;
-    _button.image_cache = NULL;
+    _button.size  =  1;
+    _button.image_cache = (char *)select_set[select_now].png_p;
     
     _button.w     = select_set[select_now].w;
     _button.h     = select_set[select_now].h;

@@ -163,6 +163,8 @@ typedef struct window_node_line{
     window_node_t   *this_node;
     uint16_t        last_x;
     uint16_t        last_y;
+    uint16_t        last_size;
+
     uint16_t        start_x;
     uint16_t        start_y;
     uint16_t        end_x;
@@ -181,7 +183,7 @@ typedef struct window_node_text{
     window_node_t   *this_node;
     uint16_t        last_x;
     uint16_t        last_y;
-    uint16_t        x;
+      uint16_t        x;
     uint16_t        y;
     uint8_t         font_size;
     uint8_t         asc_width;
