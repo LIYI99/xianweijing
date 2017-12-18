@@ -12,9 +12,10 @@
 #define XW_LINE_CHOICE_WINDOW_ID            "Aau"
 #define XW_LINE_SET_SIZE_WINDOW_ID          "Aat"
 #define XW_LINE_SET_COLOR_WINDOW_ID         "Aas"
-#define XW_LINE_CHECK_WINDOW_ID             "Aar"
-#define XW_LINE_ONLY_WINDOW_ID              "Aaq"
-#define XW_LINE_CHANGE_COLOR_WINDOW_ID      "Aap"
+#define XW_LINE_SELECT_LINE_WINDOW_ID       "Aar"
+#define XW_LINE_LOCK_WINDOW_ID              "Aaq"
+
+//#define XW_LINE_CHANGE_COLOR_WINDOW_ID      "Aap"
 //#define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
 
 //define video advanced settings

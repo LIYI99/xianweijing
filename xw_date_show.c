@@ -82,6 +82,14 @@ static void mouse_leave_settime_func(void *data){
 }
 
 
+static void mouse_lup_settime_func(void *data){
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = 0xf0f0;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    return;
+}
+
+
 
 
 
@@ -294,7 +302,11 @@ void*   xw_date_show(void *data)
     bt.color            =  0;
     bt.video_set.mouse_left_down = mouse_ldown_button_setdown;
     ret = Image_SDK_Create_Button(node_attr,bt);
-    
+
+
+    ret = Image_SDK_Set_Node_Disp(XW_DATE_SET_UP_WINDOW_ID,CLOSE_DISP);
+    ret = Image_SDK_Set_Node_Disp(XW_DATE_SET_DOWN_WINDOW_ID,CLOSE_DISP);
+
     memcpy(node_attr.node_id,XW_DATE_SET_WINDOW_ID  ,strlen(XW_DATE_SET_WINDOW_ID));
     node_attr.en_freshen = NORTHING; //NEED_FRESHEN; // NORTHING;  
     memset(&bt,0x0,sizeof(window_node_button_t));
@@ -308,8 +320,9 @@ void*   xw_date_show(void *data)
     bt.video_set.mouse_left_down = mouse_ldown_button_settime;
     bt.video_set.mouse_leave = mouse_leave_settime_func;
     bt.video_set.mouse_offset = mouse_offset_settime_func;
+    bt.video_set.mouse_left_up = mouse_lup_settime_func;
     ret = Image_SDK_Create_Button(node_attr,bt);
-    
+
 
     
 
@@ -365,7 +378,7 @@ void*   xw_date_show(void *data)
         }
         
         last_time =  set_time;
-        usleep(500000);
+        usleep(100000);
     }
     
     return;
