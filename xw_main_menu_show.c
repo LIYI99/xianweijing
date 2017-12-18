@@ -11,12 +11,22 @@
 
 
 
+static void mouse_leave_main_menu_func(void *data)
+{
+    window_node_menu_t *mt  = (window_node_menu_t *)data;
+    mt->this_node->freshen_arrt = NEED_CLEAR;
+    mt->this_node->en_node = 0;
+    mt->this_node->en_submenu = 0;
+    //printf("func:%s line:%d\n",__func__,__LINE__);
+    return ;
+}
+
 static void mouse_offset_main_menu_func(void *data)
 {
     window_node_menu_t *mt  = (window_node_menu_t *)data;
-    //mt->this_node->freshen_arrt = NEED_CLEAR;
+    //mt->this_node->en_submenu = 1;
     //mt->this_node->en_node = 0;
-    //printf("func:%s line:%d\n",__func__,__LINE__);
+   // printf("func:%s line:%d\n",__func__,__LINE__);
     return ;
 }
 
@@ -37,11 +47,13 @@ int xw_main_menu_show(void *data)
     
     xw_get_png_hw(XW_MAIN_WINDOW_ID,&mt.w,&mt.h);
     //printf("main menu w:%d ,h:%d\n",mt.w,mt.h); 
-    mt.image_cache = xw_get_window_png(XW_MAIN_WINDOW_ID);
-    mt.video_set.mouse_offset = mouse_offset_main_menu_func;
+    mt.image_cache = (char *)xw_get_window_png(XW_MAIN_WINDOW_ID);
+    mt.video_set.mouse_offset =  NULL;//mouse_offset_main_menu_func;
+
+    mt.video_set.mouse_leave  =  mouse_leave_main_menu_func;
     int ret = 0;
     ret = Image_SDK_Create_Menu(_attr,mt);
-    printf("create main menu show ret:%d\n",ret); 
+   // printf("create main menu show ret:%d\n",ret); 
     return ret ;
 
 }
