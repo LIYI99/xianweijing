@@ -45,7 +45,7 @@ static int xw_window_png_add(char *png_path,char *window_id)
     ret =   image_png_load_rgba_16bit(png_path,offset_p,&(png_t[png_cnts].h),
                 &(png_t[png_cnts].w));
     if(ret < 0){
-       printf("%s %d ret:%d\n",__func__,__LINE__,ret);
+       printf("%s %d  path:%s ret:%d\n",__func__,__LINE__,png_path,ret);
         return -2;
     }
     printf("get window_id:%s png image  h:%d w:%d size:%d\n ",window_id,png_t[png_cnts].h,
@@ -82,23 +82,31 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_LINE_MANGER_SETSIZEC    "/usr/local/bin/png/size3.png"
 #define     WINDOW_LINE_MANGER_SETSIZED    "/usr/local/bin/png/size4.png"
 //line color set
-#define     WINDOW_LINE_MANGER_SETCOLORR    "/usr/local/bin/png/read.png"
+#define     WINDOW_LINE_MANGER_SETCOLORR    "/usr/local/bin/png/red.png"
 #define     WINDOW_LINE_MANGER_SETCOLORG    "/usr/local/bin/png/green.png"
-#define     WINDOW_LINE_MANGER_SETCOLORB    "/usr/local/bin/png/bule.png"
+#define     WINDOW_LINE_MANGER_SETCOLORB    "/usr/local/bin/png/blue.png"
 #define     WINDOW_LINE_MANGER_SETCOLORC    "/usr/local/bin/png/cyan.png"
 #define     WINDOW_LINE_MANGER_SETCOLORY    "/usr/local/bin/png/yello.png"
 #define     WINDOW_LINE_MANGER_SETCOLORV    "/usr/local/bin/png/violet.png"
 
+//select line set 
+#define     WINDOW_LINE_MANGER_SELECTH1    "/usr/local/bin/png/hori1.png"
+#define     WINDOW_LINE_MANGER_SELECTH2    "/usr/local/bin/png/hori2.png"
+#define     WINDOW_LINE_MANGER_SELECTH3    "/usr/local/bin/png/hori3.png"
+#define     WINDOW_LINE_MANGER_SELECTH4    "/usr/local/bin/png/hori4.png"
+#define     WINDOW_LINE_MANGER_SELECTH5    "/usr/local/bin/png/hori5.png"
+#define     WINDOW_LINE_MANGER_SELECTH6    "/usr/local/bin/png/hori6.png"
+#define     WINDOW_LINE_MANGER_SELECTH7    "/usr/local/bin/png/hori7.png"
+#define     WINDOW_LINE_MANGER_SELECTH8    "/usr/local/bin/png/hori8.png"
 
-
-
-
-
-
-
-
-
-
+#define     WINDOW_LINE_MANGER_SELECTV1    "/usr/local/bin/png/vert1.png"
+#define     WINDOW_LINE_MANGER_SELECTV2    "/usr/local/bin/png/vert2.png"
+#define     WINDOW_LINE_MANGER_SELECTV3    "/usr/local/bin/png/vert3.png"
+#define     WINDOW_LINE_MANGER_SELECTV4    "/usr/local/bin/png/vert4.png"
+#define     WINDOW_LINE_MANGER_SELECTV5    "/usr/local/bin/png/vert5.png"
+#define     WINDOW_LINE_MANGER_SELECTV6    "/usr/local/bin/png/vert6.png"
+#define     WINDOW_LINE_MANGER_SELECTV7    "/usr/local/bin/png/vert7.png"
+#define     WINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/png/vert8.png"
 
 
 
@@ -171,7 +179,43 @@ int     xw_png_load_all(void)
     
     sprintf(id,"%s_%c",XW_LINE_SET_COLOR_WINDOW_ID,'6');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETCOLORV, id);
-   
+    //load selcet png
+
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H1");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H2");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH2 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H3");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH3 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H4");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH4 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H5");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH5 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H6");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH6 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H7");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH7 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H8");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH8 , id);
+
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V1");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V2");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V3");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V4");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V5");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V6");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V7");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V8");
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+
     return ret;
 
 }

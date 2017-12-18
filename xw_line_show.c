@@ -30,7 +30,7 @@ struct xw_line_s{
 
 typedef struct xw_lines_s{
     uint8_t             line_arry_state;    // o close 1 open
-    uint8_t             line_state;         // 0 close 1 open
+    uint8_t             lock;         // 0 close 1 open
     uint16_t            now_order;         //manger button check conf order
     uint16_t            line_order;         //manger button check line  order
     struct xw_line_s    lines[XW_LINE_CONF_NUMS][XW_LINE_NUMS_MAX];
@@ -45,7 +45,6 @@ static  FILE                    *xw_fp = NULL;
 
 //file save and load
 static  int  xw_load_line_data(char *path,xw_lines_t *lt);
-static  int  xw_save_line_data(char *path,xw_lines_t *lt);
 
 //line  set add update
 
@@ -319,15 +318,15 @@ static  int  xw_load_line_data(char *path,xw_lines_t *lt)
         xw_fp = NULL;
         printf("read config file error ret :%d sizeof(xw_lines_t):%d\n",ret,sizeof(xw_lines_t));
     }
-    
+       
     return 0;
     
 }
 
 
-static  int  xw_save_line_data(char *path,xw_lines_t *lt)
+int  xw_save_line_data(char *path)
 {
-    if(path == NULL || lt == NULL)
+    if(xw_lt == NULL)
         return -1;
 
     if(xw_fp == NULL)
@@ -338,8 +337,9 @@ static  int  xw_save_line_data(char *path,xw_lines_t *lt)
     int ret ;
 
     fseek(xw_fp,0,SEEK_SET);
-    ret = fwrite((void *)lt,1,sizeof(xw_lines_t),xw_fp);
-
+    ret = fwrite((void *)xw_lt,1,sizeof(xw_lines_t),xw_fp);
+    //fclose(xw_fp);
+    //xw_fp = NULL;
     return 0;
 }  
 
@@ -349,7 +349,7 @@ int  xw_lines_arry_set_order(uint16_t set_order)
     
     if(set_order > XW_LINE_CONF_NUMS || xw_lt == NULL)
         return -1;
-    if(xw_lt->line_arry_state == 0 )
+    if(xw_lt->line_arry_state == 0 || xw_lt->lock != 0 )
         return -2;
     int k = 0,ret = 0;
     
@@ -358,30 +358,29 @@ int  xw_lines_arry_set_order(uint16_t set_order)
     for(k = 0 ;k < XW_LINE_NUMS_MAX ; k ++){
         ret = Image_SDK_Set_Line_Node_Param(xw_lt->lines[xw_lt->now_order][k]._attr.node_id,&(xw_lt->lines[xw_lt->now_order][k].line));
         
-        Image_SDK_Set_Text_Node_Xy(xw_lt->lines[xw_lt->now_order][k].line.text_id,
+        ret = Image_SDK_Set_Text_Node_Xy(xw_lt->lines[xw_lt->now_order][k].line.text_id,
                 xw_lt->lines[xw_lt->now_order][k].line.start_x,  xw_lt->lines[xw_lt->now_order][k].line.start_y );
 
     }
-    
+    Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
     return 0;
 }
-  int  xw_lines_line_set_order(uint16_t set_order,uint16_t color,uint16_t size)
+  int  xw_lines_line_set_param(uint16_t set_order,uint16_t color,uint16_t size)
 {
      
     if(set_order > XW_LINE_CONF_NUMS || xw_lt == NULL)
         return -1;
     
-    if(xw_lt->line_arry_state == 0 || xw_lt->line_state == 0)
+    if(xw_lt->line_arry_state == 0 || xw_lt->lock != 0)
         
         return -2;
 
-
-    xw_lt->lines[xw_lt->now_order][set_order].line.color = color;
-    xw_lt->lines[xw_lt->now_order][set_order].line.size =  size;
+    xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.color    = color;
+    xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.size     = size;
     int ret = 0;
-    ret = Image_SDK_Set_Line_Node_Param(xw_lt->lines[xw_lt->now_order][set_order]._attr.node_id,&(xw_lt->lines[xw_lt->now_order][set_order].line));
-    Image_SDK_Set_Text_Node_Xy(xw_lt->lines[xw_lt->now_order][set_order].line.text_id,
-                xw_lt->lines[xw_lt->now_order][set_order].line.start_x,  xw_lt->lines[xw_lt->now_order][set_order].line.start_y );
+    ret = Image_SDK_Set_Line_Node_Param(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id,&(xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line));
+    Image_SDK_Set_Text_Node_Xy(xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.text_id,
+                xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.start_x,  xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.start_y );
 
     
 
@@ -393,16 +392,17 @@ int     xw_lines_cl_op_all(void *data)
  
     if(xw_lt == NULL)
         return -1;
+    if(xw_lt->lock != 0)
+        return -2;
 
-     if(xw_lt->line_arry_state == 0){
-         //printf("open leins-------------\n");
+     if(xw_lt->line_arry_state == 0)
+     {
         Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID ,1);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,1);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
-
         xw_lt->line_arry_state = 1;
     }else{
-       // printf("close_lines--------------\n");
+
         Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
@@ -419,26 +419,51 @@ int     xw_lines_cl_op_line(void *data)
      
     if(xw_lt == NULL)
         return -1;
+    
+    if(xw_lt->line_arry_state == 0 || xw_lt->lock != 0)
+        return -2;
 
-
-
-    if(xw_lt->line_state == 0){
+    if(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node == 0){
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,1);
-        Image_SDK_Set_Node_Submenu( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id        ,1);
-        Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id       ,NEED_FRESHEN);
-
-        xw_lt->line_state = 1;
+        Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id  ,NEED_FRESHEN);
+        xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 1;
     }else{
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,0);
-        Image_SDK_Set_Node_Submenu( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,0);
         Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,NEED_CLEAR);
-        xw_lt->line_state= 0;
+        xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 0;
     }
 
     return 0;
 }
 
+int     xw_lines_set_select(uint16_t line_order)
+{
+    if(xw_lt == NULL)
+        return -1;
+    
+    if(xw_lt->line_arry_state == 0 || xw_lt->lock != 0)
+        return -2;
+    
+    xw_lt->line_order = line_order;
+    return 0;
+}
+
+int     xw_lines_set_lock(uint8_t  line_order)
+{
+    
+    if(xw_lt == NULL)
+        return -1;
+    //lock   
+    if(xw_lt->lock == 0){
+        xw_lt->lock = 1;
+
+    }else  //ulock
+    {
+        xw_lt->lock = 0;
+    }
+    return 0;
+}
 
 
