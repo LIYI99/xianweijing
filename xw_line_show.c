@@ -78,7 +78,7 @@ static  void mouse_ldown_theline(void *data)
 {
     window_node_line_t *lt  = (window_node_line_t *)data;
     window_node_line_t *sa = NULL;
-       if(lt->this_node->move_arrt != 0)
+       if(lt->this_node->move_arrt != 0 && xw_lt->lock  == 0)
     {   
                 
             sa = find_line_for_array(lt->this_node->node_id);
@@ -92,9 +92,9 @@ static  void mouse_ldown_theline(void *data)
             }
             *sa = *lt;
 
-        lt->this_node->f_node->freshen_arrt = NEED_FRESHEN;
         Image_SDK_Set_Text_Node_Xy(lt->text_id,lt->start_x,lt->start_y);
-
+        lt->this_node->f_node->freshen_arrt = NEED_FRESHEN;
+        
         int i = 0;
         for(i = 0 ;i < XW_LINE_NUMS_MAX;i++ )
         {
@@ -121,9 +121,14 @@ static  void mouse_ldown_theline(void *data)
 
 
 }
-static  void mouse_offset_theline(void *data)
+static  void mouse_ldown_line_menu(void *data)
 {
-
+    
+    printf("test line man menu left down\n");
+    
+    Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,0);
+    Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_CLEAR);
+    Image_SDK_Set_Node_Submenu(XW_MAIN_WINDOW_ID,0);
     return;
 }
 
@@ -264,6 +269,7 @@ void xw_line_show_all(void *data)
     mt.h =   XW_LINE_RARR_WINDOW_H;
     mt.w =   XW_LINE_RARR_WINDOW_W;
     ret  = Image_SDK_Create_Menu(_attr,mt);
+    mt.video_set.mouse_right_down = mouse_ldown_line_menu;
 
     ret =  Image_SDK_Set_Node_Disp(XW_LINE_RARR_WINDOW_ID,CLOSE_DISP);
     ret =  Image_SDK_Set_Node_Order(XW_LINE_RARR_WINDOW_ID,FIXD_ORDER);

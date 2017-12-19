@@ -49,6 +49,12 @@ static void*    _image_mouse_event_read_thread(void *data);
 //handle data proess
 static void*    _image_sdk_handle_data_process(void *data);
 
+//prcoess node limit rect func
+static int  get_limit_rect_for_node_freshen(window_node_t *node);
+static int  compler_limit_rect_ture(uint16_t x,uint16_t y,limit_rect_t *limit);
+static void inline  limit_rect_free(limit_rect_t *limit);
+
+
 
 static inline void      debug_node_id(window_node_t *node){
     
@@ -182,6 +188,12 @@ void    Image_SDK_Init(void){
 
     if(sdk_handle->object_pool == NULL)
         goto ERR3;
+
+    sdk_handle->limit_rect_pool  =  object_pool_create(sizeof(limit_rect_t),DISP_OBJ_MAX+1,NULL);
+    if(sdk_handle->limit_rect_pool == NULL)
+        goto ERR4;
+
+
     
     //init root node
     window_node_t *root = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
@@ -212,6 +224,9 @@ void    Image_SDK_Init(void){
         printf("load font lib fail ret:%d\n",ret);
 
     return;
+
+ERR4:
+    object_pool_destory(sdk_handle->object_pool);
 
 ERR3:
     object_pool_destory(sdk_handle->window_node_pool);
@@ -1483,7 +1498,7 @@ static void freshen_image_line(void *data){
         return ;
     }
 
-    int k,i,h,w,ho,wo;
+    int k,i,h,w,ho,wo,ret = 1;
     if(bt->start_x  == bt->end_x){
         h = bt->end_y - bt->start_y;
         w = bt->size;
@@ -1513,13 +1528,20 @@ static void freshen_image_line(void *data){
         if(bt->this_node->move_arrt != NOT_MOVE){
             for(k = bt->last_y ; k < (ho + bt->last_y) ;k++){
                 for(i = bt->last_x ;  i < (bt->last_x + wo)  ; i++ )
-                    *(buf+ sdk_handle->scree_w*k + i) = 0;    
+                {
+                    //limit rect conut
+                  //  if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
+                            *(buf+ sdk_handle->scree_w*k + i) = 0x0;    
+                
+                }
             }
         }
 
         for(k = bt->start_y ; k < (h + bt->start_y) ;k++){
-            for(i = bt->start_x ;  i < (bt->start_x + w)  ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = bt->color;    
+            for(i = bt->start_x ;  i < (bt->start_x + w)  ; i++ ){
+               // if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
+                    *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+            }    
         }
         
         bt->last_x = bt->start_x;
@@ -1531,7 +1553,8 @@ static void freshen_image_line(void *data){
       //  printf("line w:%d h:%d color:%x\n ",w,h,bt->color);
 
     }
-    
+    //limit_rect_free(bt->this_node->limit);
+    bt->this_node->limit = NULL;
     bt->this_node->freshen_arrt = NORTHING;
     return ;
 }
@@ -1978,8 +2001,8 @@ static inline void image_set_bother_put_freshen(window_node_t *node)
         }    
     }
     return;
-
 }
+
 static inline int  find_set_freshen_fnode(window_node_t **savebuf,window_node_t *fnode,int cnt)
 {
     
@@ -1990,6 +2013,7 @@ static inline int  find_set_freshen_fnode(window_node_t **savebuf,window_node_t 
     
     return 0;
 }
+
 
 static void  image_put_video(void)
 {
@@ -2010,7 +2034,18 @@ static void  image_put_video(void)
       
         if(node->en_node && node->freshen_arrt == NEED_FRESHEN )
         {
-            
+
+            //use dereferntt func
+#if 0
+            if(node->f_node == sdk_handle->root ||
+                    (node->f_node->en_node == 1 && node->f_node != sdk_handle->root))
+            {
+                get_limit_rect_for_node_freshen(node);
+            }
+
+
+#else
+
             //the every level only set one times the fshen attr ,becares the image put run before,compler the all
             //window intersection attr,and set flags
             if(node->en_intersection  
@@ -2022,7 +2057,8 @@ static void  image_put_video(void)
                 save_set[save_cnt] = node->f_node;
                 save_cnt++;
             }
-
+#endif
+          
             //freshen now node
            if(node->f_node == sdk_handle->root){
                 _image_freshen(node);
@@ -2228,7 +2264,17 @@ static inline int ab_abs(int a,int b)
 
 static int compler_image(window_node_t *node,window_node_t *temp)
 {
+   
+#if 1
+    if(node->move_arrt != NOT_MOVE && node->win_type == OBJECT_LINE)
+    {
         
+        node->en_intersection = 1;
+        temp->en_intersection = 1;
+        return 1;
+    }
+#endif
+
     struct  update_param_save   data_s,data_n;
     update_param_get(temp,&data_n);
     update_param_get(node,&data_s);
@@ -2251,7 +2297,7 @@ static int compler_image(window_node_t *node,window_node_t *temp)
             //    temp->node_id[0],temp->node_id[1],temp->node_id[2] );
         return 1;
     }
-
+    return 0;
 }
 
 
@@ -2320,6 +2366,138 @@ static void  _image_all_window_comper_intersection_attr(void)
 
 
 }
+
+
+//the func get limit rect for now freshen node,only set now window is prev node
+static int  get_limit_rect_for_node_freshen(window_node_t *node)
+{   
+    if(node == NULL)
+        return -1;
+
+
+    if( node->video_attr == CLOSE_DISP)
+        return -2;
+    window_node_t *temp = NULL,*temp2;
+
+    if(node->f_node == sdk_handle->root || node->f_node->video_attr != CLOSE_DISP)
+    {
+        temp = node->prev;
+    }else if(node->f_node->video_attr == CLOSE_DISP){
+        temp  = node->f_node->prev;
+        temp2 = node->prev;
+    }else{
+        ;
+    }
+   // printf("temp:%p\n",temp);
+
+    struct update_param_save    save;
+    limit_rect_t                *limit = NULL ,*templimit = NULL;
+
+    for( ; temp != NULL ; temp = temp->prev)
+    {
+
+        if(temp->en_node == 0 || temp->video_state == CLEAR_STATE ||
+                temp->video_attr == CLOSE_DISP)
+            continue;
+
+        //count insterince
+        if(compler_image(node,temp))
+        {
+            if( update_param_get(temp,&save) != 0)
+                continue;
+            //debug_node_id(node);
+            //debug_node_id(temp);
+
+            limit  = (limit_rect_t *)object_pool_get(sdk_handle->limit_rect_pool);
+            if(limit == NULL){
+                 //debug_node_id(node);
+                 //debug_node_id(temp);
+                 //printf("limit:%p\n",limit);
+                break;
+
+            }
+          //  printf("limit:%p\n",limit);
+
+            limit->x = save.x;
+            limit->y = save.y;
+            limit->end_y = save.end_y ;
+            limit->end_x = save.end_x ;
+            if(node->limit == NULL)
+            {
+                node->limit = limit;
+            }else{
+                for(templimit = node->limit; templimit->next != NULL; templimit = templimit->next)
+                    ;
+                templimit->next = limit;
+                limit->prev     = templimit;
+            }
+        }
+    }
+    // printf("limit:%p x\n",limit);
+
+#if 0
+    // now not count
+    for(;temp2; temp2  =  temp2->prev){
+
+        if(temp->en_node == 0 || temp->video_state == CLEAR_STATE ||
+                temp->video_attr == CLOSE_DISP)
+            continue;
+
+        //count insterince
+        if(compler_image(node,temp))
+        {
+            if( update_param_get(temp,&save) != 0)
+                continue;
+
+            limit  = (limit_rect_t *)object_pool_get(sdk_handle->window_node_pool);
+            limit->x = save.x;
+            limit->y = save.y;
+            limit->h = save.end_y - save.y;
+            limit->w = save.end_x - save.x;
+            if(node->limit == NULL){
+                node->limit = limit;
+            }else{
+                for(templimit = node->limit; templimit->next != NULL; templimit = templimit->next)
+                    ;
+                templimit->next = limit;
+                limit->prev = templimit;
+            }
+        }
+        //get limit q
+    }
+#endif
+    return 0;
+
+}
+
+static int  compler_limit_rect_ture(uint16_t x,uint16_t y,limit_rect_t *limit)
+{
+    if(limit == NULL)
+        return 0;
+
+    limit_rect_t *temp = limit;
+    for(;temp != NULL; temp =  temp->next){
+        if( x >= temp->x && x <= temp->end_x && y >= temp->y && y <= temp->end_y)
+                    return 1; 
+    }
+    
+    return 0;
+}
+
+static void inline  limit_rect_free(limit_rect_t *limit)
+{
+    
+    for(;limit != NULL ; limit = limit->next){
+        object_pool_free(sdk_handle->limit_rect_pool,(void * )limit);
+        limit->next = NULL;
+        limit->prev = NULL;
+
+    }
+    return ;
+
+}
+
+
 
 
 static  pthread_t   mouse_thread_id, process_thread_id;

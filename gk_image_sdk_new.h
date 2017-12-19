@@ -62,6 +62,20 @@ typedef enum{
     FIXD_ORDER,         //not move order
 } NODE_ORDER_ATTR;
 
+typedef struct limit_rect   limit_rect_t;
+
+struct limit_rect{
+    limit_rect_t    *next; 
+    limit_rect_t    *prev;
+    uint16_t        x;
+    uint16_t        y;
+    uint16_t        end_x;
+    uint16_t        end_y;
+    uint16_t        color;
+
+};
+
+
 struct window_node{
 
 #define     MENU_LEVEL              5
@@ -73,7 +87,7 @@ struct window_node{
     window_node_t       *s_head;
     window_node_t       *s_end;
     window_node_t       *f_node;   
-    
+    limit_rect_t        *limit;
     //window func flags 
     uint8_t             en_node;            // the node is close or open
     uint8_t             check_node;         // the node 
@@ -251,6 +265,7 @@ typedef struct  image_sdk_s{
     //pool
     object_pool_t   *window_node_pool;
     object_pool_t   *object_pool;
+    object_pool_t   *limit_rect_pool;
     
     //mouse check node record
     window_node_t   *last_check_node[MENU_LEVEL];
