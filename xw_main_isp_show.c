@@ -43,17 +43,30 @@ FILE            *xw_isp_fp = NULL;
 #define         XW_ISP_FILE_PATH    "/usr/local/bin/isp.cnf"
 
 
-#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR          0xfeee
-#define     XW_ISP_BUTTON_CHCEK_COLOR                0xf0f0
+#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR           0xfeee
+#define     XW_ISP_BUTTON_CHCEK_COLOR               0xf0f0
+#define     XW_ISP_BUTTON_H                         20
+#define     XW_ISP_BUTTON_W                         30
+
+
+
 
 #define     XW_ISP_BAR_WIN_COLOR                    0xfeee
 #define     XW_ISP_BAR_COLOR                        0xf0f0
+#define     XW_ISP_BAR_LIEN_H                       200
+#define     XW_ISP_BAR_LINE_W                       20
+
+
 #define     XW_ISP_BAR_TEXT_WIN_COLOR               0xfeee
 #define     XW_ISP_BAR_TEXT_FONT_COLOR              0xf0f0
 
 
-#define     XW_ISP_BUTTON_H                         20
-#define     XW_ISP_BUTTON_W                         30
+static int  xw_isp_exposure_show(void *data);
+static int  xw_isp_white_banlance_show(void *data);
+static int  xw_isp_filck_show(void *data);
+static int  xw_isp_frequen_show(void *data);
+static int  xw_video_frequen_show(void *data);
+
 
 
 
@@ -106,17 +119,29 @@ int  xw_main_isp_show(void *data)
         xw_isp_p->hdr               = 0;
     }
     
-    //create  AE auto 
-    window_node_button_t            _bt;
-    window_node_bar_t       _bar;
-    window_node_text_t      _text;
-    struct user_set_node_atrr       _attr;
     
+     
+    return  0;
+}
+
+
+static int  xw_isp_exposure_show(void *data)
+{
+    
+    
+    if(xw_isp_p == NULL)
+        return -1;
+    //create  AE auto 
+    window_node_button_t        _bt;
+    window_node_bar_t           _bar;
+    window_node_text_t          _text;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+
     memset(&_bt,0x0,sizeof(window_node_button_t));
     memset(&_attr,0x0,sizeof(window_node_button_t));
     memset(&_bar,0x0,sizeof(window_node_bar_t));
     memset(&_text,0x0,sizeof(window_node_text_t));
-    
     _attr.en_node = 1;
     
 
@@ -164,12 +189,30 @@ int  xw_main_isp_show(void *data)
     _text.lens          = 2 ;
     memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID ) );
     ret = Image_SDK_Create_Text(_attr,_text);
-    
     char text_buf[10];
     sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
     Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
     
+    return 0;
 
+}
+
+
+static int  xw_isp_white_banlance_show(void *data)
+{
+    
+    
+    window_node_button_t        _bt;
+    window_node_bar_t           _bar;
+    window_node_text_t          _text;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+
+    memset(&_bt,0x0,sizeof(window_node_button_t));
+    memset(&_attr,0x0,sizeof(window_node_button_t));
+    memset(&_bar,0x0,sizeof(window_node_bar_t));
+    memset(&_text,0x0,sizeof(window_node_text_t));
+    _attr.en_node = 1;
 
     //create  AWB auto
     _bt.x = XW_AUTO_WHITE_BALANCE_WINDOW_X;
@@ -203,8 +246,129 @@ int  xw_main_isp_show(void *data)
     _bt.video_set.mouse_left_down = NULL;
     memcpy(_attr.node_id,XW_MANUL_WHITE_BALANCE_WINDOW_ID  ,strlen(XW_MANUL_WHITE_BALANCE_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
+   
+
+    //create  AWB temp
+    _bar.x = XW_ISP_COLOR_TEMP_WINDOW_X  ;
+    _bar.y = XW_ISP_COLOR_TEMP_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->colortemp_awb;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    //set bar text id 
+    memcpy(_bar.text_id,XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID,strlen(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_COLOR_TEMP_WINDOW_ID,strlen(XW_ISP_COLOR_TEMP_WINDOW_ID ));
+    ret = Image_SDK_Create_Bar(_attr,_bar);
     
-    //create filk 50HZ
+    //create  temp text
+    _text.x = XW_ISP_COLOR_TEMP_TEXT_WINDOW_X;
+    _text.y = XW_ISP_COLOR_TEMP_TEXT_WINDOW_X;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID,strlen(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    char text_buf[10];
+    sprintf(text_buf,"%d",xw_isp_p->colortemp_awb);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+    
+
+    
+    //create AWB red
+     _bar.x = XW_ISP_RED_WINDOW_X  ;
+    _bar.y = XW_ISP_RED_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->red_awb;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_RED_TEXT_WINDOW_ID,strlen(XW_ISP_RED_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_RED_WINDOW_ID,strlen(XW_ISP_RED_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_RED_TEXT_WINDOW_X;
+    _text.y = XW_ISP_RED_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_RED_TEXT_WINDOW_ID,strlen(XW_ISP_RED_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_RED_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+    
+    //create AWB green
+    _bar.x = XW_ISP_GREEN_WINDOW_X  ;
+    _bar.y = XW_ISP_GREEN_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->gree_awb;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_GREEN_TEXT_WINDOW_ID,strlen(XW_ISP_GREEN_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_GREEN_WINDOW_ID,strlen(XW_ISP_GREEN_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  gree text
+    _text.x = XW_ISP_GREEN_TEXT_WINDOW_X;
+    _text.y = XW_ISP_GREEN_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_GREEN_TEXT_WINDOW_ID,strlen(XW_ISP_GREEN_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_GREEN_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+    //craate AWB bule
+     _bar.x = XW_ISP_BLUE_WINDOW_X  ;
+    _bar.y = XW_ISP_BLUE_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->blue_awb;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_BLUE_TEXT_WINDOW_ID,strlen(XW_ISP_BLUE_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_BLUE_WINDOW_ID,strlen(XW_ISP_BLUE_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  gree text
+    _text.x = XW_ISP_BLUE_TEXT_WINDOW_X;
+    _text.y = XW_ISP_BLUE_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_BLUE_TEXT_WINDOW_ID,strlen(XW_ISP_BLUE_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_BLUE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+    
+    return 0;
+
+
+}
+
+static int  xw_isp_filck_show(void *data)
+
+{
+
+    
+    window_node_button_t        _bt;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+
+    memset(&_bt,0x0,sizeof(window_node_button_t));
+    memset(&_attr,0x0,sizeof(window_node_button_t));
+    _attr.en_node = 1;
+
+      //create filk 50HZ
     _bt.x = XW_FILCKER_50H_WINDOW_X;
     _bt.y = XW_FILCKER_50H_WINDOW_Y; 
     _bt.w = XW_ISP_BUTTON_W;
@@ -236,169 +400,213 @@ int  xw_main_isp_show(void *data)
     _bt.video_set.mouse_left_down = NULL;
     memcpy(_attr.node_id, XW_FILCKER_60H_WINDOW_ID ,strlen(XW_FILCKER_60H_WINDOW_ID));
     ret = Image_SDK_Create_Button(_attr,_bt); 
-    
-    //create  AWB temp
-     _bar.x = XW_AE_MANUL_WINDOW_X ;
-    _bar.y = XW_AE_MANUL_WINDOW_Y; 
-    _bar.w = XW_ISP_BUTTON_W;
-    _bar.h = XW_ISP_BUTTON_H;
-    
-    if(xw_isp_p->auto_exposure == 1)
-    {
-        _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
 
-    }else{
-        _bt.color = XW_ISP_BUTTON_NOT_CHCEK_COLOR ; 
-
-    }
-
-    memcpy(_bar.text_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID));
-    _bt.video_set.mouse_left_down = NULL;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ) );
-    ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  AE manul text
-
-    _text.x = XW_MANUL_EXPOUSURE_TEXT_WINDOW_X;
-    _text.y = XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y;
-    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
-    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
-    _text.lens          = 2 ;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID ) );
-    ret = Image_SDK_Create_Text(_attr,_text);
-    
-    char text_buf[10];
-    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
-    Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
-    
-
-    
-    //create AWB red
-     _bar.x = XW_AE_MANUL_WINDOW_X ;
-    _bar.y = XW_AE_MANUL_WINDOW_Y; 
-    _bar.w = XW_ISP_BUTTON_W;
-    _bar.h = XW_ISP_BUTTON_H;
-    
-    if(xw_isp_p->auto_exposure == 1)
-    {
-        _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
-
-    }else{
-        _bt.color = XW_ISP_BUTTON_NOT_CHCEK_COLOR ; 
-
-    }
-
-    memcpy(_bar.text_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID));
-    _bt.video_set.mouse_left_down = NULL;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ) );
-    ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  AE manul text
-
-    _text.x = XW_MANUL_EXPOUSURE_TEXT_WINDOW_X;
-    _text.y = XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y;
-    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
-    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
-    _text.lens          = 2 ;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID ) );
-    ret = Image_SDK_Create_Text(_attr,_text);
-    
-    char text_buf[10];
-    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
-    Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
-    
-
-    //create AWB bule
-     _bar.x = XW_AE_MANUL_WINDOW_X ;
-    _bar.y = XW_AE_MANUL_WINDOW_Y; 
-    _bar.w = XW_ISP_BUTTON_W;
-    _bar.h = XW_ISP_BUTTON_H;
-    
-    if(xw_isp_p->auto_exposure == 1)
-    {
-        _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
-
-    }else{
-        _bt.color = XW_ISP_BUTTON_NOT_CHCEK_COLOR ; 
-
-    }
-
-    memcpy(_bar.text_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID));
-    _bt.video_set.mouse_left_down = NULL;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ) );
-    ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  AE manul text
-
-    _text.x = XW_MANUL_EXPOUSURE_TEXT_WINDOW_X;
-    _text.y = XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y;
-    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
-    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
-    _text.lens          = 2 ;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID ) );
-    ret = Image_SDK_Create_Text(_attr,_text);
-    
-    char text_buf[10];
-    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
-    Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
-    
-    //craate AWB gree
-
-    _bar.x = XW_AE_MANUL_WINDOW_X ;
-    _bar.y = XW_AE_MANUL_WINDOW_Y; 
-    _bar.w = XW_ISP_BUTTON_W;
-    _bar.h = XW_ISP_BUTTON_H;
-    
-    if(xw_isp_p->auto_exposure == 1)
-    {
-        _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
-
-    }else{
-        _bt.color = XW_ISP_BUTTON_NOT_CHCEK_COLOR ; 
-
-    }
-
-    memcpy(_bar.text_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID));
-    _bt.video_set.mouse_left_down = NULL;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ) );
-    ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create text
-
-    _text.x = XW_MANUL_EXPOUSURE_TEXT_WINDOW_X;
-    _text.y = XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y;
-    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
-    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
-    _text.lens          = 2 ;
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID ) );
-    ret = Image_SDK_Create_Text(_attr,_text);
-    
-    char text_buf[10];
-    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
-    Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
-    
-
-
-
-
-
-
-    return  0;
+    return 0;
 }
 
-
-
-
-static void mouse_offset_main_menu_func(void *data)
+static int  xw_isp_frequen_show(void *data)
 {
-    window_node_menu_t *mt  = (window_node_menu_t *)data;
-    mt->this_node->freshen_arrt = NEED_CLEAR;
-    mt->this_node->en_node = 0;
-    return ;
+
+    window_node_bar_t           _bar;
+    window_node_text_t          _text;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+    memset(&_attr,0x0,sizeof(window_node_button_t));
+    memset(&_bar,0x0,sizeof(window_node_bar_t));
+    memset(&_text,0x0,sizeof(window_node_text_t));
+    _attr.en_node = 1;
+    
+    //create denosie
+    _bar.x = XW_ISP_DENOISE_WINDOW_X  ;
+    _bar.y = XW_ISP_DENOISE_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->denoise;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_DENOISE_TEXT_WINDOW_ID,strlen(XW_ISP_DENOISE_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_DENOISE_WINDOW_ID,strlen(XW_ISP_DENOISE_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_DENOISE_TEXT_WINDOW_X;
+    _text.y = XW_ISP_DENOISE_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_DENOISE_TEXT_WINDOW_ID,strlen(XW_ISP_DENOISE_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_DENOISE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+    //sharpness
+    _bar.x = XW_ISP_SHARPNESS_WINDOW_X  ;
+    _bar.y = XW_ISP_SHARPNESS_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->sharpness;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_SHARPNESS_TEXT_WINDOW_ID,strlen(XW_ISP_SHARPNESS_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_SHARPNESS_WINDOW_ID,strlen(XW_ISP_SHARPNESS_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_SHARPNESS_TEXT_WINDOW_X;
+    _text.y = XW_ISP_SHARPNESS_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_SHARPNESS_TEXT_WINDOW_ID,strlen(XW_ISP_SHARPNESS_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_SHARPNESS_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+    //brightness
+     _bar.x = XW_ISP_BRIGHTNESS_WINDOW_X  ;
+    _bar.y = XW_ISP_BRIGHTNESS_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->brightness;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,strlen(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_BRIGHTNESS_WINDOW_ID,strlen(XW_ISP_BRIGHTNESS_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_BRIGHTNESS_TEXT_WINDOW_X;
+    _text.y = XW_ISP_BRIGHTNESS_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,strlen(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+    //staruration
+    
+     _bar.x = XW_ISP_SATURATION_WINDOW_X  ;
+    _bar.y = XW_ISP_SATURATION_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->saturation;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_SATURATION_TEXT_WINDOW_ID,strlen(XW_ISP_SATURATION_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_SATURATION_WINDOW_ID,strlen(XW_ISP_SATURATION_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_SATURATION_TEXT_WINDOW_X;
+    _text.y = XW_ISP_SATURATION_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_SATURATION_TEXT_WINDOW_ID,strlen(XW_ISP_SATURATION_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_SATURATION_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+     //contrast
+     _bar.x = XW_ISP_CONTRAST_WINDOW_X  ;
+    _bar.y = XW_ISP_CONTRAST_WINDOW_Y;
+    _bar.w = XW_ISP_BAR_LINE_W;
+    _bar.h = XW_ISP_BAR_LINE_H;
+    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+    _bar.now_value  = xw_isp_p->contrast;
+    _bar.max_value  = 100;
+    _bar.video_set.mouse_left_down = NULL;
+    memcpy(_bar.text_id,XW_ISP_CONTRAST_TEXT_WINDOW_ID,strlen(XW_ISP_CONTRAST_TEXT_WINDOW_ID));
+    memcpy(_attr.node_id,XW_ISP_CONTRAST_WINDOW_ID,strlen(XW_ISP_CONTRAST_WINDOW_ID ) );
+    ret = Image_SDK_Create_Bar(_attr,_bar);
+    //create  red text
+    _text.x = XW_ISP_CONTRAST_TEXT_WINDOW_X;
+    _text.y = XW_ISP_CONTRAST_TEXT_WINDOW_Y;
+    _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
+    _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
+    _text.lens          = 2 ;
+    memcpy(_attr.node_id,XW_ISP_CONTRAST_TEXT_WINDOW_ID,strlen(XW_ISP_CONTRAST_TEXT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Text(_attr,_text);
+    
+    sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
+    Image_SDK_Set_Text_Node_Text(XW_ISP_CONTRAST_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+
+
+    return 0;
+
 }
 
-
-int xw_main_menu_show(void *data)
+static int  xw_video_frequen_show(void *data)
 {
     
-       return ret ;
+    window_node_button_t        _bt;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+
+    memset(&_bt,0x0,sizeof(window_node_button_t));
+    memset(&_attr,0x0,sizeof(window_node_button_t));
+    _attr.en_node = 1;
+    //create filp button
+    _bt.x = XW_VIDEO_FILP_WINDOW_X;
+    _bt.y = XW_VIDEO_FILP_WINDOW_Y;
+    _bt.w = XW_ISP_BUTTON_W;
+    _bt.h = XW_ISP_BUTTON_H;
+    _bt.color = 0xfeee;
+    _bt.size  = 2;
+    _bt.video_set.mouse_left_down = NULL;
+    memcpy(_attr.node_id,XW_VIDEO_FILP_WINDOW_ID  ,strlen(XW_VIDEO_FILP_WINDOW_ID ) );
+    ret = Image_SDK_Create_Button(_attr,_bt); 
+    
+    //create mirror button
+    _bt.x = XW_VIDEO_MIRROR_WINDOW_X;
+    _bt.y = XW_VIDEO_MIRROR_WINDOW_Y;
+    _bt.w = XW_ISP_BUTTON_W;
+    _bt.h = XW_ISP_BUTTON_H;
+    _bt.color = 0xfeee;
+    _bt.size  = 2;
+    _bt.video_set.mouse_left_down = NULL;
+    memcpy(_attr.node_id,XW_VIDEO_MIRROR_WINDOW_ID  ,strlen(XW_VIDEO_MIRROR_WINDOW_ID ) );
+    ret = Image_SDK_Create_Button(_attr,_bt); 
+    
+     //create  choram button
+    _bt.x = XW_VIDEO_NIGHGT_WINDOW_X;
+    _bt.y = XW_VIDEO_NIGHGT_WINDOW_Y;
+    _bt.w = XW_ISP_BUTTON_W;
+    _bt.h = XW_ISP_BUTTON_H;
+    _bt.color = 0xfeee;
+    _bt.size  = 2;
+    _bt.video_set.mouse_left_down = NULL;
+    memcpy(_attr.node_id,XW_VIDEO_NIGHGT_WINDOW_ID  ,strlen(XW_VIDEO_NIGHGT_WINDOW_ID ) );
+    ret = Image_SDK_Create_Button(_attr,_bt); 
+    
+
+     //create mirror button
+    _bt.x = XW_VIDEO_HDR_WINDOW_X;
+    _bt.y = XW_VIDEO_HDR_WINDOW_Y;
+    _bt.w = XW_ISP_BUTTON_W;
+    _bt.h = XW_ISP_BUTTON_H;
+    _bt.color = 0xfeee;
+    _bt.size  = 2;
+    _bt.video_set.mouse_left_down = NULL;
+    memcpy(_attr.node_id,XW_VIDEO_HDR_WINDOW_ID  ,strlen(XW_VIDEO_HDR_WINDOW_ID ) );
+    ret = Image_SDK_Create_Button(_attr,_bt); 
+    
+
+    
+    return 0;
+
+
 
 }
+
+
+
+
 
 
