@@ -604,7 +604,7 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         printf("you set x > srcee_w\n");
     }
     if(text->y > sdk_handle->scree_h){
-        text->y = sdk_handle->scree_h -text->asc_width;
+        text->y = sdk_handle->scree_h - text->font_size;
         printf("you set y > srcee_h\n");
     }
    
@@ -886,6 +886,9 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
 
 }
 
+
+
+
 int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr)
 {
     if(node_id == NULL)
@@ -905,6 +908,23 @@ int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr)
 
 }
 
+int     Image_SDK_Set_Button_Color(char *node_id ,uint16_t color){
+
+    if(node_id == NULL)
+        return -1;
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL){
+        return -2;
+    }
+    
+    window_node_button_t *bt =  (window_node_button_t *)temp->window;
+    bt->color = color;
+    temp->freshen_arrt = NEED_FRESHEN;
+    return 0;
+}
 
 
 static inline int image_buttont_xy_analysis(void *data,window_func_t *set,
@@ -1012,7 +1032,7 @@ static inline int image_bar_xy_analysis(void *data,
     
     //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
-    if( (mdata.x + MOUSE_SIZE /2)  >= bt->x  && (mdata.x + MOUSE_SIZE/2) <= bt->x + bt->w  
+    if( (mdata.x + MOUSE_SIZE /2)  >= (bt->x - 20)  && (mdata.x + MOUSE_SIZE/2) <= (bt->x + bt->w + 20)  
             && (mdata.y + MOUSE_SIZE /2) >= bt->y - 2  && (mdata.y+ MOUSE_SIZE/2) <= (bt->y+bt->h+2)){
         //add mouse data
         
@@ -1639,19 +1659,20 @@ static void freshen_image_text(void *data){
         
        // printf("bt->last_x:%d y:%d now x:%d y:%d bt->this_node->move:%d \n",bt->last_x,bt->last_y,bt->x,bt->y,
          //       bt->this_node->move_arrt);
+        if(bt->last_x != 0 && bt->last_y != 0){
+            for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
 
-        for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ ){
 
-            for(i = bt->last_x ;  i < (bt->asc_width *bt->lens + bt->last_x) ; i++ ){
-                
-                if(bt->this_node->move_arrt == NOT_MOVE){
-                    *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;
+                    if(bt->this_node->move_arrt == NOT_MOVE){
+                        *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;
 
-                   // printf("X&X&X&X\n");
-                }else{
-                    // printf("X&X&X&X\n");
-                    *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
-                }  
+                        // printf("X&X&X&X\n");
+                    }else{
+                        // printf("X&X&X&X\n");
+                        *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
+                    }  
+                }
             }
         }
         //usleep(200000);
@@ -1662,7 +1683,7 @@ static void freshen_image_text(void *data){
             s = bt->text_cache[nums];
             if(s == '\0')
                 break;
-            //printf("freshen put c:%c \n",s);
+       //     printf("freshen put c:%c",s);
             text_bit = image_text_lib_put_pixl(&s);
 
             if(text_bit == NULL)
@@ -1678,7 +1699,7 @@ static void freshen_image_text(void *data){
                 }
             }
         }
-
+     //   printf("\n");
         bt->this_node->video_state = VIDEO_STATE;
         bt->last_x = bt->x;
         bt->last_y = bt->y;

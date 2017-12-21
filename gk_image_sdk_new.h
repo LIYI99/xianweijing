@@ -197,7 +197,7 @@ typedef struct window_node_text{
     window_node_t   *this_node;
     uint16_t        last_x;
     uint16_t        last_y;
-      uint16_t        x;
+    uint16_t        x;
     uint16_t        y;
     uint8_t         font_size;
     uint8_t         asc_width;
@@ -303,21 +303,16 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         window_node_bar_t _bar);
 
+
+int     Image_SDK_Set_Button_Color(char *node_id ,uint16_t color);
 int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt);
-
-
-
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt);
 int     Image_SDK_Set_Node_En(char *node_id,uint8_t en);
 int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr);
 int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en);
-
 int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr);
-
 int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
-
 int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
-
 int     Image_SDK_Set_Text_Node_Xy(char *node_id,uint16_t x,uint16_t y);
 
 

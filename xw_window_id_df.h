@@ -19,7 +19,6 @@
 //#define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
 
 //define video advanced settings
-//#define XW_VIDEO_ZOOZ_BOOST_WINDOW_ID       "Aam"  //del
 #define XW_VIDEO_FILP_WINDOW_ID             "Aal"
 #define XW_VIDEO_MIRROR_WINDOW_ID           "Aak"
 #define XW_VIDEO_NIGHGT_WINDOW_ID           "Aaj"
@@ -42,8 +41,8 @@
 #define XW_ISP_COLOR_TEMP_WINDOW_ID         "AaX"
 #define XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID    "AaW"
 
-#define XW_ISP_BULE_WINDOW_ID               "AaV"
-#define XW_ISP_BULE_TEXT_WINDOW_ID          "AaU"
+#define XW_ISP_BLUE_WINDOW_ID               "AaV"
+#define XW_ISP_BLUE_TEXT_WINDOW_ID          "AaU"
 
 #define XW_ISP_RED_WINDOW_ID                "Aag"
 #define XW_ISP_RED_TEXT_WINDOW_ID           "AaT"
@@ -71,7 +70,7 @@
 #define XW_FILCKER_50H_WINDOW_ID            "AaG"
 #define XW_FILCKER_60H_WINDOW_ID            "AaF"
 #define XW_AUTO_WHITE_BALANCE_WINDOW_ID     "AaE"
-#define XW_MANUL_WHITE_BALANCE_WINDOW_ID    "Aan" 
+#define XW_MANUL_WHITE_BALANCE_WINDOW_ID    "Aam" 
 
 #define XW_MANUL_EXPOUSURE_WINDOW_ID        "AaD"
 #define XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID   "AaB"
