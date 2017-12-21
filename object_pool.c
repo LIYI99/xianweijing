@@ -30,6 +30,7 @@ object_pool_t*  object_pool_create(unsigned int object_size,unsigned int max,
 
 
 
+
     int i = 0;
     struct qnode *nodep = NULL,*temp =NULL;
 
@@ -56,7 +57,7 @@ object_pool_t*  object_pool_create(unsigned int object_size,unsigned int max,
         }
     }
     s->_init = func;
-    
+    s->object_size = object_size; 
     return  s;
 }
 
@@ -86,8 +87,12 @@ void*   object_pool_get(object_pool_t *s){
     }
     node->tab = USEING_STATE  ; //use
     s->usecnts++;
-
-   return  ((void *)node) + sizeof(struct qnode);
+    
+    void *p = ((void *)node) + sizeof(struct qnode);
+    
+    //memset(p,0x0,s->object_size) ;
+    return  p;
+    //((void *)node) + sizeof(struct qnode);
 
 }
 
