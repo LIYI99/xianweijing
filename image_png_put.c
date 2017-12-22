@@ -172,7 +172,6 @@ void inline   rgba8888_to_rgba4444_test(uint32_t *in, uint16_t *put)
     printf("in :%d \n",*in);
 #if 1
     y->r = x->r >> 4;
-    y->r -= 4;
     y->g = x->g >> 4;
     y->b = x->b >> 4;
     y->a = x->a >> 4;
@@ -306,8 +305,8 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
                     getp++;
                    // getp+=2;
 
-#if 0   
-                    if(py == 10 && px == 10){
+#if 1 
+                    if(py == 0 && px == 0){
                             
                             struct  rgba8888 *testy = NULL ;
                             uint32_t testx  = 0;

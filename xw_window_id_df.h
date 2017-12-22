@@ -14,9 +14,9 @@
 #define XW_LINE_SET_COLOR_WINDOW_ID         "Aas"
 #define XW_LINE_SELECT_LINE_WINDOW_ID       "Aar"
 #define XW_LINE_LOCK_WINDOW_ID              "Aaq"
-//#define XW_LINE_CHANGE_COLOR_WINDOW_ID      "Aap"
+#define XW_LINE_CLEAR_WINDOW_ID             "Aap"
+#define XW_LINE_SAVE_WINDOW_ID              "Aao"
 
-//#define XW_LINE_SET_SIZE_WINDOW_ID          "Aao"
 
 //define video advanced settings
 #define XW_VIDEO_FILP_WINDOW_ID             "Aal"
@@ -136,6 +136,15 @@
 #define XW_RECOD_WINDOW_ID                  "Acy"
 #define XW_SET_WINDOW_ID                    "Acx"
 #define XW_PERVIEW_WINDOW_ID                "Acw"
+
+
+//#define image  preview  window
+
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_ID          "Ad"
+#define XW_PERVIEW_IMAGE_ONLY_WINDOW_ID         "Ae"
+
+//#define imagessege info window
+#define XW_MESSAGE_PINT_TEXT_WINDOW_ID          "Af"
 
 
 

@@ -9,7 +9,7 @@
 
 
 //deinfine line set button
-#define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X +  225
+#define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X +  224
 #define XW_LINE_SHOW_WINDOW_Y       XW_MAIN_WINDOW_Y +  669
 #define XW_LINE_CHOICE_WINDOW_X      XW_MAIN_WINDOW_X + 35
 #define XW_LINE_CHOICE_WINDOW_Y      XW_MAIN_WINDOW_Y + 669
@@ -20,41 +20,43 @@
 #define XW_LINE_SET_SIZE_WINDOW_Y      XW_MAIN_WINDOW_Y +   747
 #define XW_LINE_SET_COLOR_WINDOW_X       XW_MAIN_WINDOW_X + 35   
 #define XW_LINE_SET_COLOR_WINDOW_Y       XW_MAIN_WINDOW_Y + 747   
+
 #define XW_LINE_SELECT_LINE_WINDOW_X      XW_MAIN_WINDOW_X + 225 
 #define XW_LINE_SELECT_LINE_WINDOW_Y      XW_MAIN_WINDOW_Y + 747  
 
-//#define XW_LINE_CHANGE_COLOR_WINDOW_X       XW_MAIN_WINDOW_X + 0 
-//#define XW_LINE_CHANGE_COLOR_WINDOW_Y    XW_MAIN_WINDOW_Y + 0 
+#define XW_LINE_CLAER_WINDOW_X          XW_MAIN_WINDOW_X +  319
+#define XW_LINE_CLAER_WINDOW_Y          XW_MAIN_WINDOW_Y + 745
 
-//define video advanced settings
-#define XW_VIDEO_ZOOZ_LESSEN_WINDOW_X   XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_ZOOZ_LESSEN_WINDOW_Y    XW_MAIN_WINDOW_Y + 0 
+#define XW_LINE_SAVE_WINDOW_X           XW_MAIN_WINDOW_X + 319
+#define XW_LINE_SAVE_WINDOW_Y           XW_MAIN_WINDOW_Y + 669
 
+
+//define video param settings
 #define XW_VIDEO_ZOOZ_BOOST_WINDOW_X      XW_MAIN_WINDOW_X + 0   
 #define XW_VIDEO_ZOOZ_BOOST_WINDOW_Y        XW_MAIN_WINDOW_Y + 0 
 
 
-#define XW_VIDEO_FILP_WINDOW_X            XW_MAIN_WINDOW_X + 0   
-#define XW_VIDEO_FILP_WINDOW_Y              XW_MAIN_WINDOW_Y + 0 
+#define XW_VIDEO_FILP_WINDOW_X            XW_MAIN_WINDOW_X + 33   
+#define XW_VIDEO_FILP_WINDOW_Y              XW_MAIN_WINDOW_Y + 593 
 
-#define XW_VIDEO_MIRROR_WINDOW_X            XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_MIRROR_WINDOW_Y            XW_MAIN_WINDOW_Y + 0 
-
-
-#define XW_VIDEO_NIGHGT_WINDOW_X          XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_NIGHGT_WINDOW_Y            XW_MAIN_WINDOW_Y + 0 
+#define XW_VIDEO_MIRROR_WINDOW_X            XW_MAIN_WINDOW_X + 128 
+#define XW_VIDEO_MIRROR_WINDOW_Y            XW_MAIN_WINDOW_Y + 593
 
 
-#define XW_VIDEO_DAY_WINDOW_X        XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_DAY_WINDOW_Y        XW_MAIN_WINDOW_Y + 0 
+#define XW_VIDEO_NIGHGT_WINDOW_X          XW_MAIN_WINDOW_X + 224
+#define XW_VIDEO_NIGHGT_WINDOW_Y            XW_MAIN_WINDOW_Y + 593
+
+#define XW_VIDEO_HDR_WINDOW_X        XW_MAIN_WINDOW_X + 319
+#define XW_VIDEO_HDR_WINDOW_Y        XW_MAIN_WINDOW_Y + 593
 
 
-#define XW_VIDEO_HDR_WINDOW_X        XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_HDR_WINDOW_Y        XW_MAIN_WINDOW_Y + 0 
+//#define XW_VIDEO_DAY_WINDOW_X        XW_MAIN_WINDOW_X + 0 
+//#define XW_VIDEO_DAY_WINDOW_Y        XW_MAIN_WINDOW_Y + 0 
 
 
-#define XW_VIDEO_UNLOCK_WINDOW_X     XW_MAIN_WINDOW_X + 0 
-#define XW_VIDEO_UNLOCK_WINDOW_Y     XW_MAIN_WINDOW_Y + 0 
+
+//#define XW_VIDEO_UNLOCK_WINDOW_X     XW_MAIN_WINDOW_X + 0 
+//#define XW_VIDEO_UNLOCK_WINDOW_Y     XW_MAIN_WINDOW_Y + 0 
 
 
 
@@ -221,6 +223,24 @@
 
 #define XW_SET_WINDOW_X             XW_TOP_MENU_WINDOW_X + 321
 #define XW_SET_WINDOW_Y             XW_TOP_MENU_WINDOW_Y + 1
+
+
+
+
+//#define image  preview  window
+
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_X          0
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_Y          0
+
+#define XW_PERVIEW_IMAGE_ONLY_WINDOW_X         0
+#define XW_PERVIEW_IMAGE_ONLY_WINDOW_Y         0
+
+
+
+//#define imagessege info window
+#define XW_MESSAGE_PINT_TEXT_WINDOW_X          920
+#define XW_MESSAGE_PINT_TEXT_WINDOW_Y          500
+
 
 
 
