@@ -109,6 +109,20 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/png/vert8.png"
 
 
+void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color)
+{
+    if(image == NULL)
+        return ;
+    int i = 0;
+    for(i = 0 ; i < size; i++)
+    {
+        if(image[i] == src_color || image[i] ==  0xfff)
+            image[i] = det_color;
+
+    }
+    return ;
+
+}
 
 
 
@@ -119,47 +133,96 @@ int     xw_png_load_all(void)
     ret = xw_window_png_init(PNG_MEM_ALL_SIZE,  WINDOW_PNG_NUMS);
     if(ret != 0)
         return -1;
+
+
     //add main menue
     ret = xw_window_png_add(WINDOW_MAIN_MENU_PATH,XW_MAIN_WINDOW_ID );
     //add top menu
     ret = xw_window_png_add(WINDOW_TOP_MENU_PATH,XW_TOP_MENU_WINDOW_ID);
     
+    uint16_t *p = NULL,w,h;
     char id[10];
     //load line arry set
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'1');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEA, id);
+    //change color
+    xw_get_png_hw(id,&w,&h);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'2');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEB, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'3');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEC, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'4');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICED, id);
-    
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+
+
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'5');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEE, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'6');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEF, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'7');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEG, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     sprintf(id,"%s_%c",XW_LINE_CHOICE_WINDOW_ID,'8');
     ret = xw_window_png_add( WINDOW_LINE_MANGER_CHOICEH, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     //load line size set
-    
+
     sprintf(id,"%s_%c",XW_LINE_SET_SIZE_WINDOW_ID,'1');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETSIZEA, id);
-    
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+
     sprintf(id,"%s_%c",XW_LINE_SET_SIZE_WINDOW_ID,'2');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETSIZEB, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%c",XW_LINE_SET_SIZE_WINDOW_ID,'3');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETSIZEC, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%c",XW_LINE_SET_SIZE_WINDOW_ID,'4');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETSIZED, id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     //load line color set
     sprintf(id,"%s_%c",XW_LINE_SET_COLOR_WINDOW_ID,'1');
@@ -180,41 +243,109 @@ int     xw_png_load_all(void)
     sprintf(id,"%s_%c",XW_LINE_SET_COLOR_WINDOW_ID,'6');
     ret = xw_window_png_add(  WINDOW_LINE_MANGER_SETCOLORV, id);
     //load selcet png
+    
 
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H1");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH1 , id);
+     p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+    
+    
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H2");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH2 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H3");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH3 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H4");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH4 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H5");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH5 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H6");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH6 , id);
+
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H7");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH7 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H8");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTH8 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V1");
     ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V2");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV2 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V3");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV3 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
 
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V4");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV4 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V5");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV5 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V6");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV6 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V7");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV7 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
+
     sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"V8");
-    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV1 , id);
+    ret = xw_window_png_add(WINDOW_LINE_MANGER_SELECTV8 , id);
+    p = xw_get_window_png(id);
+    xw_color_change_func(p,w*h,0x112,0xfeee);
+
 
     return ret;
 

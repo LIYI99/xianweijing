@@ -31,6 +31,9 @@
 #define     FONT_PATH_T         "/usr/local/bin/font/asc16"
 
 
+#define     XW_GOKE_OPTTIMIZE   1
+
+
 
 
 image_sdk_t         *sdk_handle = NULL;
@@ -1442,6 +1445,17 @@ static void freshen_image_buttion(void *data){
 
 }
 
+#ifdef  XW_GOKE_OPTTIMIZE
+    
+static uint8_t  top_menu_video_state = 0 ;
+static uint8_t  main_menu_video_state = 0;
+
+
+
+#endif
+
+
+
 static void freshen_image_menu(void *data){
     
     window_node_menu_t *bt =  (window_node_menu_t *)data;
@@ -1453,6 +1467,7 @@ static void freshen_image_menu(void *data){
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
         bt->this_node->video_state = VIDEO_STATE;
         bt->this_node->freshen_arrt = NORTHING;
+
         return;
     }
 
@@ -1503,6 +1518,167 @@ static void freshen_image_menu(void *data){
     return ;
        
 }
+#ifdef  XW_GOKE_OPTTIMIZE
+
+static   window_node_t  *main_menu= NULL,*top_menu= NULL;
+
+static uint16_t main_x = 0, main_y = 0,main_xd = 0,main_yd;
+static uint16_t top_x = 0,top_y = 0,top_xd = 0,top_yd = 0 ;
+
+
+static void freshen_image_line(void *data){
+    
+    int level = 0;
+    if(main_menu == NULL){
+        level       = node_id_level_re("Aa");
+        main_menu   =  find_all_key_node("Aa",level);
+    }
+    if( top_menu = NULL){
+        level       =  node_id_level_re("Ac");
+        top_menu    =  find_all_key_node("Ac",level);
+    }
+   
+
+    uint8_t video_state_main = 0,video_state_top = 0;
+    window_node_menu_t *mt = NULL;
+
+    if(main_menu == NULL){
+        video_state_main = 0;
+    }else {
+        if(main_menu->freshen_arrt == NEED_FRESHEN ||
+                main_menu->video_state == VIDEO_STATE)
+            video_state_main = 1;
+        if(main_yd == 0){
+            mt = (window_node_menu_t *)main_menu->window;
+            main_x = mt->x;
+            main_y = mt->y;
+            main_xd = mt->x + mt->w;
+            main_yd = mt->h + mt->y;
+            printf("main_x:%d y:%d main_xd:%d main_yd:%d\n",main_x,
+                    main_y,main_xd,main_yd);
+        }
+    }
+    if(top_menu == NULL){
+        video_state_top = 0;
+    }else {
+
+        if(top_menu->freshen_arrt == NEED_FRESHEN ||
+                top_menu->video_state == VIDEO_STATE)
+            video_state_top = 1;
+        
+        if(top_yd== 0){
+            mt = (window_node_menu_t *)top_menu->window;
+            top_x = mt->x;
+            top_y = mt->y;
+            top_xd = mt->w + mt->x;
+            top_yd = mt->h + mt->y;
+        }
+
+    }
+    
+
+    window_node_line_t *bt =  (window_node_line_t *)data;
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
+#if 0
+    if(bt->user_video_freshen){
+        bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
+        bt->this_node->freshen_arrt = NORTHING;
+        bt->this_node->video_state = VIDEO_STATE;
+        return ;
+    }
+
+#endif
+
+    int k,i,h,w,ho,wo,ret = 1;
+    if(bt->start_x  == bt->end_x){
+        h = bt->end_y - bt->start_y;
+        w = bt->size;
+        ho = h;
+        wo = bt->last_size;
+    }else{
+        
+        w = bt->end_x - bt->start_x;
+        h = bt->size;
+        ho = bt->last_size;
+        wo = w;
+    }
+    //printf("line w:%d h:%d \n ",w,h);
+
+    int step_x = 0;
+    if(bt->this_node->freshen_arrt  == NEED_CLEAR){
+
+        for(k = bt->last_y ; k < bt->last_y + ho ;k++){
+            for(i = bt->last_x  ;  i < bt->last_x + wo ; i++ )
+            {
+                if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
+                    i  = top_xd + 1;
+                    continue;
+                }
+                if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
+                    i  = main_xd + 1;
+                    continue;
+                }
+                //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
+                  //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
+                *(buf+ sdk_handle->scree_w*k + i) = 0;    
+            }
+        }
+        
+        bt->this_node->video_state = CLEAR_STATE;
+
+    }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
+
+        //if open move attr ,need clear before x,y
+        if(bt->this_node->move_arrt != NOT_MOVE){
+            for(k = bt->last_y ; k < (ho + bt->last_y) ;k++){
+                for(i = bt->last_x ;  i < (bt->last_x + wo)  ; i++ )
+                {
+                    if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
+                        i  = top_xd + 1;
+                        continue;
+                    }else if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
+                        i  = main_xd + 1;
+                        continue;
+                    }
+                    //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
+                    //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
+
+
+                    *(buf+ sdk_handle->scree_w*k + i) = 0x0;    
+                }
+            }
+        }
+
+        for(k = bt->start_y ; k < (h + bt->start_y) ;k++){
+            for(i = bt->start_x ;  i < (bt->start_x + w)  ; i++ )
+            {
+                if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
+                    i  = main_xd + 1;
+                    continue;
+                }else if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
+                    i  = main_xd + 1;
+                    continue;
+                }
+                //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
+                  //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
+
+                *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+            }    
+        }
+        
+        bt->last_x = bt->start_x;
+        bt->last_y = bt->start_y;
+        bt->last_size = bt->size;
+
+        bt->this_node->video_state = VIDEO_STATE;
+
+    }
+    bt->this_node->limit = NULL;
+    bt->this_node->freshen_arrt = NORTHING;
+    return ;
+}
+       
+#else
 static void freshen_image_line(void *data){
     
     window_node_line_t *bt =  (window_node_line_t *)data;
@@ -1578,6 +1754,8 @@ static void freshen_image_line(void *data){
     bt->this_node->freshen_arrt = NORTHING;
     return ;
 }
+
+#endif
 
 
 static void freshen_image_bar(void *data){
@@ -1934,13 +2112,15 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
         return;
     }
     // father menu is not disp
+    
+
     for(;head != NULL;head = head->next)
     {
         if(head->en_intersection){
             if(head->video_state == VIDEO_STATE && head->freshen_arrt != NEED_CLEAR)
             {
                 head->freshen_arrt = NEED_FRESHEN;
-                printf("++++++set clear ");
+                //printf("++++++set clear ");
                 debug_node_id(head);
             }
         }
@@ -1971,7 +2151,10 @@ static void image_clear_video(void)
         {
 
             if(node->en_intersection){
-                  image_set_bother_clear_freshen(node->f_node->s_head); 
+#ifdef XW_GOKE_OPTTIMIZE
+                if(node->node_id[1] != 'b')
+#endif
+                    image_set_bother_clear_freshen(node->f_node->s_head); 
 
             }
             
@@ -2013,10 +2196,22 @@ static void image_clear_video(void)
 
 static inline void image_set_bother_put_freshen(window_node_t *node)
 {
+
+
+#ifdef XW_GOKE_OPTTIMIZE
+
+    if(node->node_id[1] == 'b')
+        return ;
+#endif
+
+
+    
     node = node->prev; 
     for( ; node != NULL; node = node->prev)
     {
-        if(node->en_intersection){
+        
+            if(node->en_intersection){
+
             if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR)
                 node->freshen_arrt = NEED_FRESHEN;
         }    

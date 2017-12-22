@@ -30,8 +30,8 @@ typedef struct  xw_isp_set{
     uint8_t     denoise;
     
     //video set
-    uint8_t     filp_h;
-    uint8_t     filp_v;
+    uint8_t     filp;
+    uint8_t     mirror;
     uint8_t     chroma;
     uint8_t     hdr;
 }xw_isp_set_t;
@@ -48,6 +48,14 @@ FILE            *xw_isp_fp = NULL;
 #define     XW_ISP_BUTTON_H                         10
 #define     XW_ISP_BUTTON_W                         18
 
+
+#define     XW_VIDEO_SET_BUTTON_H                   45
+#define     XW_VIDEO_SET_BUTTON_W                   45
+
+#define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR             0xfeee
+#define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR             0xf0f0
+#define     XW_VIDEO_SET_BUTTON_OFFSET_COLOR            0xf00f
+#define     XW_VIDEO_SET_BUTTON_SIZE                    2
 
 
 
@@ -88,7 +96,7 @@ int  xw_main_isp_show(void *data)
     int ret  = 0 ;
     //load isp data 
 
-    xw_isp_fp = fopen(XW_ISP_FILE_PATH ,"rb");
+    xw_isp_fp = fopen(XW_ISP_FILE_PATH ,"rw+");
     if( xw_isp_fp )
     {
         ret = fread(xw_isp_p,1,sizeof(xw_isp_set_t),xw_isp_fp);
@@ -116,8 +124,8 @@ int  xw_main_isp_show(void *data)
         //video set
         xw_isp_p->filcker           = 1;  // 1: 50HZ  0:60HZ
         xw_isp_p->chroma            = 90;
-        xw_isp_p->filp_v            = 0;
-        xw_isp_p->filp_h            = 0;
+        xw_isp_p->filp              = 0;
+        xw_isp_p->mirror            = 0;
         xw_isp_p->hdr               = 0;
     }
     //add menu
@@ -127,7 +135,6 @@ int  xw_main_isp_show(void *data)
     //return ;
     ret = xw_isp_filck_show(NULL);
     ret = xw_isp_frequen_show(NULL);
-    return 0;
     ret = xw_video_frequen_show(NULL);
 
     return  0;
@@ -987,6 +994,129 @@ static int  xw_isp_frequen_show(void *data)
 
 }
 
+
+static void usr_push_isp_video_button(void *data ,uint16_t *fbbuf,int scree_w ,int scree_h)
+{
+
+    window_node_button_t *bt =  (window_node_button_t *)data;
+    // printf(" video push bt->color:%x\n",bt->color); 
+    //top w line
+    int i ,k ;
+    for(i = bt->y; i < (bt->y+bt->size) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    //low w line
+    for(i = bt->y+bt->h - bt->size; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < (bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // l h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x; k < ( bt->x + bt->size) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+    // r h line
+    for(i = bt->y; i < (bt->y+bt->h) ;i ++){
+        for(k = bt->x + bt->w - bt->size; k  < ( bt->w + bt->x) ; k++)
+            *(fbbuf+ scree_w*i +k) = bt->color; 
+    }
+
+}
+
+
+static void    xw_video_set_button_offset(void *data)
+{
+    
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_OFFSET_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    return ;
+
+
+}
+static void    xw_video_set_button_leave(void *data){
+    
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    return ;
+}
+
+
+static void     xw_video_filp_button_ldown(void *data)
+{
+    
+    
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    if(xw_isp_p->filp == 0)
+        xw_isp_p->filp = 1;
+    else
+        xw_isp_p->filp = 0;
+    //add video filp set func,set filp vluae
+
+    return ;
+    
+}
+
+static void     xw_video_mirror_button_ldown(void *data)
+{
+
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    if(xw_isp_p->mirror == 0)
+        xw_isp_p->mirror = 0;
+    else
+        xw_isp_p->mirror = 1;
+
+    //add video mirror set func
+
+
+    
+    return ;
+
+}
+
+static void     xw_video_day_night_button_ldown(void *data)
+{
+
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    if(xw_isp_p->chroma == 0)
+        xw_isp_p->chroma = 0;
+    else
+        xw_isp_p->chroma = 1;
+
+    //add video mirror set func
+    
+    return ;
+}
+
+static void     xw_video_hdr_button_ldown(void *data)
+{
+    
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    if(xw_isp_p->hdr == 0)
+        xw_isp_p->hdr = 0;
+    else
+        xw_isp_p->hdr = 1;
+
+    //add video mirror set func
+    
+    return ;
+}
+
+
+
+
+
+
 static int  xw_video_frequen_show(void *data)
 {
     
@@ -1000,33 +1130,38 @@ static int  xw_video_frequen_show(void *data)
     //create filp button
     _bt.x = XW_VIDEO_FILP_WINDOW_X;
     _bt.y = XW_VIDEO_FILP_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
-    _bt.color = 0xfeee;
-    _bt.size  = 2;
-    _bt.video_set.mouse_left_down = NULL;
+    _bt.w = XW_VIDEO_SET_BUTTON_W;
+    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
+    
+    _bt.video_set.mouse_left_down =  xw_video_filp_button_ldown;
+    _bt.video_set.mouse_offset = xw_video_set_button_offset;
+    _bt.video_set.mouse_leave = xw_video_set_button_leave;
+
+    _bt.user_video_freshen = usr_push_isp_video_button;
     memcpy(_attr.node_id,XW_VIDEO_FILP_WINDOW_ID  ,strlen(XW_VIDEO_FILP_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
     //create mirror button
     _bt.x = XW_VIDEO_MIRROR_WINDOW_X;
     _bt.y = XW_VIDEO_MIRROR_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
-    _bt.color = 0xfeee;
-    _bt.size  = 2;
-    _bt.video_set.mouse_left_down = NULL;
+    _bt.w =XW_VIDEO_SET_BUTTON_W;
+    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    _bt.color =XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    _bt.size  = XW_VIDEO_SET_BUTTON_SIZE;
+    _bt.video_set.mouse_left_down =  xw_video_mirror_button_ldown;
     memcpy(_attr.node_id,XW_VIDEO_MIRROR_WINDOW_ID  ,strlen(XW_VIDEO_MIRROR_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
      //create  choram button
     _bt.x = XW_VIDEO_NIGHGT_WINDOW_X;
     _bt.y = XW_VIDEO_NIGHGT_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
-    _bt.color = 0xfeee;
-    _bt.size  = 2;
-    _bt.video_set.mouse_left_down = NULL;
+    _bt.w = XW_VIDEO_SET_BUTTON_W;
+    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    _bt.color = XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    _bt.size  = XW_VIDEO_SET_BUTTON_SIZE;
+    _bt.video_set.mouse_left_down =  xw_video_day_night_button_ldown;
     memcpy(_attr.node_id,XW_VIDEO_NIGHGT_WINDOW_ID  ,strlen(XW_VIDEO_NIGHGT_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
@@ -1034,11 +1169,11 @@ static int  xw_video_frequen_show(void *data)
      //create mirror button
     _bt.x = XW_VIDEO_HDR_WINDOW_X;
     _bt.y = XW_VIDEO_HDR_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
-    _bt.color = 0xfeee;
-    _bt.size  = 2;
-    _bt.video_set.mouse_left_down = NULL;
+    _bt.w = XW_VIDEO_SET_BUTTON_W;
+    _bt.h =  XW_VIDEO_SET_BUTTON_H;
+    _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
+    _bt.video_set.mouse_left_down =  xw_video_hdr_button_ldown;
     memcpy(_attr.node_id,XW_VIDEO_HDR_WINDOW_ID  ,strlen(XW_VIDEO_HDR_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
@@ -1051,7 +1186,38 @@ static int  xw_video_frequen_show(void *data)
 }
 
 
+int  xw_main_isp_save_param(char *path)
+{
+    FILE *fp = NULL;
 
+    if(path){
+        fp = fopen(path,"wr+");
+    }else{
+        fp = xw_isp_fp;
+    }
+    
+    if(fp == NULL)
+        return -1;
+
+    int ret = 0;
+
+    fseek(xw_isp_fp,0,SEEK_SET);
+    ret = fwrite((void *)xw_isp_p,1,sizeof(xw_isp_set_t),xw_isp_fp);
+    
+    return ret;
+
+}
+
+
+int  xw_main_isp_de_show(void *data){
+
+    
+    fclose(xw_isp_fp);
+    xw_isp_p = NULL;
+    free(xw_isp_p);
+    return 0;
+
+}
 
 
 

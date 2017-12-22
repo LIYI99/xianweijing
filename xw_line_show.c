@@ -451,11 +451,15 @@ int     xw_lines_cl_op_line(void *data)
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,1);
         Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id  ,NEED_FRESHEN);
+        Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
         xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 1;
     }else{
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,0);
         Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,NEED_CLEAR);
+
+        Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
+              
         xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 0;
     }
 

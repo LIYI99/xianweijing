@@ -28,24 +28,38 @@ static  uint16_t     colors[6] = {0xf00f,0xfeef,0xff00,0xf0f0,0xfff0,0xf0ff};
 
 
 
+
 static void xw_line_show_button_ldow(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->color = 0xf0f0;
-    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
-    xw_lines_cl_op_all(NULL);
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+
+        xw_lines_cl_op_all(NULL);
     return;
     
 }
+
+
+#define     XW_LINE_MANGER_BUTTON_OFFSET_COLOR      0xf00f
+#define     XW_LINE_MANGER_BUTTON_LDOWN_COLOR       0xf0f0
+#define     XW_LINE_MANGER_BUTTON_LEAVE_COLOR       0xfeee
+
+#define     XW_LINE_MANGER_BUTTON_SIZE              2
+
+
 
 static void xw_line_show_button_lup(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xfeee;
-    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
-    return;
+    bt->color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+
+     return;
 
        
 }
@@ -54,9 +68,11 @@ static void xw_line_show_button_offset(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xf00f;
-    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
-    return;
+    bt->color =  XW_LINE_MANGER_BUTTON_OFFSET_COLOR;
+     bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+
+      return;
 
        
 }
@@ -64,12 +80,12 @@ static void xw_line_show_button_offset(void *data)
 static void xw_line_show_button_leave(void *data)
 {
     
-    int ret = 0;
-    
+      
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xfeee;
-    Image_SDK_Set_Node_En_Freshen(bt->this_node->node_id,NEED_FRESHEN);
+    bt->color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
 
+  
     return;
 }
 
@@ -86,14 +102,15 @@ static void xw_line_setarry_button_ldow(void *data)
     ret = xw_lines_arry_set_order(arry_now);
     if(ret != 0)
     {
-        printf("fail \n");
+        printf("set line arry fail,maybe lock or not open \n");
         arry_now --;
         return;
     }
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)arry_set[arry_now].png_p;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_CHOICE_WINDOW_ID,NEED_FRESHEN);
-    
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+      
     return;
 }
 
@@ -115,7 +132,8 @@ static void xw_line_setsize_button_ldow(void *data)
 
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)size_set[size_now].png_p;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SET_SIZE_WINDOW_ID,NEED_FRESHEN);
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
 
     
     return;
@@ -139,8 +157,8 @@ static void xw_line_setcolor_button_ldow(void *data)
 
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)color_set[color_now].png_p;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SET_COLOR_WINDOW_ID,NEED_FRESHEN);
-
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+   
 
     
     return;
@@ -159,9 +177,9 @@ static void xw_line_select_line_button_ldow(void *data)
     }
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->image_cache = (char *)select_set[select_now].png_p;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_SELECT_LINE_WINDOW_ID,NEED_FRESHEN);
-    printf("select now:%d imagep:%p\n",select_now,bt->image_cache);
-    return;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+     return;
 }
 
 
@@ -172,11 +190,44 @@ static void xw_line_lock_button_ldow(void *data)
     
     ret = xw_lines_set_lock(0);
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xf0f0;
-    Image_SDK_Set_Node_En_Freshen(XW_LINE_LOCK_WINDOW_ID,NEED_FRESHEN);
+    bt->color = XW_LINE_MANGER_BUTTON_LDOWN_COLOR ;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
 
     return;
 }
+
+static void xw_line_clear_button_ldow(void *data)
+{
+    
+    int ret = 0;
+    
+    ret  = xw_lines_cl_op_line(NULL);
+    if(ret < 0)
+        return ;
+
+    window_node_button_t *bt = (window_node_button_t *)data; 
+    bt->color = XW_LINE_MANGER_BUTTON_LDOWN_COLOR ;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
+    return;
+}
+
+static void xw_line_save_button_ldow(void *data)
+{
+    
+    int ret = 0;
+    window_node_button_t *bt = (window_node_button_t *)data; 
+    bt->color = XW_LINE_MANGER_BUTTON_LDOWN_COLOR ;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    ret =  xw_save_line_data(NULL);
+
+
+    return;
+}
+
+
+
 
 
 
@@ -185,8 +236,7 @@ static void usr_push_video_button_line(void *data ,uint16_t *fbbuf,int scree_w ,
 {
 
     window_node_button_t *bt =  (window_node_button_t *)data;
-    printf(" video push bt->color:%x\n",bt->color); 
-    //top w line
+      //top w line
     int i ,k ;
     for(i = bt->y; i < (bt->y+bt->size) ;i ++){
         for(k = bt->x; k < (bt->w + bt->x) ; k++)
@@ -300,7 +350,7 @@ int  xw_main_line_manger_show(void *data)
     _button.color = 0xfeee;
     _button.w     = 45;
     _button.h     = 45;
-    _button.size  = 2;
+    _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.video_set.mouse_left_down   = xw_line_show_button_ldow;
     _button.video_set.mouse_leave     =    xw_line_show_button_leave;
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
@@ -313,7 +363,7 @@ int  xw_main_line_manger_show(void *data)
     _button.x    =  XW_LINE_LOCK_WINDOW_X ;
     _button.y     =  XW_LINE_LOCK_WINDOW_Y ;
     _button.color =  0xfeee;
-    _button.size  =  2;
+    _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
     _button.w     = 45;
     _button.h     = 45;
@@ -385,7 +435,33 @@ int  xw_main_line_manger_show(void *data)
     _button.video_set.mouse_left_down = xw_line_select_line_button_ldow;
     memcpy(node_attr.node_id,XW_LINE_SELECT_LINE_WINDOW_ID,strlen(XW_LINE_SELECT_LINE_WINDOW_ID));
     Image_SDK_Create_Button(  node_attr,_button);
+   //clean line
+    _button.x     =  XW_LINE_CLAER_WINDOW_X ;
+    _button.y     =  XW_LINE_CLAER_WINDOW_Y ;
+    _button.color =  0xfeee;
+    _button.size  =   XW_LINE_MANGER_BUTTON_SIZE;
+    _button.image_cache = NULL;
+    _button.video_set.mouse_left_down = xw_line_clear_button_ldow;
+    _button.video_set.mouse_leave       = xw_line_show_button_leave; 
+    _button.video_set.mouse_offset      = xw_line_show_button_offset;
+
+    _button.user_video_freshen = usr_push_video_button_line;
+
+    memcpy(node_attr.node_id,XW_LINE_CLEAR_WINDOW_ID,strlen(XW_LINE_CLEAR_WINDOW_ID));
+    Image_SDK_Create_Button(  node_attr,_button);
     
+    //lines param save
+    _button.x     =  XW_LINE_SAVE_WINDOW_X ;
+    _button.y     =  XW_LINE_SAVE_WINDOW_Y ;
+    _button.color =  0xfeee;
+    _button.size  =  XW_LINE_MANGER_BUTTON_SIZE;
+    _button.image_cache = NULL;
+    _button.video_set.mouse_left_down =  xw_line_save_button_ldow;
+    memcpy(node_attr.node_id,XW_LINE_SAVE_WINDOW_ID, strlen(XW_LINE_SAVE_WINDOW_ID));
+    Image_SDK_Create_Button(  node_attr,_button);
+    
+
+
      
     return 0;
 
