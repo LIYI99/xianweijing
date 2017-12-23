@@ -992,7 +992,8 @@ static inline int image_line_xy_analysis(void *data,
             && mdata.y >= (bt->start_y - size) && mdata.y <= (bt->start_y + h + size)){
          
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-
+        printf("line x:%d y:%d ",bt->start_x,bt->start_y);
+        debug_node_id(bt->this_node);
         return 1;
     }
     else 
@@ -1098,6 +1099,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
      
     while ( node  ){
         
+        ret = 0; 
         if(node->en_node){
 
             switch(node->win_type)
@@ -1131,7 +1133,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
                 save_node[check_cnt] = node;
                 check_cnt++;
             
-             //  printf("check node_id:%c%c%c node:%p check_cnt:%d x:%d y;%d\n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
+             printf("check node_id:%c%c%c node:%p check_cnt:%d mouserx:%d mousry;%d \n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
             }
         }
         
@@ -1533,7 +1535,7 @@ static void freshen_image_line(void *data){
         level       = node_id_level_re("Aa");
         main_menu   =  find_all_key_node("Aa",level);
     }
-    if( top_menu = NULL){
+    if( top_menu == NULL){
         level       =  node_id_level_re("Ac");
         top_menu    =  find_all_key_node("Ac",level);
     }
@@ -1566,12 +1568,15 @@ static void freshen_image_line(void *data){
                 top_menu->video_state == VIDEO_STATE)
             video_state_top = 1;
         
-        if(top_yd== 0){
+        if(top_yd == 0){
             mt = (window_node_menu_t *)top_menu->window;
             top_x = mt->x;
             top_y = mt->y;
             top_xd = mt->w + mt->x;
             top_yd = mt->h + mt->y;
+            printf("main_x:%d y:%d main_xd:%d main_yd:%d top state:%d\n",top_x,
+                    top_y,top_xd,top_yd, video_state_top);
+
         }
 
     }
@@ -1610,12 +1615,12 @@ static void freshen_image_line(void *data){
         for(k = bt->last_y ; k < bt->last_y + ho ;k++){
             for(i = bt->last_x  ;  i < bt->last_x + wo ; i++ )
             {
-                if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
-                    i  = top_xd + 1;
+                if( k >= top_y && k <= top_yd && i >= top_x && i<= top_xd && video_state_top == 1){
+                    i  = top_xd ;
                     continue;
                 }
-                if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
-                    i  = main_xd + 1;
+                if( k >= main_y && k <= main_yd && i >= main_x && i <= main_xd && video_state_main == 1){
+                    i  = main_xd ;
                     continue;
                 }
                 //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
@@ -1633,11 +1638,11 @@ static void freshen_image_line(void *data){
             for(k = bt->last_y ; k < (ho + bt->last_y) ;k++){
                 for(i = bt->last_x ;  i < (bt->last_x + wo)  ; i++ )
                 {
-                    if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
-                        i  = top_xd + 1;
+                    if( k >= top_y && k <= top_yd && i >= top_x && i < top_xd && video_state_top == 1){
+                        i  = top_xd ;
                         continue;
-                    }else if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
-                        i  = main_xd + 1;
+                    }else if( k >= main_y && k <= main_yd && i >= main_x &&  i <= main_xd &&video_state_main == 1){
+                        i  = main_xd ;
                         continue;
                     }
                     //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
@@ -1652,11 +1657,11 @@ static void freshen_image_line(void *data){
         for(k = bt->start_y ; k < (h + bt->start_y) ;k++){
             for(i = bt->start_x ;  i < (bt->start_x + w)  ; i++ )
             {
-                if( k >= top_y && k <= top_yd && i == top_x && video_state_top == 1){
-                    i  = main_xd + 1;
+                if( k >= top_y && k <= top_yd && i >= top_x && i <= top_xd && video_state_top == 1){
+                    i  = top_xd ;
                     continue;
-                }else if( k >= main_y && k <= main_yd && i == main_x && video_state_main == 1){
-                    i  = main_xd + 1;
+                }else if( k >= main_y && k <= main_yd && i >= main_x && i<= main_xd && video_state_main == 1){
+                    i  = main_xd ;
                     continue;
                 }
                 //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
