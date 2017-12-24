@@ -385,6 +385,15 @@ int  xw_lines_arry_set_order(uint16_t set_order)
         
         ret = Image_SDK_Set_Text_Node_Xy(xw_lt->lines[xw_lt->now_order][k].line.text_id,
                 xw_lt->lines[xw_lt->now_order][k].line.start_x,  xw_lt->lines[xw_lt->now_order][k].line.start_y );
+        if(xw_lt->lines[xw_lt->now_order][k]._attr.en_node != 0){
+            
+            Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][k]._attr.node_id,1);
+            Image_SDK_Set_Node_En_Freshen(xw_lt->lines[xw_lt->now_order][k]._attr.node_id,NEED_FRESHEN);
+
+        }else{
+            Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][k]._attr.node_id,0);
+            Image_SDK_Set_Node_En_Freshen(xw_lt->lines[xw_lt->now_order][k]._attr.node_id,NEED_CLEAR);
+        }
 
     }
     Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
