@@ -9,11 +9,11 @@
 #include "xw_window_xy_df.h"
 #include "xw_date_show.h"
 #include "gk_image_sdk_new.h"
-
+#include "xw_logsrv.h"
 //
 #define FONT_SIZE                   16
-#define FONT_WIN_COLOR              0xefee
-#define FONT_COLOR                  0xf00f
+#define FONT_WIN_COLOR              0xfeee
+#define FONT_COLOR                  0xf0f0
 
 //
 #define DATE_SET_UP_WINDOW_H        30
@@ -348,35 +348,35 @@ void*   xw_date_show(void *data)
 
         if(last_time.tm_year != set_time.tm_year)
         {
-            sprintf(year,"%d",set_time.tm_year+1900);
+            sprintf(year,"%4d",set_time.tm_year+1900);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_YEAR_WINDOW_ID,year,4);
         }
         if(last_time.tm_mon != set_time.tm_mon)
         {
-            sprintf(year,"%d",set_time.tm_mon+1);
+            sprintf(year,"%02d",set_time.tm_mon+1);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_MONN_WINDOW_ID,year,2);
         }
         if(last_time.tm_mday != set_time.tm_mday)
         {   
-            sprintf(year,"%d",set_time.tm_mday);
+            sprintf(year,"%02d",set_time.tm_mday);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_DAY_WINDOW_ID, year,2);
         }
         if(last_time.tm_hour != set_time.tm_hour)
         {
-            sprintf(year,"%d",set_time.tm_hour);
+            sprintf(year,"%02d",set_time.tm_hour);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_HOUR_WINDOW_ID , year,2);
         }
         if(last_time.tm_min != set_time.tm_min)
         {
-            sprintf(year,"%d",set_time.tm_min);
+            sprintf(year,"%02d",set_time.tm_min);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_MIN_WINDOW_ID, year,2);
         }
         if(last_time.tm_sec != set_time.tm_sec)
         {
-            sprintf(year,"%d",set_time.tm_sec);
+            sprintf(year,"%02d",set_time.tm_sec);
             ret = Image_SDK_Set_Text_Node_Text(XW_DATE_SEC_WINDOW_ID, year,2);
         }
-        
+//        xw_logsrv_debug("xxxxxxxxxxxxxxx\n");        
         last_time =  set_time;
         usleep(100000);
     }

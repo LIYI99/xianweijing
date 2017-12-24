@@ -6,6 +6,7 @@
 #include "gk_image_sdk_new.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
+#include "xw_logsrv.h"
 
 #define     XW_LINE_NUMS_MAX            16   //H:8 w:8    
 #define     XW_LINE_CONF_NUMS           8
@@ -78,7 +79,7 @@ static  void mouse_ldown_theline(void *data)
 {
     window_node_line_t *lt  = (window_node_line_t *)data;
     window_node_line_t *sa = NULL;
-       if(lt->this_node->move_arrt != 0 && xw_lt->lock  == 0)
+    if(lt->this_node->move_arrt != 0 && xw_lt->lock  == 0)
     {   
                 
             sa = find_line_for_array(lt->this_node->node_id);
@@ -124,7 +125,7 @@ static  void mouse_ldown_theline(void *data)
 static  void mouse_ldown_line_menu(void *data)
 {
     
-    printf("test line man menu left down\n");
+    xw_logsrv_debug("test line man menu left down\n");
     
     Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,0);
     Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_CLEAR);
@@ -313,7 +314,7 @@ void xw_line_show_all(void *data)
         }else{
             sprintf(text_buf,"w%d",i - 7);
         }
-        printf("text_buf:%s node_id:%c%c%c create node ret:%d, y:%d,x:%d\n",text_buf,_attr.node_id[0],_attr.node_id[1],_attr.node_id[2],ret,_text.y,_text.x);
+        xw_logsrv_debug("text_buf:%s node_id:%c%c%c create node ret:%d, y:%d,x:%d\n",text_buf,_attr.node_id[0],_attr.node_id[1],_attr.node_id[2],ret,_text.y,_text.x);
         Image_SDK_Set_Text_Node_Text(_attr.node_id,text_buf,2);
         Image_SDK_Set_Node_Move_Atrr(_attr.node_id,MOUSE_LDOWN_MOVE);
 
@@ -340,7 +341,7 @@ static  int  xw_load_line_data(char *path,xw_lines_t *lt)
     {
         fclose(xw_fp);
         xw_fp = NULL;
-        printf("read config file error ret :%d sizeof(xw_lines_t):%d\n",ret,sizeof(xw_lines_t));
+        xw_logsrv_debug("read config file error ret :%d sizeof(xw_lines_t):%d\n",ret,sizeof(xw_lines_t));
     }
        
     return 0;
@@ -437,6 +438,27 @@ int     xw_lines_cl_op_all(void *data)
 
 }
 
+int     xw_lines_close_all_root(void *data)
+{
+
+    if(xw_lt == NULL)
+        return -1;
+
+    if(xw_lt->lock != 0)
+        xw_lt->lock = 0;
+
+    Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
+    //Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
+    Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
+    xw_lt->line_arry_state= 0;
+    
+    xw_lt->lock = 1;
+
+
+    return 0;
+
+}
+
 
 int     xw_lines_cl_op_line(void *data)
 {
@@ -451,13 +473,14 @@ int     xw_lines_cl_op_line(void *data)
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,1);
         Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id  ,NEED_FRESHEN);
+        //usleep(40000);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
         xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 1;
     }else{
         
         Image_SDK_Set_Node_En(xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,0);
         Image_SDK_Set_Node_En_Freshen( xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.node_id ,NEED_CLEAR);
-
+        //usleep(40000);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
               
         xw_lt->lines[xw_lt->now_order][xw_lt->line_order]._attr.en_node = 0;

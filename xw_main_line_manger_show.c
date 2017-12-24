@@ -7,6 +7,7 @@
 #include "xw_png_load.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
+#include "xw_logsrv.h"
 
 struct  xw_line_ui_set{
         uint8_t     order;
@@ -102,7 +103,7 @@ static void xw_line_setarry_button_ldow(void *data)
     ret = xw_lines_arry_set_order(arry_now);
     if(ret != 0)
     {
-        printf("set line arry fail,maybe lock or not open \n");
+        xw_logsrv_err("set line arry fail,maybe lock or not open \n");
         arry_now --;
         return;
     }
@@ -172,7 +173,7 @@ static void xw_line_select_line_button_ldow(void *data)
     select_now =  select_now % SELECT_SET_NUMS;
     ret = xw_lines_set_select(select_now);
     if(ret != 0){
-        printf("select set fail revale%d\n",ret);
+        xw_logsrv_err("select set fail revale%d\n",ret);
         return ;
     }
     window_node_button_t *bt = (window_node_button_t *)data; 
@@ -294,7 +295,7 @@ int  xw_main_line_manger_show(void *data)
         sprintf(idbuf,"%s_%d",XW_LINE_CHOICE_WINDOW_ID,i+1);
         arry_set[i].png_p = xw_get_window_png(idbuf);
         xw_get_png_hw(idbuf,&arry_set[i].w,&arry_set[i].h);
-        printf("arry_set[%d].png_p:%p,arry_set[i].w:%d arry_set[i].h:%d png id:%s\n",i,
+        xw_logsrv_debug("arry_set[%d].png_p:%p,arry_set[i].w:%d arry_set[i].h:%d png id:%s\n",i,
                 arry_set[i].png_p,arry_set[i].w,arry_set[i].h,idbuf);
     }
 
@@ -320,7 +321,7 @@ int  xw_main_line_manger_show(void *data)
         sprintf(idbuf,"%s_H%d",XW_LINE_SELECT_LINE_WINDOW_ID,i+1);
         select_set[i].png_p =  xw_get_window_png(idbuf);
         xw_get_png_hw(idbuf,&select_set[i].w,&select_set[i].h);
-        printf("select_set[%d].png_p:%p,select_set[i].w:%d select_set[i].h:%d png id:%s\n",i,
+        xw_logsrv_debug("select_set[%d].png_p:%p,select_set[i].w:%d select_set[i].h:%d png id:%s\n",i,
                 select_set[i].png_p,select_set[i].w,select_set[i].h,idbuf);
 
 
@@ -330,7 +331,7 @@ int  xw_main_line_manger_show(void *data)
         sprintf(idbuf,"%s_V%d",XW_LINE_SELECT_LINE_WINDOW_ID,i - 7);
         select_set[i].png_p =  xw_get_window_png(idbuf);
         xw_get_png_hw(idbuf,&select_set[i].w,&select_set[i].h);
-        printf("select_set[%d].png_p:%p,select_set[i].w:%d select_set[i].h:%d png id:%s\n",i,
+        xw_logsrv_debug("select_set[%d].png_p:%p,select_set[i].w:%d select_set[i].h:%d png id:%s\n",i,
                 select_set[i].png_p,select_set[i].w,select_set[i].h,idbuf);
 }
 

@@ -12,6 +12,8 @@
 
 #include"gk_image_sdk_new.h"
 #include"image_text_put.h"
+#include"xw_logsrv.h"
+
 //device info set 
 #define     VO_SCREE_W          1920
 #define     VO_SCREE_H          1080
@@ -36,9 +38,10 @@
 
 
 
+
+
 image_sdk_t         *sdk_handle = NULL;
 
-//video fb
 static void*  _image_fb_init(char *dev_path,int *fd);
 static void*  _image_fb_deinit(void *mmap_p,int fd);
 static void   _image_fb_push(int xoffset,int yoffset);
@@ -60,7 +63,7 @@ static void inline  limit_rect_free(limit_rect_t *limit);
 
 
 static inline void      debug_node_id(window_node_t *node){
-    
+
     int i;
     for(i = 0; i < MENU_LEVEL ; i++)
         if(node->node_id[i] >= 'A' && node->node_id[i] <=  'z')
@@ -73,15 +76,16 @@ static void     _image_mouse_image_load(window_node_mouse_t *mouse)
 
 #define     MOUSE_IMAGE_PATH_1  NULL
 #define     MOUSE_IMAGE_PATH_2  NULL
-    
+
     //16bit color
     mouse->image_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
     if(mouse->image_cache == NULL)
     {
-        printf("mouse load fail\n");
+        
+        xw_logsrv_err("mouse load fail ");
         return ;
     }
-    
+
     mouse->save_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt/8);
 
 
@@ -116,8 +120,8 @@ static void     _image_mouse_image_load(window_node_mouse_t *mouse)
                 }
         }
 
-        
-    
+
+
     }else{
         //load image to buf
     }
@@ -133,7 +137,7 @@ static void     _image_mouse_image_deload(window_node_mouse_t *mouse)
     if(mouse == NULL)
         return;
 
-    
+
     free(mouse->image_cache);
     free(mouse->save_cache);
 
@@ -147,20 +151,20 @@ static void     _image_mouse_image_deload(window_node_mouse_t *mouse)
 
 //ok
 void    Image_SDK_Init(void){
-    
+
     if(sdk_handle != NULL)
         return ;
     sdk_handle =  (image_sdk_t *)malloc(sizeof(image_sdk_t));
     if(sdk_handle == NULL)
         return;
     memset(sdk_handle ,0x0,sizeof(image_sdk_t));
-    
+
     sdk_handle->en = 1;
     sdk_handle->scree_w = VO_SCREE_W;
     sdk_handle->scree_h = VO_SCREE_H;
     sdk_handle->color_fmt = VO_COLOR_FMT;
     sdk_handle->disp_fps = VO_DISP_FPS;    
-    
+
     //open fb fd
     sdk_handle->mmap_p = _image_fb_init(GK_DEVICE_FB,&sdk_handle->video_fd);
     if(sdk_handle->video_fd < 0)
@@ -168,9 +172,9 @@ void    Image_SDK_Init(void){
     //open mouse fd 
     sdk_handle->mouse_fd =  gk_mouse_open(GK_DEVICE_MOUSE,VO_SCREE_W,
             VO_SCREE_H,GK_MOUSE_SPEED,MOUSE_SIZE);
-   
+
     if(sdk_handle->mouse_fd < 0){
-        printf("not use mouse\n");
+        xw_logsrv_err("not use mouse\n");
     }
 
     //create window node pool
@@ -178,15 +182,15 @@ void    Image_SDK_Init(void){
         object_pool_create(sizeof(window_node_t),DISP_OBJ_MAX+1,NULL);
     if(sdk_handle->window_node_pool == NULL)
         goto ERR2;
-    
+
     //create image meadie obj pool
     unsigned int obj_size = 0;
     obj_size = sizeof(window_node_button_t) > sizeof(window_node_menu_t)? 
         sizeof(window_node_button_t) : sizeof(window_node_menu_t);
     obj_size = obj_size > sizeof(window_node_line_t)? obj_size : sizeof(window_node_line_t);
-    
+
     obj_size = obj_size > sizeof(window_node_text_t)? obj_size : sizeof(window_node_text_t);
-    
+
     sdk_handle->object_pool = object_pool_create(obj_size,DISP_OBJ_MAX+1,NULL);
 
     if(sdk_handle->object_pool == NULL)
@@ -197,34 +201,34 @@ void    Image_SDK_Init(void){
         goto ERR4;
 
 
-    
+
     //init root node
     window_node_t *root = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     memset(root, 0x0 ,sizeof(window_node_t));
     memcpy(root->node_id,"A",1);
     root->en_node = 1;
     sdk_handle->root = root;
-    printf("window root:%p\n",root);
+    xw_logsrv_debug("window root:%p\n",root);
     //add mouse window node
     window_node_mouse_t *mouse = NULL;
     mouse = (window_node_mouse_t *)malloc(sizeof(window_node_mouse_t));
     if(mouse == NULL){
-        printf("fisrt get obj fail???\n");
+        xw_logsrv_err("fisrt get obj fail???\n");
     }
-    
+
     memset(mouse,0x0,sizeof(window_node_mouse_t));
     mouse->size = MOUSE_SIZE;
-     _image_mouse_image_load(mouse);
+    _image_mouse_image_load(mouse);
     sdk_handle->mouse = mouse;
-    
+
     //en sdk handle
     sdk_handle->en = 1;
-    
+
     //load font lib
     int ret = 0; 
     ret = image_text_lib_init(FONT_SIZE_T,FONT_PATH_T);
     if(ret < 0)
-        printf("load font lib fail ret:%d\n",ret);
+        xw_logsrv_err("load font lib fail ret:%d\n",ret);
 
     return;
 
@@ -235,10 +239,10 @@ ERR3:
     object_pool_destory(sdk_handle->window_node_pool);
 
 ERR2:
-   if(sdk_handle->mouse_fd > 0)
+    if(sdk_handle->mouse_fd > 0)
         gk_mouse_close(sdk_handle->mouse_fd); 
-    
-   _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
+
+    _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
 
 ERR1:
     free(sdk_handle);
@@ -252,10 +256,10 @@ void    Image_SDK_deInit(void)
 {
     if(sdk_handle == NULL)
         return;
-     _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
-    
-     if(sdk_handle->mouse_fd > 0)
-            gk_mouse_close(sdk_handle->mouse_fd); 
+    _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
+
+    if(sdk_handle->mouse_fd > 0)
+        gk_mouse_close(sdk_handle->mouse_fd); 
 
     object_pool_destory(sdk_handle->window_node_pool);
     object_pool_destory(sdk_handle->object_pool);
@@ -269,7 +273,7 @@ void    Image_SDK_deInit(void)
 
 //ok
 static int inline  node_id_level_re(char *node_id){
-    
+
     int i;
     for(i = 0 ;i  < MENU_LEVEL ; i++){
         if(node_id[i] < 'A'  || node_id[i] > 'z' )
@@ -280,25 +284,25 @@ static int inline  node_id_level_re(char *node_id){
 //ok
 static inline window_node_t  *key_find_node(window_node_t *father,char key,int level)
 {
-   window_node_t *temp = father->s_head;
-  // printf("father->shead:%p,father:%p,root:%p\n",temp,father,sdk_handle->root);
+    window_node_t *temp = father->s_head;
+    // xw_logsrv_err("father->shead:%p,father:%p,root:%p\n",temp,father,sdk_handle->root);
     for (;temp != NULL; temp = temp->next)
-   {
-    //    printf("temp->node_id[2]:%c\n",temp->node_id[1]); 
- 
-       if(temp->node_id[level] ==  key)
+    {
+        //    xw_logsrv_err("temp->node_id[2]:%c\n",temp->node_id[1]); 
+
+        if(temp->node_id[level] ==  key)
             break;
-   }
-   return temp;
+    }
+    return temp;
 }
 //ok
 static window_node_t  *find_father_node(char *node_id,int level){
-    
+
     if(level == 2)
         return sdk_handle->root;
-    
+
     window_node_t *temp  = sdk_handle->root;
-    
+
     int k = 1;
     for (k = 1 ; k < level -1 && temp != NULL; k ++ ){
         temp = key_find_node(temp,node_id[k],k);
@@ -312,23 +316,23 @@ static int  window_node_inster(window_node_t *node){
     //get window level
     level = node_id_level_re(node->node_id);
     if(level < 2){
-        printf(" node_id write erro node->node_id:%c%c%c\n",node->node_id[0],
+        xw_logsrv_err(" node_id write erro node->node_id:%c%c%c\n",node->node_id[0],
                 node->node_id[1],node->node_id[2]);
         return -1;
     }
 
     //get window father window
-    //printf("get level:%d\n",level);
+    //xw_logsrv_err("get level:%d\n",level);
     window_node_t *ftemp = NULL,*same = NULL;
     ftemp = find_father_node(node->node_id,level);
     if(ftemp == NULL){
-        printf("not find father node \n");
+        xw_logsrv_err("not find father node \n");
         return -2;
     }
     //find same window
     same = key_find_node(ftemp,node->node_id[level -1],level -1);
     if(same != NULL){
-        printf("a same node ,you set name error \n");
+        xw_logsrv_err("a same node ,you set name error \n");
         return -3;
     }
     //inster node 
@@ -350,7 +354,7 @@ static int  window_node_inster(window_node_t *node){
     node->prev = NULL;
     ftemp->s_head->prev = node;
     ftemp->s_head = node;
-    
+
 #endif
     return 0;
 }
@@ -361,22 +365,22 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
 
     if(sdk_handle == NULL)
         return -2;
-    
+
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
-        
+
         return -3;
     }
-    printf("linenode:%p \n",lq);
- 
+    xw_logsrv_debug("linenode:%p \n",lq);
+
     window_node_button_t * button = NULL;
     button = (window_node_button_t *)object_pool_get(sdk_handle->object_pool);
     if(button == NULL){
         object_pool_free(sdk_handle->window_node_pool,lq);
         return -5;
     }
-    
+
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
@@ -393,20 +397,20 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
 
     if(button->x > sdk_handle->scree_w){
         button->x = sdk_handle->scree_w - button->w;
-        printf("you set x > srcee_w\n");
+        xw_logsrv_err("you set x > srcee_w\n");
     }
     if(button->y > sdk_handle->scree_h){
         button->y = sdk_handle->scree_h -button->h;
-        printf("you set y > srcee_h\n");
+        xw_logsrv_err("you set y > srcee_h\n");
     }
     if(button->w > sdk_handle->scree_w){
         button->w = 60;
-        printf("you set w > srcee_w,now set 60 pixl\n");
+        xw_logsrv_err("you set w > srcee_w,now set 60 pixl\n");
 
     }
     if(button->h > sdk_handle->scree_h){
         button->h = 30;
-        printf("you set h > srcee_h,now set 30pixl\n");
+        xw_logsrv_err("you set h > srcee_h,now set 30pixl\n");
 
     }
 
@@ -422,24 +426,24 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
 }
 int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
         window_node_menu_t _menu){
-    
+
     if(sdk_handle == NULL)
         return -2;
-    
+
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
-        
+
         return -3;
     }
-   
+
     window_node_menu_t * menu = NULL;
     menu = (window_node_menu_t *)object_pool_get(sdk_handle->object_pool);
     if(menu == NULL){
         object_pool_free(sdk_handle->window_node_pool,lq);
         return -5;
     }
-    
+
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
@@ -456,20 +460,20 @@ int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
 
     if(menu->x > sdk_handle->scree_w){
         menu->x = sdk_handle->scree_w - menu->w;
-        printf("you set x > srcee_w\n");
+        xw_logsrv_err("you set x > srcee_w\n");
     }
     if(menu->y > sdk_handle->scree_h){
         menu->y = sdk_handle->scree_h -menu->h;
-        printf("you set y > srcee_h\n");
+        xw_logsrv_err("you set y > srcee_h\n");
     }
     if(menu->w > sdk_handle->scree_w){
         menu->w = 60;
-        printf("you set w > srcee_w,now set 60 pixl\n");
+        xw_logsrv_err("you set w > srcee_w,now set 60 pixl\n");
 
     }
     if(menu->h > sdk_handle->scree_h){
         menu->h = 30;
-        printf("you set h > srcee_h,now set 30pixl\n");
+        xw_logsrv_err("you set h > srcee_h,now set 30pixl\n");
 
     }
 
@@ -485,17 +489,17 @@ int    Image_SDK_Create_Menu(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
         window_node_line_t _line)
 {
-    
+
     if(sdk_handle == NULL)
         return -2;
-    
+
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
-        
+
         return -3;
     }
-   // printf("linenode:%p \n",lq);
+    // xw_logsrv_err("linenode:%p \n",lq);
 
     window_node_line_t * line = NULL;
     line = (window_node_line_t *)object_pool_get(sdk_handle->object_pool);
@@ -503,7 +507,7 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
         object_pool_free(sdk_handle->window_node_pool,lq);
         return -5;
     }
-    
+
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
@@ -520,20 +524,20 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
 
     if(line->start_x > sdk_handle->scree_w){
         line->start_x = sdk_handle->scree_w -line->size;
-        printf("you set x > srcee_w\n");
+        xw_logsrv_err("you set x > srcee_w\n");
     }
     if(line->start_y > sdk_handle->scree_h){
         line->start_y = sdk_handle->scree_h -line->size;
-        printf("you set y > srcee_h\n");
+        xw_logsrv_err("you set y > srcee_h\n");
     }
     if(line->end_x > sdk_handle->scree_w){
         line->end_x = sdk_handle->scree_w - line->size;
-        printf("you set w > srcee_w,now set 60 pixl\n");
+        xw_logsrv_err("you set w > srcee_w,now set 60 pixl\n");
 
     }
     if(line->end_y > sdk_handle->scree_h){
         line->end_y = sdk_handle->scree_h - line->size;
-        printf("you set h > srcee_h,now set 30pixl\n");
+        xw_logsrv_err("you set h > srcee_h,now set 30pixl\n");
 
     }
 
@@ -551,34 +555,34 @@ int    Image_SDK_Create_Line(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text)
 {
-    
+
     if(sdk_handle == NULL)
         return -2;
 
     if(image_text_get_font_width() <= 0){
-        
-        printf("text lib not load \n");
+
+        xw_logsrv_err("text lib not load \n");
         return -9;
     }
     uint8_t asc_width = image_text_get_font_width();
     uint8_t font_size = image_text_get_font_size();
 
-          
+
 
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
-        
+
         return -3;
     }
-   
+
     window_node_text_t * text = NULL;
     text = (window_node_text_t *)object_pool_get(sdk_handle->object_pool);
     if(text == NULL){
         object_pool_free(sdk_handle->window_node_pool,lq);
         return -5;
     }
-    
+
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
@@ -604,13 +608,13 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
 
     if(text->x > sdk_handle->scree_w){
         text->x = sdk_handle->scree_w - text->lens *text->asc_width;
-        printf("you set x > srcee_w\n");
+        xw_logsrv_err("you set x > srcee_w\n");
     }
     if(text->y > sdk_handle->scree_h){
         text->y = sdk_handle->scree_h - text->font_size;
-        printf("you set y > srcee_h\n");
+        xw_logsrv_err("you set y > srcee_h\n");
     }
-   
+
     lq->en_node = attr.en_node;
     lq->freshen_arrt = attr.en_freshen;
     lq->win_type = OBJECT_TEXT_WIN;
@@ -625,26 +629,26 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         window_node_bar_t _bar)
 {
-    
-    printf("create bar w:%d max_value:%d now_value:%d \n",_bar.w,
+
+    xw_logsrv_debug("create bar w:%d max_value:%d now_value:%d \n",_bar.w,
             _bar.max_value,_bar.now_value);
     if(sdk_handle == NULL)
         return -2;
-    
+
     window_node_t  *lq = NULL;
     lq = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
     if(lq == NULL){
-        
+
         return -3;
     }
-   
+
     window_node_bar_t *     bar = NULL;
     bar = (window_node_bar_t *)object_pool_get(sdk_handle->object_pool);
     if(bar == NULL){
         object_pool_free(sdk_handle->window_node_pool,lq);
         return -5;
     }
-    
+
     memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
@@ -655,26 +659,26 @@ int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
     }
 
     *bar =  _bar;
-     bar->this_node = lq;
+    bar->this_node = lq;
 
     if(_bar.video_set.data == NULL)
         bar->video_set.data  = (void *)bar;
 
     if(bar->x > sdk_handle->scree_w){
         bar->x = sdk_handle->scree_w - bar->w;
-        printf("you set x > srcee_w\n");
+        xw_logsrv_err("you set x > srcee_w\n");
     }
     if(bar->y > sdk_handle->scree_h){
         bar->y = sdk_handle->scree_h -bar->h;
-        printf("you set y > srcee_h\n");
+        xw_logsrv_err("you set y > srcee_h\n");
     }
-   
+
     lq->en_node = attr.en_node;
     lq->freshen_arrt = attr.en_freshen;
     lq->win_type = OBJECT_BAR;
     lq->window = (void *)bar;
     lq->mouse_garp_reflect = attr.mouse_garp_reflect;
-    printf("bar->now_value:%d _bar.now_value:%d\n",bar->now_value,_bar.now_value);
+    xw_logsrv_debug("bar->now_value:%d _bar.now_value:%d\n",bar->now_value,_bar.now_value);
     return 0;
 
 
@@ -683,12 +687,12 @@ int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
 
 //ok
 static window_node_t  *find_all_key_node(char *node_id,int level){
-    
+
     if(level == 1)
         return sdk_handle->root;
-    
+
     window_node_t *temp  = sdk_handle->root;
-    
+
     int k ;
     for (k = 1 ; k < level ; k ++ ){
         temp = key_find_node(temp,node_id[k],k);
@@ -699,7 +703,7 @@ static window_node_t  *find_all_key_node(char *node_id,int level){
 //ok
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
 {
-    
+
     int level = 0;
     level = node_id_level_re(node_id);
     window_node_t *temp = NULL;
@@ -707,7 +711,7 @@ int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
     if(temp == NULL)
         return -2;
     temp->move_arrt = _arrt;
-    
+
     return 0;
 
 }
@@ -721,13 +725,13 @@ int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL)
     {
-        printf("not find this window :%s \n",node_id);
+        xw_logsrv_err("not find this window :%s \n",node_id);
 
         return -2;
     }
-    printf("find node id:%c%c%c level:%d in node_id:%s\n",temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+    xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
     temp->en_node = en;
-    
+
     return 0;
 
 }
@@ -741,11 +745,11 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id, NODE_FRESHEN_ARRT en_freshe
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL){
-        printf("not find this window :%s \n",node_id);
+        xw_logsrv_err("not find this window :%s \n",node_id);
         return -2;
     }
     temp->freshen_arrt = en_freshen;
-    printf("temp set freansh_arrt:%d,node_id:%c%c%c\n",temp->freshen_arrt,temp->node_id[0],
+    xw_logsrv_debug("temp set freansh_arrt:%d,node_id:%c%c%c\n",temp->freshen_arrt,temp->node_id[0],
             temp->node_id[1],temp->node_id[2]); 
     return 0;
 
@@ -759,34 +763,34 @@ int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr){
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL)
     {
-        printf("not find this window :%s \n",node_id);
+        xw_logsrv_err("not find this window :%s \n",node_id);
 
         return -2;
     }
-   // printf("find node id:%c%c%c level:%d in node_id:%s\n",
-     //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
-    
+    // xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",
+    //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+
     temp->order_attr = _attr;
-    
+
     return 0;
 
 
 }
 int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en){
-    
+
     int level = 0;
     level = node_id_level_re(node_id);
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL)
     {
-        printf("not find this window :%s \n",node_id);
+        xw_logsrv_err("not find this window :%s \n",node_id);
 
         return -2;
     }
-   // printf("find node id:%c%c%c level:%d in node_id:%s\n",
-     //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
-    
+    // xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",
+    //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+
     temp->en_submenu = en;
 
 
@@ -798,31 +802,29 @@ int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en){
 int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
 {
 
-    
+
     int level = 0;
     level = node_id_level_re(node_id);
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL){
- //       printf("not find node_id\n");
+        //       xw_logsrv_err("not find node_id\n");
         return -2;
     }
-    //printf("win_type:%d\n",temp->win_type);
     if(temp->win_type != OBJECT_TEXT_WIN)
         return -3;
 
     window_node_text_t *tt = (window_node_text_t *)temp->window;
-     
-    //printf("find node:%p tt->lens:%d\n",temp,tt->lens);
+
     if(tt->lens < size)
         return -5;
 
     memcpy(tt->text_cache,text,size);
-    
+
     tt->text_cache[size] = '\0';
-    //printf("set char tt->text:%s\n",tt->text_cache);
+    //xw_logsrv_debug("set char tt->text:%s\n",tt->text_cache);
     temp->freshen_arrt = NEED_FRESHEN;
-    
+
     return 0;
 
 }
@@ -830,27 +832,26 @@ int     Image_SDK_Set_Text_Node_Text(char *node_id, char *text,int size)
 int     Image_SDK_Set_Text_Node_Xy(char *node_id, uint16_t x,uint16_t y)
 {
 
-    
+
     int level = 0;
     level = node_id_level_re(node_id);
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL){
- //       printf("not find node_id\n");
+        //       xw_logsrv_err("not find node_id\n");
         return -2;
     }
-    //printf("win_type:%d\n",temp->win_type);
     if(temp->win_type != OBJECT_TEXT_WIN)
         return -3;
 
     window_node_text_t *tt = (window_node_text_t *)temp->window;
-   
+
     tt->x = x;
     tt->y = y;
 
-    
+
     temp->freshen_arrt = NEED_FRESHEN;
-    
+
     return 0;
 
 }
@@ -868,10 +869,9 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
     window_node_t *temp = NULL;
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL){
- //       printf("not find node_id\n");
+        xw_logsrv_err("not find node_id\n");
         return -2;
     }
-    //printf("win_type:%d\n",temp->win_type);
     if(temp->win_type != OBJECT_LINE)
         return -3;
 
@@ -882,9 +882,9 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
     tt->end_y    = lt->end_y;
     tt->size     = lt->size;
     tt->color    = lt->color;
-    
+
     temp->f_node->freshen_arrt = NEED_FRESHEN;
-    
+
     return 0;
 
 }
@@ -903,10 +903,10 @@ int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr)
     if(temp == NULL){
         return -2;
     }
-  
-       
+
+
     temp->video_attr = _attr;
-        
+
     return 0;
 
 }
@@ -922,7 +922,7 @@ int     Image_SDK_Set_Button_Color(char *node_id ,uint16_t color){
     if(temp == NULL){
         return -2;
     }
-    
+
     window_node_button_t *bt =  (window_node_button_t *)temp->window;
     bt->color = color;
     temp->freshen_arrt = NEED_FRESHEN;
@@ -933,17 +933,17 @@ int     Image_SDK_Set_Button_Color(char *node_id ,uint16_t color){
 static inline int image_buttont_xy_analysis(void *data,window_func_t *set,
         GK_MOUSE_DATA mdata)
 {
-    
+
     window_node_button_t *bt = (window_node_button_t *)data;
     //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
     //mdata.x = x + 
 
     if( (mdata.x  >= bt->x || mdata.x+ MOUSE_SIZE >= bt->x)  && mdata.x <= bt->x+bt->w 
             && (mdata.y >= bt->y || mdata.y + MOUSE_SIZE >= bt->y)&& mdata.y <= bt->y+bt->h){
-         
+
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        //printf("mouse check mouse.x:%d mouse.y:%d button.x:%d button.y:%d\n",mdata.x,mdata.y,
-          //      bt->x,bt->y);
+        //xw_logsrv_debug("mouse check mouse.x:%d mouse.y:%d button.x:%d button.y:%d\n",mdata.x,mdata.y,
+        //      bt->x,bt->y);
         return 1;
     }
     else 
@@ -953,14 +953,14 @@ static inline int image_buttont_xy_analysis(void *data,window_func_t *set,
 
 static inline int image_menu_xy_analysis(void *data,
         window_func_t *set,GK_MOUSE_DATA mdata){
-    
+
     window_node_menu_t *bt = (window_node_menu_t *)data;
     //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
-    
+
     if( mdata.x  >= bt->x  && mdata.x <= bt->x+bt->w 
             && mdata.y >= bt->y && mdata.y <= bt->y+bt->h)
     {
-        
+
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
 
         return 1;
@@ -972,34 +972,34 @@ static inline int image_menu_xy_analysis(void *data,
 
 static inline int image_line_xy_analysis(void *data,
         window_func_t *set,GK_MOUSE_DATA mdata){
-    
-    
+
+
     window_node_line_t *bt = (window_node_line_t *)data;
-    
+
     int h,w;
     if(bt->start_x  == bt->end_x){
         h = bt->end_y - bt->start_y;
         w = bt->size;
     }else{
-        
+
         w = bt->end_x - bt->start_x;
         h = bt->size;
     }
     int  size = 30;
- //   GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
-    //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
+    //   GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
+    //xw_logsrv_debug("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( mdata.x  >= (bt->start_x -size) && mdata.x <= (bt->start_x + w + size) 
             && mdata.y >= (bt->start_y - size) && mdata.y <= (bt->start_y + h + size)){
-         
+
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        printf("line x:%d y:%d ",bt->start_x,bt->start_y);
-        debug_node_id(bt->this_node);
+        xw_logsrv_debug("line x:%d y:%d ",bt->start_x,bt->start_y);
+        //debug_node_id(bt->this_node);
         return 1;
     }
     else 
         return 0;
 
-    
+
     return 0;
 
 }
@@ -1007,47 +1007,47 @@ static inline int image_line_xy_analysis(void *data,
 
 static inline int image_text_xy_analysis(void *data,
         window_func_t *set,GK_MOUSE_DATA mdata){
-    
-    
+
+
     window_node_text_t *bt = (window_node_text_t *)data;
-    
+
     //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
-    //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
+    //xw_logsrv_debug("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( mdata.x  >= bt->x  && mdata.x <= bt->x + bt->asc_width * bt->lens 
             && mdata.y >= bt->y  && mdata.y <= bt->y+bt->font_size){
-       
-         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
 
-         return 1;
+        bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
+
+        return 1;
     }
     else 
         return 0;
 
-    
+
     return 0;
 
 }
 
 static inline int image_bar_xy_analysis(void *data,
         window_func_t *set,GK_MOUSE_DATA mdata){
-    
-    
+
+
     window_node_bar_t *bt = (window_node_bar_t *)data;
-    
+
     //GK_MOUSE_DATA  mdata = sdk_handle->mouse_new_data;
-    //printf("chcek  line set->data:%p line:%p\n" ,set->data,bt);
+    //xw_logsrv_debug("chcek  line set->data:%p line:%p\n" ,set->data,bt);
     if( (mdata.x + MOUSE_SIZE /2)  >= (bt->x - 20)  && (mdata.x + MOUSE_SIZE/2) <= (bt->x + bt->w + 20)  
             && (mdata.y + MOUSE_SIZE /2) >= bt->y - 2  && (mdata.y+ MOUSE_SIZE/2) <= (bt->y+bt->h+2)){
         //add mouse data
-        
+
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        printf("check bar \n"); 
+        xw_logsrv_debug("check bar \n"); 
         return 1;
     }
     else 
         return 0;
 
-    
+
     return 0;
 
 }
@@ -1058,12 +1058,12 @@ static inline int image_bar_xy_analysis(void *data,
 static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
 {   
     window_node_t *temp = head;
-    
+
     for(;temp != NULL; temp =  temp->next){
         if(temp->order_attr == FREE_ORDER)
             break;
     }
-    
+
     return temp;
 
 }
@@ -1072,16 +1072,16 @@ static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
 static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
 
 {
-    
+
     if(sdk_handle->root == NULL)
         return ;
-   
+
     int ks;
-    
+
     //clear sdk hanlde save mouse check node buf
     for(ks = 0 ; ks < MENU_LEVEL ; ks++)
         sdk_handle->check_node[ks] = NULL;
-    
+
     //set sdk handle last node is mouse not check mode
     for(ks = 0; ks < MENU_LEVEL ; ks ++){
         if(sdk_handle->last_check_node[ks] == NULL)
@@ -1092,13 +1092,13 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
     window_node_t  *node = NULL,*save_node[MENU_LEVEL+1],*ft_stack[MENU_LEVEL] ;
     memset(save_node,0x0,sizeof(void *) * MENU_LEVEL+1);
     int check_cnt = 0,ret = 0,stack_cnt = 1;
-    
+
     ft_stack[0] = sdk_handle->root;
-       
+
     node = sdk_handle->root->s_head;
-     
+
     while ( node  ){
-        
+
         ret = 0; 
         if(node->en_node){
 
@@ -1132,14 +1132,14 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
                 node->check_node = 1;
                 save_node[check_cnt] = node;
                 check_cnt++;
-            
-             printf("check node_id:%c%c%c node:%p check_cnt:%d mouserx:%d mousry;%d \n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
+
+                xw_logsrv_debug("check node_id:%c%c%c node:%p check_cnt:%d mouserx:%d mousry;%d \n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
             }
         }
-        
+
         if(ret > 0  && node->s_head == NULL ){
             break;
-        
+
         }
 
         // if check node have childe node ,than tarlve the son node 
@@ -1153,22 +1153,22 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             node = node->next;
         }
-        
+
         if(node == NULL && stack_cnt > 0 ){
             stack_cnt--;
             node = ft_stack[stack_cnt]->next;
-            
+
             //if sub windows not check ,than those tarlve mouse envet eof       
             if(check_cnt != 0 && node){
-                printf("quit tarlve mouse decitc\n");
-                debug_node_id(node);
+                xw_logsrv_debug("quit tarlve mouse decitc\n");
+                //debug_node_id(node);
                 break;
             }
 
         }
-    
+
     }
-    
+
     // there have a bug ,now the mouse data get a pthread ,poces s another thread 
     if( check_cnt != 0 )
     {
@@ -1178,8 +1178,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
             check_cnt = 0;
         }
     }
-     
-    //printf("########mdata.event:%d\n",mdata.event);
+
     //move top
     window_node_t *temp = NULL;
     int  k;
@@ -1191,11 +1190,11 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         // some scene have bugs.....
         if(mdata.event == GK_MOUSE_OFFSET)
             break;
-        
-    
+
+
 
         node = save_node[k];
-        
+
 
         // the node is head or FIXD node ,not need move 
         if(node == node->f_node->s_head || node->order_attr == FIXD_ORDER )
@@ -1214,9 +1213,9 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         temp = find_frist_free_node(node->f_node->s_head);
         if(temp == NULL)
             continue;
-        printf("move window order\n"); 
+        xw_logsrv_debug("move window order\n"); 
         debug_node_id(node);
-        
+
         node->prev = temp->prev;
         node->next = temp;
         temp->prev = node;
@@ -1225,28 +1224,28 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         else{ 
             node->f_node->s_head = node;
         }
-        
+
         //if the video state is put ,and the freshen not is clear than need update
         if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR
                 && node->en_intersection != 0 ){
             node->freshen_arrt = NEED_FRESHEN;
 
-            printf("##2######mdata.event:%d en_intersectio:%d node_id:%c%c%c \n\n",mdata.event,
+            xw_logsrv_debug("##2######mdata.event:%d en_intersectio:%d node_id:%c%c%c \n\n",mdata.event,
                     node->en_intersection,node->node_id[0],node->node_id[1],
                     node->node_id[2]);
         }
     }
-    
+
     sdk_handle->check_level_cnt = check_cnt;
     //save now mouse check node
     for (k  =  0 ; k < check_cnt ; k++){
         sdk_handle->check_node[k] = save_node[k];
         sdk_handle->check_node[k]->last_event = sdk_handle->mouse_new_data.event;
     }
-    
+
     return  ;
 
- }
+}
 
 static window_func_t inline *get_window_func(window_node_t *node)
 {
@@ -1285,7 +1284,7 @@ static window_func_t inline *get_window_func(window_node_t *node)
 
 static void  _image_window_func_run(void *data)
 {
-    
+
     if(sdk_handle->root->s_head == NULL)
         return;
     window_node_t  *node = NULL ;
@@ -1293,27 +1292,27 @@ static void  _image_window_func_run(void *data)
     //build leave event and run
     window_func_t *funcs = NULL;
     for(k = MENU_LEVEL -1  ; k >= 0; k--){
-        
+
         if(sdk_handle->last_check_node[k] == NULL)
             continue;
-            
+
         node = sdk_handle->last_check_node[k];
-       // printf("node->chcek_node:%d\n",node->check_node);
-        
+        // xw_logsrv_debug("node->chcek_node:%d\n",node->check_node);
+
         if(node->check_node)
             continue;
 
         funcs = get_window_func(node);
         if(funcs->mouse_leave){
-             //printf("func:%s line:%d run leave func %c%c%c \n",
-               //     __func__,__LINE__,node->node_id[0],node->node_id[1],
-                //    node->node_id[2]); 
+            //xw_logsrv_debug("func:%s line:%d run leave func %c%c%c \n",
+            //     __func__,__LINE__,node->node_id[0],node->node_id[1],
+            //    node->node_id[2]); 
             funcs->mouse_leave(funcs->data);
         }
         node->last_event = 0;
         sdk_handle->last_check_node[k] = NULL; 
     }
-    
+
     if(sdk_handle->check_level_cnt == 0)
         return;
     //clear save buf
@@ -1325,17 +1324,17 @@ static void  _image_window_func_run(void *data)
         sdk_handle->check_node[k]->check_node = 0;
         sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
     }
-    
+
 
     //get top event,and only run top window event 
     node = sdk_handle->check_node[sdk_handle->check_level_cnt -1];
-    
+
     //clear levevl save 
     sdk_handle->check_level_cnt = 0; 
-    
+
     if(!node->en_node)
         return;
-    
+
     funcs = get_window_func(node);
     if(funcs == NULL)
         return;
@@ -1367,13 +1366,13 @@ static void  _image_window_func_run(void *data)
             if(funcs->mouse_leave)
                 funcs->mouse_leave(funcs->data);
             break;
-        
+
         case GK_MOUSE_NOTHOR:
             break;
-        
+
         case GK_MOUSE_DEL:
             break;
-        
+
         default:
             break;
     }
@@ -1402,7 +1401,6 @@ static void freshen_image_buttion(void *data){
     uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
 
     if(bt->user_video_freshen){
-      //  printf("__freshen_image_buttion__\n");
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
         bt->this_node->freshen_arrt = NORTHING;
         bt->this_node->video_state = VIDEO_STATE;
@@ -1413,15 +1411,15 @@ static void freshen_image_buttion(void *data){
     int k,i,s;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
-        printf("button clear\n");
+        xw_logsrv_debug("button clear\n");
         for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
             for(i = bt->last_x ;  i < (bt->w + bt->last_x) ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
         bt->this_node->video_state = CLEAR_STATE;
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
-    
-        //printf("freshen button\n");
+
+        //xw_logsrv_debug("freshen button\n");
 
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
@@ -1433,7 +1431,7 @@ static void freshen_image_buttion(void *data){
         for(s = 0 ,k = bt->y ; k < (bt->h + bt->y) ;k++){
             for(i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
                 if(bt->image_cache){
-                  *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
+                    *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
                 }else{
                     *(buf+ sdk_handle->scree_w*k + i) = bt->color;
                 }
@@ -1442,13 +1440,13 @@ static void freshen_image_buttion(void *data){
         bt->last_y = bt->y;
         bt->this_node->video_state = VIDEO_STATE;
     }
-   
+
     bt->this_node->freshen_arrt = NORTHING;
 
 }
 
 #ifdef  XW_GOKE_OPTTIMIZE
-    
+
 static uint8_t  top_menu_video_state = 0 ;
 static uint8_t  main_menu_video_state = 0;
 
@@ -1459,11 +1457,11 @@ static uint8_t  main_menu_video_state = 0;
 
 
 static void freshen_image_menu(void *data){
-    
+
     window_node_menu_t *bt =  (window_node_menu_t *)data;
-    
+
     uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
-    
+
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
@@ -1476,7 +1474,7 @@ static void freshen_image_menu(void *data){
     int k,i ,s;
     //
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
-        printf("clear menu \n");
+        xw_logsrv_debug("clear menu \n");
 
         for(k = bt->last_y ; k < (bt->last_h + bt->last_y) ;k++){
             for(i = bt->last_x ;  i < (bt->last_w + bt->last_x) ; i++ )
@@ -1485,7 +1483,6 @@ static void freshen_image_menu(void *data){
         bt->this_node->video_state = CLEAR_STATE;
 
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
-       // printf("push mune video \n");
         //if open move attr ,need clear before x,y
         if(bt->this_node->move_arrt != NOT_MOVE){
             for(k = bt->last_y ; k < (bt->h + bt->last_y) ;k++){
@@ -1493,32 +1490,32 @@ static void freshen_image_menu(void *data){
                     *(buf+ sdk_handle->scree_w*k + i) = 0;    
             }
         }
-        
+
         for(s = 0 ,k = bt->y ; k < (bt->h + bt->y) ;k++) {
             for(i = bt->x ;  i < (bt->w + bt->x) ; i++,s++ )
             {
-               
+
                 if(bt->image_cache){
-                  *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
+                    *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_cache) +s);    
                 }else{
                     *(buf+ sdk_handle->scree_w*k + i) = bt->color;
                 }
-             
+
             }    
         }
         bt->last_h = bt->h;
         bt->last_w = bt->w;
         bt->last_x = bt->x;
         bt->last_y = bt->y;
-        
+
         bt->this_node->video_state = VIDEO_STATE;
 
     }
 
     bt->this_node->freshen_arrt = NORTHING;
-    
+
     return ;
-       
+
 }
 #ifdef  XW_GOKE_OPTTIMIZE
 
@@ -1529,7 +1526,7 @@ static uint16_t top_x = 0,top_y = 0,top_xd = 0,top_yd = 0 ;
 
 
 static void freshen_image_line(void *data){
-    
+
     int level = 0;
     if(main_menu == NULL){
         level       = node_id_level_re("Aa");
@@ -1539,7 +1536,7 @@ static void freshen_image_line(void *data){
         level       =  node_id_level_re("Ac");
         top_menu    =  find_all_key_node("Ac",level);
     }
-   
+
 
     uint8_t video_state_main = 0,video_state_top = 0;
     window_node_menu_t *mt = NULL;
@@ -1556,7 +1553,7 @@ static void freshen_image_line(void *data){
             main_y = mt->y;
             main_xd = mt->x + mt->w;
             main_yd = mt->h + mt->y;
-            printf("main_x:%d y:%d main_xd:%d main_yd:%d\n",main_x,
+            xw_logsrv_debug("main_x:%d y:%d main_xd:%d main_yd:%d\n",main_x,
                     main_y,main_xd,main_yd);
         }
     }
@@ -1567,20 +1564,20 @@ static void freshen_image_line(void *data){
         if(top_menu->freshen_arrt == NEED_FRESHEN ||
                 top_menu->video_state == VIDEO_STATE)
             video_state_top = 1;
-        
+
         if(top_yd == 0){
             mt = (window_node_menu_t *)top_menu->window;
             top_x = mt->x;
             top_y = mt->y;
             top_xd = mt->w + mt->x;
             top_yd = mt->h + mt->y;
-            printf("main_x:%d y:%d main_xd:%d main_yd:%d top state:%d\n",top_x,
+            xw_logsrv_debug("main_x:%d y:%d main_xd:%d main_yd:%d top state:%d\n",top_x,
                     top_y,top_xd,top_yd, video_state_top);
 
         }
 
     }
-    
+
 
     window_node_line_t *bt =  (window_node_line_t *)data;
     uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
@@ -1601,13 +1598,12 @@ static void freshen_image_line(void *data){
         ho = h;
         wo = bt->last_size;
     }else{
-        
+
         w = bt->end_x - bt->start_x;
         h = bt->size;
         ho = bt->last_size;
         wo = w;
     }
-    //printf("line w:%d h:%d \n ",w,h);
 
     int step_x = 0;
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
@@ -1624,11 +1620,11 @@ static void freshen_image_line(void *data){
                     continue;
                 }
                 //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
-                  //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
+                //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
             }
         }
-        
+
         bt->this_node->video_state = CLEAR_STATE;
 
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
@@ -1665,12 +1661,12 @@ static void freshen_image_line(void *data){
                     continue;
                 }
                 //if(k < top_y && k > top_yd && i < top_x && i > top_xd 
-                  //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
+                //      && k < main_x && k > main_xd && i < main_y && i > main_yd )
 
                 *(buf+ sdk_handle->scree_w*k + i) = bt->color;
             }    
         }
-        
+
         bt->last_x = bt->start_x;
         bt->last_y = bt->start_y;
         bt->last_size = bt->size;
@@ -1682,18 +1678,18 @@ static void freshen_image_line(void *data){
     bt->this_node->freshen_arrt = NORTHING;
     return ;
 }
-       
+
 #else
 static void freshen_image_line(void *data){
-    
+
     window_node_line_t *bt =  (window_node_line_t *)data;
-    
-   uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
-    
+
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
+
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
-                
+
         bt->this_node->freshen_arrt = NORTHING;
         bt->this_node->video_state = VIDEO_STATE;
         return ;
@@ -1706,13 +1702,12 @@ static void freshen_image_line(void *data){
         ho = h;
         wo = bt->last_size;
     }else{
-        
+
         w = bt->end_x - bt->start_x;
         h = bt->size;
         ho = bt->last_size;
         wo = w;
     }
-    //printf("line w:%d h:%d \n ",w,h);
 
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
 
@@ -1720,7 +1715,7 @@ static void freshen_image_line(void *data){
             for(i = bt->last_x ;  i < bt->last_x + wo ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = 0;    
         }
-        
+
         bt->this_node->video_state = CLEAR_STATE;
 
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
@@ -1731,27 +1726,26 @@ static void freshen_image_line(void *data){
                 for(i = bt->last_x ;  i < (bt->last_x + wo)  ; i++ )
                 {
                     //limit rect conut
-                  //  if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
-                            *(buf+ sdk_handle->scree_w*k + i) = 0x0;    
-                
+                    //  if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
+                    *(buf+ sdk_handle->scree_w*k + i) = 0x0;    
+
                 }
             }
         }
 
         for(k = bt->start_y ; k < (h + bt->start_y) ;k++){
             for(i = bt->start_x ;  i < (bt->start_x + w)  ; i++ ){
-               // if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
-                    *(buf+ sdk_handle->scree_w*k + i) = bt->color;
+                // if(!compler_limit_rect_ture(i,k,bt->this_node->limit))
+                *(buf+ sdk_handle->scree_w*k + i) = bt->color;
             }    
         }
-        
+
         bt->last_x = bt->start_x;
         bt->last_y = bt->start_y;
         bt->last_size = bt->size;
 
         bt->this_node->video_state = VIDEO_STATE;
         //debug_node_id(bt->this_node);
-      //  printf("line w:%d h:%d color:%x\n ",w,h,bt->color);
 
     }
     //limit_rect_free(bt->this_node->limit);
@@ -1764,11 +1758,11 @@ static void freshen_image_line(void *data){
 
 
 static void freshen_image_bar(void *data){
-    
+
     window_node_bar_t *bt =  (window_node_bar_t *)data;
-    
-   uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
-    
+
+    uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
+
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
@@ -1790,7 +1784,7 @@ static void freshen_image_bar(void *data){
                 *(buf+ sdk_handle->scree_w*k + i) = 0xFFFF;    
         }
         int vl = bt->w * bt->now_value/bt->max_value;
-        printf("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
+        xw_logsrv_debug("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
                 bt->bar_color);
         for(k = bt->y ; k < (bt->h + bt->y) ;k++){
             for(i = bt->x ;  i < ( bt->x + vl )  ; i++ )
@@ -1798,11 +1792,11 @@ static void freshen_image_bar(void *data){
         }
         bt->last_x = bt->x;
         bt->last_y = bt->y;
-                
+
         bt->this_node->freshen_arrt = NORTHING;
 
     }
-    
+
     return ;
 }
 //need wirte text load lib
@@ -1812,7 +1806,7 @@ static void freshen_image_text(void *data){
     window_node_text_t *bt =  (window_node_text_t *)data;
 
     uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
-    
+
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
@@ -1833,15 +1827,13 @@ static void freshen_image_text(void *data){
                 if(bt->this_node->move_arrt == NOT_MOVE)
                     *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;  
                 else
-                     *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
+                    *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
 
             }  
         }
         bt->this_node->video_state = CLEAR_STATE;
     }else if(bt->this_node->freshen_arrt == NEED_FRESHEN){
-        
-       // printf("bt->last_x:%d y:%d now x:%d y:%d bt->this_node->move:%d \n",bt->last_x,bt->last_y,bt->x,bt->y,
-         //       bt->this_node->move_arrt);
+
         if(bt->last_x != 0 && bt->last_y != 0){
             for(k = bt->last_y ; k < (bt->font_size + bt->last_y) ;k++){
 
@@ -1850,9 +1842,7 @@ static void freshen_image_text(void *data){
                     if(bt->this_node->move_arrt == NOT_MOVE){
                         *(buf+ sdk_handle->scree_w*k + i) = bt->win_color;
 
-                        // printf("X&X&X&X\n");
                     }else{
-                        // printf("X&X&X&X\n");
                         *(buf+ sdk_handle->scree_w*k + i) = 0x0;  
                     }  
                 }
@@ -1866,7 +1856,6 @@ static void freshen_image_text(void *data){
             s = bt->text_cache[nums];
             if(s == '\0')
                 break;
-       //     printf("freshen put c:%c",s);
             text_bit = image_text_lib_put_pixl(&s);
 
             if(text_bit == NULL)
@@ -1882,7 +1871,6 @@ static void freshen_image_text(void *data){
                 }
             }
         }
-     //   printf("\n");
         bt->this_node->video_state = VIDEO_STATE;
         bt->last_x = bt->x;
         bt->last_y = bt->y;
@@ -1897,9 +1885,9 @@ static void freshen_image_text(void *data){
 
 static void freshen_image_mouse(void)
 {
-    
-    
-    
+
+
+
     if(!sdk_handle->mouse_data_updated)
         return  ;
 
@@ -1909,38 +1897,37 @@ static void freshen_image_mouse(void)
     window_node_mouse_t *bt = sdk_handle->mouse;
     uint16_t *buf = (uint16_t *)sdk_handle->mmap_p; 
     int k,i;
- 
+
 #define  MOUSE_LINE_SIZE    2
     //reset data
     //clear
 #if 1
-  //  printf("frensh mouse \n");
     //1.reset data  2.save data 3.push data
-    
+
     uint16_t *savebuf ;
     savebuf =  (uint16_t *)bt->save_cache;
- 
+
     //reset data 
     for(k = bt->y_last + bt->size/2; k < (MOUSE_LINE_SIZE + bt->y_last+bt->size/2) ; k++)
     {
         for(i = bt->x_last ;  i < (bt->size + bt->x_last) ; i++){
             if( *(buf+ sdk_handle->scree_w*k + i) == bt->color )  //if mouse use image ,this need change
-                    *(buf+ sdk_handle->scree_w*k + i) = *savebuf++;
+                *(buf+ sdk_handle->scree_w*k + i) = *savebuf++;
             else
             {
-                    savebuf++; 
-                    //printf(" W :srcecc buf x,y peixl:%u,mouse color:%u\n",*(buf + sdk_handle->scree_w*k +i),bt->color);
+                savebuf++; 
+                //xw_logsrv_debug(" W :srcecc buf x,y peixl:%u,mouse color:%u\n",*(buf + sdk_handle->scree_w*k +i),bt->color);
             }
         }
     }
-    
+
     for(k = bt->x_last + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->x_last+bt->size/2) ; k++)
     {
         for(i = bt->y_last ;  i < (bt->size + bt->y_last) ; i++){
             if(*(buf+ sdk_handle->scree_w*i + k) == bt->color) //if mouse use image ,this need change        
                 *(buf+ sdk_handle->scree_w*i + k) = *savebuf++;
             else{
-              //  printf("H:srecc buf,x,y peixl:%u,mouse color:%u\n",
+                //  xw_logsrv_debug("H:srecc buf,x,y peixl:%u,mouse color:%u\n",
                 //               *(buf + sdk_handle->scree_w*i + k),bt->color);
                 savebuf++;
             }
@@ -1952,7 +1939,7 @@ static void freshen_image_mouse(void)
     for(k = bt->y + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->y+bt->size/2) ; k++)
     {
         for(i = bt->x ;  i < (bt->size + bt->x) ; i++ )
-           *savebuf++  =  *(buf+ sdk_handle->scree_w*k + i);
+            *savebuf++  =  *(buf+ sdk_handle->scree_w*k + i);
     }
     for(k = bt->x + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->x + bt->size/2) ; k++)
     {
@@ -1965,7 +1952,7 @@ static void freshen_image_mouse(void)
     {
         for(i = bt->x ;  i < (bt->size + bt->x) ; i++ ){
             *(buf+ sdk_handle->scree_w*k + i) = bt->color;
-           // printf("mem :%d \n",*(buf + sdk_handle->scree_w*k +i));
+            // xw_logsrv_debug("mem :%d \n",*(buf + sdk_handle->scree_w*k +i));
         }
     }
     for(k = bt->x + bt->size/2 ; k < (MOUSE_LINE_SIZE + bt->x + bt->size/2) ; k++)
@@ -2008,18 +1995,18 @@ static void freshen_image_mouse(void)
 
             *(buf+ sdk_handle->scree_w*k + i) = *(((int16_t *)bt->image_p)+j);    
     }
-   
+
 #endif
     bt->x_last = bt->x;
     bt->y_last = bt->y;
-    
+
     return ;
 }
 
 
 static inline void _image_freshen(window_node_t *node)
 {
-    
+
     if(node->video_attr != OPEN_DISP)
     {
         if(node->freshen_arrt == NEED_CLEAR){
@@ -2029,23 +2016,23 @@ static inline void _image_freshen(window_node_t *node)
         }
         node->freshen_arrt = NORTHING;
         //debug_node_id(node);
-        
+
         return;
     }
-        
+
 
     switch(node->win_type){
-        
+
         case OBJECT_BUTTION:
             freshen_image_buttion(node->window);
             break;
         case OBJECT_MENU:
             freshen_image_menu(node->window);
- 
+
             break;
 
         case OBJECT_LINE:
-             freshen_image_line(node->window);
+            freshen_image_line(node->window);
 
             break;
         case OBJECT_TEXT_WIN:
@@ -2068,13 +2055,11 @@ static void image_freshen_set_sub_freshen(window_node_t *node)
 {
     window_node_t  *temp = node->s_head;
     for(;temp != NULL;temp = temp->next){
-       if((temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
-               || (temp->f_node->video_attr == CLOSE_DISP)){
+        if((temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
+                || (temp->f_node->video_attr == CLOSE_DISP)){
             temp->freshen_arrt = NEED_FRESHEN; 
-            //debug_node_id(temp);
-            //printf("set buf freshen\n");
 
-       }
+        }
     }
     return;
 
@@ -2084,10 +2069,8 @@ static void image_freshen_set_sub_clear(window_node_t *node)
 {
     window_node_t  *temp = node->s_head;
     for(;temp != NULL;temp = temp->next){
-       // if(temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
-            temp->freshen_arrt = NEED_CLEAR;
-            // debug_node_id(temp);
-            // printf("set buf clear\n");
+        // if(temp->video_state != CLEAR_STATE && temp->freshen_arrt ==  NORTHING)
+        temp->freshen_arrt = NEED_CLEAR;
 
     }
     return;
@@ -2096,18 +2079,18 @@ static void image_freshen_set_sub_clear(window_node_t *node)
 
 static inline void image_set_bother_clear_freshen(window_node_t *head)
 {
-   
+
     window_node_t *f_node = head->f_node;
     // if father menu is need disp 
     if(f_node->video_attr == OPEN_DISP && f_node != sdk_handle->root)
     {
-        
+
         f_node->freshen_arrt = NEED_FRESHEN;
         for(;head != NULL;head = head->next)
         {
-            
+
             if( head->freshen_arrt == NEED_CLEAR || (head->video_state == CLEAR_STATE
-                    && head->freshen_arrt != NEED_FRESHEN))
+                        && head->freshen_arrt != NEED_FRESHEN))
             {
                 head->freshen_arrt =  NORTHING;
             }else{  
@@ -2117,7 +2100,7 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
         return;
     }
     // father menu is not disp
-    
+
 
     for(;head != NULL;head = head->next)
     {
@@ -2125,11 +2108,9 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
             if(head->video_state == VIDEO_STATE && head->freshen_arrt != NEED_CLEAR)
             {
                 head->freshen_arrt = NEED_FRESHEN;
-                //printf("++++++set clear ");
-                debug_node_id(head);
             }
         }
-    
+
     }
     return;
 
@@ -2162,13 +2143,13 @@ static void image_clear_video(void)
                     image_set_bother_clear_freshen(node->f_node->s_head); 
 
             }
-            
+
             clear_stack[clear_cnt] = node;
             clear_cnt++;
-            
+
             if(node->s_head != NULL && node->video_attr == CLOSE_DISP)
             {
-               image_freshen_set_sub_clear(node);
+                image_freshen_set_sub_clear(node);
             }
         }
         //clear not need en_submenu
@@ -2191,10 +2172,10 @@ static void image_clear_video(void)
     for(i = 0 ; i < clear_cnt ; i++)
     {
         if(clear_stack[i]->freshen_arrt == NEED_CLEAR)
-             _image_freshen(clear_stack[i]);
+            _image_freshen(clear_stack[i]);
     }
 
-    
+
     return;
 
 }
@@ -2210,12 +2191,12 @@ static inline void image_set_bother_put_freshen(window_node_t *node)
 #endif
 
 
-    
+
     node = node->prev; 
     for( ; node != NULL; node = node->prev)
     {
-        
-            if(node->en_intersection){
+
+        if(node->en_intersection){
 
             if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR)
                 node->freshen_arrt = NEED_FRESHEN;
@@ -2226,12 +2207,12 @@ static inline void image_set_bother_put_freshen(window_node_t *node)
 
 static inline int  find_set_freshen_fnode(window_node_t **savebuf,window_node_t *fnode,int cnt)
 {
-    
+
     int i = 0;
     for(i  = 0 ; i < cnt ;i++)
         if(savebuf[i] == fnode)
             return 1;
-    
+
     return 0;
 }
 
@@ -2241,18 +2222,18 @@ static void  image_put_video(void)
     //tarlve list set all  ,very level only set one times
     if(sdk_handle->root->s_end == NULL)
         return ;
-    
-  
+
+
     window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*save_set[100];
     memset(save_set,0x0,sizeof(void *)* 100);
 
     int stack_cnt = 1,save_cnt = 0;
     ft_stack[0] = sdk_handle->root;
-    
+
     node = sdk_handle->root->s_end;
     //set freshen attr
     while ( node  ){
-      
+
         if(node->en_node && node->freshen_arrt == NEED_FRESHEN )
         {
 
@@ -2272,21 +2253,21 @@ static void  image_put_video(void)
             if(node->en_intersection  
                     && !find_set_freshen_fnode(save_set,node->f_node,save_cnt))
             {
-               // printf("set bother freshen attr fathernode:%p\n",node->f_node);
+                // xw_logsrv_debug("set bother freshen attr fathernode:%p\n",node->f_node);
                 //debug_node_id(node);
                 image_set_bother_put_freshen(node);
                 save_set[save_cnt] = node->f_node;
                 save_cnt++;
             }
 #endif
-          
+
             //freshen now node
-           if(node->f_node == sdk_handle->root){
+            if(node->f_node == sdk_handle->root){
                 _image_freshen(node);
-           }else if(node->f_node->en_node == 1 && node->f_node != sdk_handle->root){
+            }else if(node->f_node->en_node == 1 && node->f_node != sdk_handle->root){
                 _image_freshen(node);
-           }
-           // if have sub window set sub window freshen
+            }
+            // if have sub window set sub window freshen
             if(node->en_submenu && node->s_head != NULL)
                 image_freshen_set_sub_freshen(node);
         }
@@ -2302,11 +2283,11 @@ static void  image_put_video(void)
             stack_cnt--;
             node = ft_stack[stack_cnt]->prev;
         }         
-           
+
     }
 
-    
-    
+
+
     return ;
 
 }
@@ -2315,7 +2296,7 @@ static void  image_put_video(void)
 
 static void  _image_freshen_video(void)
 {
-   
+
     image_clear_video();
     image_put_video();
     freshen_image_mouse();
@@ -2329,7 +2310,7 @@ static void  _image_freshen_video(void)
 
 static  void*   _image_mouse_event_read_thread(void *data)
 {
-    
+
     GK_MOUSE_DATA       mdata;
     memset(&mdata,0x0,sizeof(GK_MOUSE_DATA));
 
@@ -2379,13 +2360,13 @@ static  void*   _image_mouse_event_read_thread(void *data)
 
 static void* _image_sdk_handle_data_process_thread(void *data)
 {
-    
-    
+
+
     int wait_times = 1000*1000 / sdk_handle->disp_fps;
 
     GK_MOUSE_DATA _ldata;
-    
-    
+
+
     while(1)
     {
 
@@ -2426,13 +2407,13 @@ static  int update_param_get(window_node_t *node,struct update_param_save *data)
 {
     data->win_type = node->win_type;
     switch(node->win_type){
-        
+
         case OBJECT_BUTTION:
             data->x         = ((window_node_button_t *)(node->window))->x;
             data->y         = ((window_node_button_t *)(node->window))->y;
             data->end_x     = ((window_node_button_t *)(node->window))->w + data->x;
             data->end_y     = ((window_node_button_t *)(node->window))->h + data->y;
-            
+
             break;
         case OBJECT_MENU:
             data->x         = ((window_node_menu_t *)(node->window))->x;
@@ -2442,7 +2423,7 @@ static  int update_param_get(window_node_t *node,struct update_param_save *data)
             break;
 
         case OBJECT_LINE:
-            
+
             data->x         = ((window_node_line_t *)(node->window))->start_x;
             data->y         = ((window_node_line_t *)(node->window))->start_y;
             data->end_x     = ((window_node_line_t *)(node->window))->end_x;
@@ -2451,7 +2432,7 @@ static  int update_param_get(window_node_t *node,struct update_param_save *data)
                 data->end_x += ((window_node_line_t *)(node->window))->size;
 
             }else{  // row line
-               data->end_y += ((window_node_line_t *)(node->window))->size;
+                data->end_y += ((window_node_line_t *)(node->window))->size;
 
             }
             break;
@@ -2472,24 +2453,24 @@ static  int update_param_get(window_node_t *node,struct update_param_save *data)
         default:
             break;
     }
- 
+
     return 0;
 }
 
 static inline int ab_abs(int a,int b)
 {
-    
+
     return a > b ? a - b : b - a;
 
 }
 
 static int compler_image(window_node_t *node,window_node_t *temp)
 {
-   
+
 #if 1
     if(node->move_arrt != NOT_MOVE && node->win_type == OBJECT_LINE)
     {
-        
+
         node->en_intersection = 1;
         temp->en_intersection = 1;
         return 1;
@@ -2505,17 +2486,17 @@ static int compler_image(window_node_t *node,window_node_t *temp)
 
     y1 = (data_s.end_y - data_s.y)/2 + data_s.y;
     y2 = (data_n.end_y - data_n.y)/2 + data_n.y;
-    
-    //printf("x1:%d y1:%d x2:%d y2:%d \n",x1,y1,x2,y2); 
+
+    //xw_logsrv_debug("x1:%d y1:%d x2:%d y2:%d \n",x1,y1,x2,y2); 
 
     if((ab_abs(x1 , x2) < (data_s.end_x - data_s.x + data_n.end_x - data_n.x)/2) &&
             (ab_abs(y1 , y2) < (data_s.end_y - data_s.y + data_n.end_y - data_n.y)/2)){
-        
+
         node->en_intersection = 1;
         temp->en_intersection = 1;
-        //printf("XXXX%s:line:%d node_id:%c%c%c  temp_id:%c%c%c\n",__func__,__LINE__,
-          //      node->node_id[0],node->node_id[1],node->node_id[2],
-            //    temp->node_id[0],temp->node_id[1],temp->node_id[2] );
+        //xw_logsrv_debug("XXXX%s:line:%d node_id:%c%c%c  temp_id:%c%c%c\n",__func__,__LINE__,
+        //      node->node_id[0],node->node_id[1],node->node_id[2],
+        //    temp->node_id[0],temp->node_id[1],temp->node_id[2] );
         return 1;
     }
     return 0;
@@ -2539,7 +2520,7 @@ static void  compler_intersection_attr(window_node_t *node)
         }    
 
     }
-    
+
     return ;
 
 }
@@ -2548,9 +2529,9 @@ static void  compler_intersection_attr(window_node_t *node)
 
 static void  _image_all_window_comper_intersection_attr(void)
 {
-    
-    
-    
+
+
+
     if(sdk_handle->root->s_head == NULL)
         return ;
 
@@ -2564,9 +2545,9 @@ static void  _image_all_window_comper_intersection_attr(void)
     while ( node  )
     {
         if(node  == node->f_node->s_head){
-            
+
             compler_intersection_attr(node); 
-        
+
         }
         // intersection compler all
         if(/*node->en_submenu &&*/ node->s_head != NULL){
@@ -2582,7 +2563,7 @@ static void  _image_all_window_comper_intersection_attr(void)
         }         
 
     }
-       
+
     return;
 
 
@@ -2609,7 +2590,6 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
     }else{
         ;
     }
-   // printf("temp:%p\n",temp);
 
     struct update_param_save    save;
     limit_rect_t                *limit = NULL ,*templimit = NULL;
@@ -2631,14 +2611,11 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
 
             limit  = (limit_rect_t *)object_pool_get(sdk_handle->limit_rect_pool);
             if(limit == NULL){
-                 //debug_node_id(node);
-                 //debug_node_id(temp);
-                 //printf("limit:%p\n",limit);
+                //debug_node_id(node);
+                //debug_node_id(temp);
                 break;
 
             }
-          //  printf("limit:%p\n",limit);
-
             limit->x = save.x;
             limit->y = save.y;
             limit->end_y = save.end_y ;
@@ -2654,7 +2631,6 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
             }
         }
     }
-    // printf("limit:%p x\n",limit);
 
 #if 0
     // now not count
@@ -2699,15 +2675,15 @@ static int  compler_limit_rect_ture(uint16_t x,uint16_t y,limit_rect_t *limit)
     limit_rect_t *temp = limit;
     for(;temp != NULL; temp =  temp->next){
         if( x >= temp->x && x <= temp->end_x && y >= temp->y && y <= temp->end_y)
-                    return 1; 
+            return 1; 
     }
-    
+
     return 0;
 }
 
 static void inline  limit_rect_free(limit_rect_t *limit)
 {
-    
+
     for(;limit != NULL ; limit = limit->next){
         object_pool_free(sdk_handle->limit_rect_pool,(void * )limit);
         limit->next = NULL;
@@ -2724,20 +2700,20 @@ static void inline  limit_rect_free(limit_rect_t *limit)
 static  pthread_t   mouse_thread_id, process_thread_id;
 void    Image_SDK_Run(void)
 {
-   
 
 
 
-   pthread_create(&mouse_thread_id,NULL,
+
+    pthread_create(&mouse_thread_id,NULL,
             _image_mouse_event_read_thread,NULL);
-    
+
     //set all window intersction attr
-    
-   _image_all_window_comper_intersection_attr();
+
+    _image_all_window_comper_intersection_attr();
 
     pthread_create(&process_thread_id,NULL,
             _image_sdk_handle_data_process_thread,NULL);
-  
+
 #if 1  //block use test
     for(;;)
         sleep(1);
@@ -2755,7 +2731,7 @@ void    Image_SDK_Run(void)
 
 static void*  _image_fb_init(char *dev_path,int *fd)
 {
-    
+
     int     fbHandle = -1;
     void    *fbBuffer = NULL;
 
@@ -2763,7 +2739,7 @@ static void*  _image_fb_init(char *dev_path,int *fd)
     if (fbHandle < 0)
     {
         *fd = -1;
-        perror("open /dev/fb0 error:\n");
+        xw_logsrv_err("open /dev/fb0 error:\n");
         return NULL;
     }
 
@@ -2771,7 +2747,7 @@ static void*  _image_fb_init(char *dev_path,int *fd)
     struct fb_var_screeninfo varInfo;
     if(ioctl(fbHandle, FBIOGET_FSCREENINFO, &fixInfo) < 0)
     {
-        printf("Cannot get fixed screen info\n.");
+        xw_logsrv_err("Cannot get fixed screen info\n.");
         close (fbHandle);
         *fd = -1;
 
@@ -2781,23 +2757,23 @@ static void*  _image_fb_init(char *dev_path,int *fd)
     varInfo.xres = VO_SCREE_W;
     varInfo.yres = VO_SCREE_H;
     varInfo.bits_per_pixel = VO_COLOR_FMT;
-    
+
     if(ioctl(fbHandle, FBIOGET_VSCREENINFO, &varInfo) < 0)
     {
-        printf("Cannot get var screen info\n.");
+        xw_logsrv_err("Cannot get var screen info\n.");
         close (fbHandle);
         *fd = -1;
         return NULL;
     }
-    printf("framebuffer: %d x %d @ %d -- %dbpp\n", varInfo.xres, varInfo.yres,
-                fixInfo.line_length, varInfo.bits_per_pixel);
+    xw_logsrv_debug("framebuffer: %d x %d @ %d -- %dbpp\n", varInfo.xres, varInfo.yres,
+            fixInfo.line_length, varInfo.bits_per_pixel);
 
     fbBuffer = (unsigned short *)mmap(NULL, fixInfo.smem_len,
-                                     PROT_WRITE,  MAP_SHARED, fbHandle, 0);
-    printf("framebuffer addr:0x%08x, len=%d\n", (int)fbBuffer, fixInfo.smem_len);
+            PROT_WRITE,  MAP_SHARED, fbHandle, 0);
+    xw_logsrv_debug("framebuffer addr:0x%08x, len=%d\n", (int)fbBuffer, fixInfo.smem_len);
     if (fbBuffer == MAP_FAILED)
     {
-        printf("Cannot mmap framebuffer memory.");
+        xw_logsrv_err("Cannot mmap framebuffer memory.");
         close (fbHandle);
         *fd = -1;
         return NULL;
@@ -2805,7 +2781,7 @@ static void*  _image_fb_init(char *dev_path,int *fd)
 
     memset(fbBuffer,0x0,fixInfo.smem_len);
     *fd = fbHandle;
-    
+
     return fbBuffer;
 }
 
@@ -2822,7 +2798,7 @@ static void*  _image_fb_deinit(void *mmap_p,int fd)
 }
 static void _image_fb_push(int xoffset,int yoffset){
 
-    
+
     struct fb_var_screeninfo varInfo;
     varInfo.xres_virtual = VO_SCREE_W;
     varInfo.yres_virtual = VO_SCREE_H;
@@ -2830,7 +2806,7 @@ static void _image_fb_push(int xoffset,int yoffset){
     varInfo.xoffset      = xoffset;
     if(ioctl(sdk_handle->mmap_p, FBIOPAN_DISPLAY, &varInfo) < 0)
     {
-        printf("Cannot display Pan\n.");
+        xw_logsrv_err("Cannot display Pan\n.");
         return ;
     }
     return ;

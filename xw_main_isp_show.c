@@ -515,7 +515,6 @@ static int  xw_isp_white_banlance_show(void *data)
     
     char text_buf[10];
     sprintf(text_buf,"%d",xw_isp_p->colortemp_awb);
-    printf("colortemp:%s\n",text_buf);
     Image_SDK_Set_Text_Node_Text(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
     
 
