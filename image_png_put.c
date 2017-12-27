@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <setjmp.h> 
 #include <png.h>
+#include "image_argb_ayuv.h"
+
 //#include "pngconf.h"
 /* Return component 'c' of pixel 'x' from the given row. */
 static unsigned int
@@ -149,7 +151,11 @@ void inline   rgba8888_to_rgba4444(uint32_t *in, uint16_t *put)
     struct argb4444 *y =  (struct argb4444 *)put;
 
 #if 0 //test
-    *((uint32_t *)put ) =  *in;
+        y->r = (x->r >> 5) ;
+        y->g = (x->g >> 4) ;
+        y->b = (x->b >> 5) ;
+        y->a = x->a >> 4;
+
 
 #else 
 
@@ -190,8 +196,11 @@ void inline   rgba8888_to_rgba4444_test(uint32_t *in, uint16_t *put)
 }
 
 
+/*
+ *  flags == 0: ayuv flags == 1: argb4444
+ * */
 
-int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
+int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,uint8_t flags)
 {
     
     if(path == NULL ||  mem == NULL)
@@ -223,9 +232,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
         return -6;
 
     }
-    //printf("test++++++++++++++++++++\n");
-
-    png_uint_32 width, height;
+      png_uint_32 width, height;
     int bit_depth, color_type, interlace_method,compression_method, filter_method;
     png_bytep  row_tmp;
     //init io
@@ -287,24 +294,24 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
                 ystep = xstep = 1;
             }
             
-            printf("ystep:%d xsetp:%d \n",ystep,xstep);
+            //printf("ystep:%d xsetp:%d \n",ystep,xstep);
             for (py = ystart; py < height; py += ystep)
             {
 
                 png_uint_32 px, ppx;
                 //get line;
                 png_read_row(png_ptr, row_tmp, NULL);
-                if(py == 629)
-                    printf("py:%d,px:%d\n",py,px);
-
+                
                 for (px = xstart, ppx = 0; px < width; px += xstep, ++ppx)
                 {
                     //rgba8888 to rbga4444
                     
-                    rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, (uint16_t *)getp);
-                    getp++;
-                   // getp+=2;
+                     image_rgba8888_to_ayuv(*((uint32_t *)row_tmp+ppx),(uint16_t *)getp);
 
+
+                    // rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, (uint16_t *)getp);
+                    getp++;
+               
 #if 1 
                     if(py == 0 && px == 0){
                             
@@ -330,6 +337,5 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w)
     }else{
         png_error(png_ptr, "pngpixel: png_get_IHDR failed");
     }
-   // printf("test++++++++++++++++++++\n");
     return result;
 }
