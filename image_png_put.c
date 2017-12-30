@@ -118,11 +118,81 @@ print_pixel(png_structp png_ptr, png_infop info_ptr, png_const_bytep row,
 struct  rgba8888{
     
     uint8_t     r;
-    uint8_t     b;
     uint8_t     g;
+    uint8_t     b;
     uint8_t     a;
 
 };
+struct rgb8888{
+    uint8_t     r;
+    uint8_t     g;
+    uint8_t     b;
+    uint8_t     a;
+};
+
+struct rgb888{
+    uint8_t     r;
+    uint8_t     g;
+    uint8_t     b;
+};
+struct rgb565{
+    uint16_t    b:5;
+    uint16_t    g:6;
+    uint16_t    r:5;
+};
+
+
+static  uint16_t    rgb888_to_rgb565(uint32_t *incolor)
+{
+    
+    struct rgba8888  temp;
+    temp.r  = ((struct rgb8888 *)incolor)->r;
+    temp.g  = ((struct rgb8888 *)incolor)->g;
+    temp.b  = ((struct rgb8888 *)incolor)->b;
+    temp.a  = 0xff;
+   
+    uint16_t  _rgb;
+    _rgb = ((temp.r << 8 )&0xF800) |(temp.g << 3 & 0x7E0) |(temp.b >> 3);
+    return _rgb;
+
+    
+#if 0
+    struct rgb565  rgb;
+    rgb.r = temp.r >> 3;
+    rgb.g = temp.g >> 2;
+    rgb.b = temp.b >> 3;
+    return *((uint16_t*)&rgb);
+#endif
+}
+static  uint16_t    rgba8888_to_rgb565(uint32_t *incolor)
+{
+    struct rgba8888  temp;
+    temp.r  = ((struct rgb8888 *)incolor)->r;
+    temp.g  = ((struct rgb8888 *)incolor)->g;
+    temp.b  = ((struct rgb8888 *)incolor)->b;
+    temp.a  = 0xff;
+    
+    struct rgb565  rgb;
+    rgb.r = temp.r >> 3;
+    rgb.g = temp.g >> 2;
+    rgb.b = temp.b >> 3;
+    return *((uint16_t*)&rgb);
+
+}
+
+
+static uint32_t     rgb_to_rgba8888(uint32_t  *incolor)
+{
+    
+    struct rgba8888  temp;
+    temp.r  = ((struct rgb8888 *)incolor)->r;
+    temp.g  = ((struct rgb8888 *)incolor)->g;
+    temp.b  = ((struct rgb8888 *)incolor)->b;
+    temp.a  = 0xff;
+    
+    return *((uint32_t*)&temp);
+
+}
 
 struct  argb4444{
 #if 1
@@ -232,7 +302,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
         return -6;
 
     }
-      png_uint_32 width, height;
+    png_uint_32 width, height;
     int bit_depth, color_type, interlace_method,compression_method, filter_method;
     png_bytep  row_tmp;
     //init io
@@ -244,7 +314,10 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
     //malloc row data mem
     row_tmp  = png_malloc(png_ptr, png_get_rowbytes(png_ptr,
                 info_ptr));
-    //get IHDR  info
+    printf("test---------now the rowbytes:%d\n",png_get_rowbytes(png_ptr,info_ptr));
+    int pix_bytes =0 ;
+    pix_bytes ;
+        //get IHDR  info
     if (png_get_IHDR(png_ptr, info_ptr, &width, &height,
                 &bit_depth, &color_type, &interlace_method,
                 &compression_method, &filter_method))
@@ -252,6 +325,8 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
         
         *w = width;
         *h = height;
+        
+        pix_bytes = png_get_rowbytes(png_ptr,info_ptr)/width;
 
 
         int passes, pass;
@@ -269,10 +344,13 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
             default:
                 png_error(png_ptr, "pngpixel: unknown interlace");
         }
+        int need_rgb_to_rgba = 0 ;
+        uint32_t    incolor;
+        uint16_t    color565 = 0;
 
         /* Now read the pixels, pass-by-pass, row-by-row: */
         png_start_read_image(png_ptr);
-
+        
         for (pass=0; pass < passes; ++pass)
         {
 
@@ -294,6 +372,15 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                 ystep = xstep = 1;
             }
             
+        
+
+            if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB){
+                    need_rgb_to_rgba  = 1;
+
+            
+            }
+
+
             //printf("ystep:%d xsetp:%d \n",ystep,xstep);
             for (py = ystart; py < height; py += ystep)
             {
@@ -305,9 +392,20 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                 for (px = xstart, ppx = 0; px < width; px += xstep, ++ppx)
                 {
                     //rgba8888 to rbga4444
-                    
-                     image_rgba8888_to_ayuv(*((uint32_t *)row_tmp+ppx),(uint16_t *)getp);
+                    //incolor = *((uint32_t )row_tmp+ppx);
+                    incolor = *((uint32_t *)(row_tmp+ppx*pix_bytes));
 
+            
+#if 1
+                    if(need_rgb_to_rgba){
+                        incolor = rgb_to_rgba8888(&incolor);
+                    }
+                    image_rgba8888_to_ayuv(incolor,(uint16_t *)getp);
+#else
+                    color565 = rgb888_to_rgb565(&incolor);
+                    image_rgb565_to_ayuv(color565,(uint16_t*)getp);
+
+#endif
 
                     // rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, (uint16_t *)getp);
                     getp++;
@@ -331,7 +429,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                 } 
             } 
         } 
-
+        printf("result:%d\n",result);
         row = NULL;
         png_free(png_ptr, row_tmp);
     }else{

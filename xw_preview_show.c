@@ -7,6 +7,8 @@
 #include "gk_image_sdk_new.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
+#include "image_argb_ayuv.h"
+#include "xw_logsrv.h"
 
 #define  XW_IMAGE_ANY_PEVIEW_WIN_W          1920/2 + 20 
 #define  XW_IMAGE_ANY_PEVIEW_WIN_H          1080/2 + 20
@@ -39,6 +41,45 @@ typedef struct  preview_handle{
 preview_handle_t  *xw_preview_p = NULL;
 
 
+struct argb_4{
+   uint16_t  g:4;
+   uint16_t  r:4;
+   uint16_t  b:4;
+   uint16_t  a:4;
+};
+
+
+static void argb_to_ayuv(uint16_t *argb, uint16_t *ayuv)
+{
+   
+    struct argb_4  *gb = (struct argb_4 *)argb;
+
+    uint8_t y,u,v,r,g,b,a;
+#if 0
+    r = gb->r;
+    g = gb->g;
+    b = gb->b;
+    a = gb->a;
+
+#endif
+#if 1
+    a = (*argb & 0xF000) >> 12;
+    g = (*argb & 0x0F00)  >> 4;
+    b = (*argb & 0x00F0)  >> 0;
+    r = (*argb & 0x0000F) << 4;
+#endif
+    xw_logsrv_debug("a:%d r:%d g:%d b:%d\n",a,r,g,b);
+    y = (( 66 * r + 129 * g +  25 * b + 128) >> 8) +  16;
+    u = ((-38 * r -  74 * g + 112 * b + 128) >> 8) + 128;
+    v = ((112 * r -  94 * g -  18 * b + 128) >> 8) + 128;
+    y >>= 4;
+    u >>= 4;
+    v >>= 4;
+
+    *ayuv = ((a << 12) | (y << 8) | (u << 4) | (v << 0));
+    xw_logsrv_err("ayuv:%x\n",*ayuv);
+    return ;
+}
 
 
 static void any_preview_freshen(void *data,uint16_t *fbbuf,
@@ -65,20 +106,32 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
     if(xw_preview_p->preview_now_state != 1)
         return;
 #if 1 //test mode
-    uint16_t    test_color = 0xf00f;
+    uint16_t    test_color;
+    uint32_t    incolor = 0xff0000ff; //read
 
+
+
+    image_rgba8888_to_ayuv(incolor,&test_color); 
     for(i = 0; i < 4 ; i ++){
         
         nw = i%2;
         nh = i/2;
         if(i == 1){
-            test_color = 0xff00;
-        }else if(i == 2){
-            test_color = 0xf0f0;
-        }else if(i == 3){
-            test_color =0xffff;
-        }
+            incolor = 0xffff0000; //bule 
+            image_rgba8888_to_ayuv(incolor,&test_color); 
         
+            //test_color = 0xff00;
+        }else if(i == 2){
+            incolor = 0xff00ff00; //green
+            image_rgba8888_to_ayuv(incolor,&test_color); 
+            //test_color = 0xf0f0;
+        }else if(i == 3){
+            incolor = 0xffffffff; 
+            image_rgba8888_to_ayuv(incolor,&test_color); 
+            //test_color =0xffff;
+        }
+        xw_logsrv_debug("ayuv:0x%x",test_color);
+
         for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
                 k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++){
             for(j = (mt->x + nw*(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )); 
@@ -134,7 +187,7 @@ static void only_preview_freshen(void *data,uint16_t *fbbuf,
             for(j = mt->x ;j < mt->x + mt->w ;j++)
                 *(fbbuf + scree_w*k + j) = 0x0;
         }
-
+        mt->this_node->video_state = CLEAR_STATE;
         return ;
 
     }
@@ -151,9 +204,12 @@ static void only_preview_freshen(void *data,uint16_t *fbbuf,
             for(j = mt->x ;j < mt->x + mt->w ;j++)
                 *(fbbuf + scree_w*k + j) = *imagep++;;
     }
-    xw_preview_p->preview_buf_big[0] = NULL;
+    xw_logsrv_debug("test xxxxx k:%d j:%d\n",k,j); 
+    mt->this_node->video_state = VIDEO_STATE;
+
+    //xw_preview_p->preview_buf_big[0] = NULL;
     xw_preview_p->big_cnt_nums_last = xw_preview_p->big_cnt_nums;
-    xw_preview_p->big_cnt_nums = 0;
+    //xw_preview_p->big_cnt_nums = 0;
     return ;
 }
 
@@ -175,7 +231,7 @@ static void any_preview_mouse_ldown(void *data){
     }
     xw_preview_p->tv_s = tv1;
 
-    printf("test dbuale check ldown\n");
+    xw_logsrv_debug("test dbuale check ldown\n");
 
     window_node_menu_t *mt  =  (window_node_menu_t *)data;
     
@@ -206,10 +262,13 @@ static void any_preview_mouse_ldown(void *data){
         }else if(n == 3){
             xw_preview_p->preview_buf_big[0] = xw_get_window_png("testprivew-4ID");
         }
+        
 
         xw_preview_p->big_cnt_nums = 1;
 #endif
-            
+        if(xw_preview_p->preview_buf_big[0] == NULL)
+            return ;
+
         // close any preview windows
         Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,NEED_CLEAR);
         Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,0);

@@ -43,7 +43,7 @@ FILE            *xw_isp_fp = NULL;
 #define         XW_ISP_FILE_PATH    "/usr/local/bin/isp.cnf"
 
 
-#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR           0xfeee
+#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR           0xfd88
 #define     XW_ISP_BUTTON_CHCEK_COLOR               0xf0f0
 #define     XW_ISP_BUTTON_H                         10
 #define     XW_ISP_BUTTON_W                         18
@@ -52,15 +52,15 @@ FILE            *xw_isp_fp = NULL;
 #define     XW_VIDEO_SET_BUTTON_H                   45
 #define     XW_VIDEO_SET_BUTTON_W                   45
 
-#define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR             0xfeee
-#define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR             0xf0f0
-#define     XW_VIDEO_SET_BUTTON_OFFSET_COLOR            0xf00f
+#define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR             0xfd88
+#define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR             0xf2e6
+#define     XW_VIDEO_SET_BUTTON_OFFSET_COLOR            0xf45e
 #define     XW_VIDEO_SET_BUTTON_SIZE                    2
 
 
 
-#define     XW_ISP_BAR_WIN_COLOR                    0xfeee
-#define     XW_ISP_BAR_COLOR                        0xf00f
+#define     XW_ISP_BAR_WIN_COLOR                    0xfd88
+#define     XW_ISP_BAR_COLOR                        0xf45e
 #define     XW_ISP_BAR_LINE_H                       6
 #define     XW_ISP_BAR_LINE_W                       120
 #define     XW_ISP_BAR_MAX_VALUE                    100
@@ -68,8 +68,8 @@ FILE            *xw_isp_fp = NULL;
 
 
 
-#define     XW_ISP_BAR_TEXT_WIN_COLOR               0xfeee
-#define     XW_ISP_BAR_TEXT_FONT_COLOR              0xf0f0
+#define     XW_ISP_BAR_TEXT_WIN_COLOR               0xfd88
+#define     XW_ISP_BAR_TEXT_FONT_COLOR              0xf2e6
 
 
 static int  xw_isp_exposure_show(void *data);
