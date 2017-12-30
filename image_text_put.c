@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 #include "image_text_put.h"
-
+#include "xw_logsrv.h"
 
 
 #define  FONT_SIZE_16       16
@@ -74,7 +74,7 @@ int     image_text_lib_init(int text_size,char* text_path)
             _text_handle->asc_width = -1;
             break;
     }
-    printf("test text init _text_handle->asc_width:%d,size:%d\n",_text_handle->asc_width,text_size);
+    xw_logsrv_debug("test text init _text_handle->asc_width:%d,size:%d\n",_text_handle->asc_width,text_size);
 
     if(_text_handle->asc_width < 0)
         goto ERR1;
@@ -145,7 +145,7 @@ uint8_t *   image_text_lib_put_pixl(char *text){
     int stride_bytes =  (_text_handle->asc_width +7)/8;
     int asc_code = *text;
     
-//    printf("put text c:%c uint8_t:%x stride_bytes :%d,_text_handle->asc_width:%d\n", *text,*text,stride_bytes,
+//    xw_logsrv_debug("put text c:%c uint8_t:%x stride_bytes :%d,_text_handle->asc_width:%d\n", *text,*text,stride_bytes,
   //          _text_handle->asc_width);
     int i,ii,iii,k = 0 ;
 

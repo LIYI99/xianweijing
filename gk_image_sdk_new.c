@@ -700,6 +700,22 @@ static window_node_t  *find_all_key_node(char *node_id,int level){
     return temp;
 }
 
+
+
+static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
+{   
+    window_node_t *temp = head;
+
+    for(;temp != NULL; temp =  temp->next){
+        if(temp->order_attr == FREE_ORDER)
+            break;
+    }
+
+    return temp;
+
+}
+
+
 //ok
 int     Image_SDK_Set_Node_Move_Atrr(char *node_id,NODE_MOVE_ARRT _arrt)
 {
@@ -729,8 +745,56 @@ int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
 
         return -2;
     }
-    xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
-    temp->en_node = en;
+    window_node_t   *save = NULL;
+  
+    //move the free node head
+    do{
+        if(en == 0)
+            break;
+        xw_logsrv_err("maybe move this window :%s to free head\n",node_id);
+
+
+#if 0
+#ifdef  XW_GOKE_OPTTIMIZE
+        if(level > 2 && node_id[1] == 'b')
+            break;
+#endif
+#endif
+
+        if(temp->f_node != sdk_handle->root && temp->f_node->order_attr == FIXD_ORDER)
+            break;
+
+
+
+        if(temp->order_attr == FIXD_ORDER)
+            break;
+        if(temp->f_node->s_head == temp)
+            break;
+       // if(temp->prev->order_attr == FIXD_ORDER)
+         //   break;
+        save  = find_frist_free_node(temp->f_node->s_head);
+        if(save == NULL || temp == save)
+            break;
+        temp->prev->next = temp->next;
+        if(temp->next)
+            temp->next->prev = temp->prev;
+        else{
+            temp->f_node->s_end = temp->prev;   
+        }
+        temp->prev = save->prev;
+        if(temp->prev == NULL){
+            temp->f_node->s_head = temp;
+        }else{
+            temp->prev->next = temp;
+        }
+        temp->next = save;
+        save->prev = temp;
+         xw_logsrv_debug("#########move############ node id:%c%c%c level:%d in node_id:%s\n",temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+
+        break;
+    }while(1);
+    
+      temp->en_node = en;
 
     return 0;
 
@@ -767,9 +831,6 @@ int     Image_SDK_Set_Node_Order(char *node_id,NODE_ORDER_ATTR _attr){
 
         return -2;
     }
-    // xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",
-    //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
-
     temp->order_attr = _attr;
 
     return 0;
@@ -788,11 +849,12 @@ int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en){
 
         return -2;
     }
-    // xw_logsrv_debug("find node id:%c%c%c level:%d in node_id:%s\n",
-    //       temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
-
     temp->en_submenu = en;
 
+     xw_logsrv_debug("set en_submenu:%dnode id:%c%c%c level:%d in node_id:%s\n",en,
+           temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
+
+    return ;
 
 
 }
@@ -883,7 +945,7 @@ int     Image_SDK_Set_Line_Node_Param(char *node_id, window_node_line_t  *lt)
     tt->size     = lt->size;
     tt->color    = lt->color;
 
-    temp->f_node->freshen_arrt = NEED_FRESHEN;
+    // temp->f_node->freshen_arrt = NEED_FRESHEN;
 
     return 0;
 
@@ -1054,19 +1116,6 @@ static inline int image_bar_xy_analysis(void *data,
 
 
 
-
-static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
-{   
-    window_node_t *temp = head;
-
-    for(;temp != NULL; temp =  temp->next){
-        if(temp->order_attr == FREE_ORDER)
-            break;
-    }
-
-    return temp;
-
-}
 
 
 static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
@@ -1465,7 +1514,6 @@ static void freshen_image_menu(void *data){
     if(bt->user_video_freshen){
 
         bt->user_video_freshen(data,buf,VO_SCREE_W,VO_SCREE_H);
-        bt->this_node->video_state = VIDEO_STATE;
         bt->this_node->freshen_arrt = NORTHING;
 
         return;
@@ -1781,7 +1829,7 @@ static void freshen_image_bar(void *data){
 
         for(k = bt->y ; k < (bt->h + bt->y) ;k++){
             for(i = bt->x ;  i < (bt->x +bt->w) ; i++ )
-                *(buf+ sdk_handle->scree_w*k + i) = 0xFFFF;    
+                *(buf+ sdk_handle->scree_w*k + i) = 0xFd88;    
         }
         int vl = bt->w * bt->now_value/bt->max_value;
         xw_logsrv_debug("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
@@ -1857,6 +1905,7 @@ static void freshen_image_text(void *data){
             if(s == '\0')
                 break;
             text_bit = image_text_lib_put_pixl(&s);
+            
 
             if(text_bit == NULL)
                 break;
@@ -1871,6 +1920,7 @@ static void freshen_image_text(void *data){
                 }
             }
         }
+
         bt->this_node->video_state = VIDEO_STATE;
         bt->last_x = bt->x;
         bt->last_y = bt->y;
@@ -2061,6 +2111,10 @@ static void image_freshen_set_sub_freshen(window_node_t *node)
 
         }
     }
+    xw_logsrv_debug("&&&&&move############ node id:%c%c%c \n",node->node_id[0],node->node_id[1],node->node_id[2]);
+
+
+
     return;
 
 } 
@@ -2096,6 +2150,7 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
             }else{  
                 head->freshen_arrt = NEED_FRESHEN;
             }
+          
         }
         return;
     }
@@ -2107,6 +2162,7 @@ static inline void image_set_bother_clear_freshen(window_node_t *head)
         if(head->en_intersection){
             if(head->video_state == VIDEO_STATE && head->freshen_arrt != NEED_CLEAR)
             {
+                debug_node_id(head);
                 head->freshen_arrt = NEED_FRESHEN;
             }
         }
@@ -2180,14 +2236,26 @@ static void image_clear_video(void)
 
 }
 
+#ifdef XW_GOKE_OPTTIMEZE
+
+#define     TOP_ID      "Ac"
+#define     MAIN_ID     "Aa"
+#define     ARRY_LINE   "Ab"
+#endif
+
+
 static inline void image_set_bother_put_freshen(window_node_t *node)
 {
 
 
 #ifdef XW_GOKE_OPTTIMIZE
 
+    window_node_t   *temp = node;
+#if 0
     if(node->node_id[1] == 'b')
         return ;
+#endif
+
 #endif
 
 
@@ -2198,8 +2266,15 @@ static inline void image_set_bother_put_freshen(window_node_t *node)
 
         if(node->en_intersection){
 
-            if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR)
-                node->freshen_arrt = NEED_FRESHEN;
+            if(node->video_state == VIDEO_STATE && node->freshen_arrt != NEED_CLEAR){
+            
+#ifdef XW_GOKE_OPTTIMIZE
+            if(node->f_node == sdk_handle->root && (node->node_id[1]== 'c'||
+                        node->node_id[1] == 'a') && temp->node_id[1] == 'b')
+                    continue;
+#endif
+            node->freshen_arrt = NEED_FRESHEN;
+            }
         }    
     }
     return;
@@ -2728,12 +2803,17 @@ void    Image_SDK_Run(void)
 
 
 
+static struct fb_fix_screeninfo fixInfo;
+static struct fb_var_screeninfo varInfo;
+
 
 static void*  _image_fb_init(char *dev_path,int *fd)
 {
 
     int     fbHandle = -1;
     void    *fbBuffer = NULL;
+    
+    
 
     fbHandle = open (dev_path, O_RDWR);
     if (fbHandle < 0)
@@ -2742,10 +2822,8 @@ static void*  _image_fb_init(char *dev_path,int *fd)
         xw_logsrv_err("open /dev/fb0 error:\n");
         return NULL;
     }
-
-    struct fb_fix_screeninfo fixInfo;
-    struct fb_var_screeninfo varInfo;
-    if(ioctl(fbHandle, FBIOGET_FSCREENINFO, &fixInfo) < 0)
+    sdk_handle->video_fd = fbHandle;
+        if(ioctl(fbHandle, FBIOGET_FSCREENINFO, &fixInfo) < 0)
     {
         xw_logsrv_err("Cannot get fixed screen info\n.");
         close (fbHandle);
@@ -2765,6 +2843,7 @@ static void*  _image_fb_init(char *dev_path,int *fd)
         *fd = -1;
         return NULL;
     }
+
     xw_logsrv_debug("framebuffer: %d x %d @ %d -- %dbpp\n", varInfo.xres, varInfo.yres,
             fixInfo.line_length, varInfo.bits_per_pixel);
 
@@ -2778,8 +2857,35 @@ static void*  _image_fb_init(char *dev_path,int *fd)
         *fd = -1;
         return NULL;
     }
-
     memset(fbBuffer,0x0,fixInfo.smem_len);
+   
+
+   #if 0//add test 
+    uint16_t y ,x ;
+    uint16_t *baseAddr = (uint16_t *)fbBuffer;
+    for(y = 0 ;y < varInfo.yres/2;y++){
+        for(x = 0 ;x < varInfo.xres/2; x++){
+            *(baseAddr + x +y*(fixInfo.line_length/2)) = 0xf00f; 
+        }
+        for(; x < varInfo.xres; x++){
+            
+             *(baseAddr + x +y*(fixInfo.line_length/2)) = 0xf0f0; 
+   
+        }
+    
+    }
+    for(; y < varInfo.yres;y++){
+        for(x = 0; x < varInfo.xres/2;x++){
+            *(baseAddr + x +y*(fixInfo.line_length/2)) = 0xff00; 
+        }
+        for(; x < varInfo.xres;x++){
+            *(baseAddr + x + y*(fixInfo.line_length/2)) = 0xffff;
+        }
+    
+    }
+
+#endif
+ 
     *fd = fbHandle;
 
     return fbBuffer;
@@ -2796,15 +2902,12 @@ static void*  _image_fb_deinit(void *mmap_p,int fd)
     close(fd);
     return NULL;
 }
-static void _image_fb_push(int xoffset,int yoffset){
+void Image_Fb_Push(int xoffset,int yoffset){
 
 
-    struct fb_var_screeninfo varInfo;
-    varInfo.xres_virtual = VO_SCREE_W;
-    varInfo.yres_virtual = VO_SCREE_H;
     varInfo.yoffset      = yoffset;
     varInfo.xoffset      = xoffset;
-    if(ioctl(sdk_handle->mmap_p, FBIOPAN_DISPLAY, &varInfo) < 0)
+    if(ioctl(sdk_handle->video_fd, FBIOPAN_DISPLAY, &varInfo) < 0)
     {
         xw_logsrv_err("Cannot display Pan\n.");
         return ;

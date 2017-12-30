@@ -37,7 +37,7 @@ typedef enum {
 
 // V,freshen 
 typedef enum{
-    NORTHING,
+    NORTHING = 0,
     NEED_FRESHEN,
     NEED_CLEAR,
     NEED_SYNC_FATHER, //not use
@@ -281,6 +281,7 @@ typedef struct  image_sdk_s{
 void    Image_SDK_Init(void);
 void    Image_SDK_deInit(void);
 void    Image_SDK_Run(void);
+void    Image_Fb_Push(int xoffset,int yoffset);
 
 
 struct user_set_node_atrr{

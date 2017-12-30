@@ -12,8 +12,8 @@
 #include "xw_logsrv.h"
 //
 #define FONT_SIZE                   16
-#define FONT_WIN_COLOR              0xfeee
-#define FONT_COLOR                  0xf0f0
+#define FONT_WIN_COLOR              0xfd88
+#define FONT_COLOR                  0xf2e6
 
 //
 #define DATE_SET_UP_WINDOW_H        30

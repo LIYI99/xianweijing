@@ -229,8 +229,8 @@
 
 //#define image  preview  window
 
-#define XW_PERVIEW_IMAGE_ANY_WINDOW_X          0
-#define XW_PERVIEW_IMAGE_ANY_WINDOW_Y          0
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_X          400
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_Y          250
 
 #define XW_PERVIEW_IMAGE_ONLY_WINDOW_X         0
 #define XW_PERVIEW_IMAGE_ONLY_WINDOW_Y         0
@@ -240,6 +240,12 @@
 //#define imagessege info window
 #define XW_MESSAGE_PINT_TEXT_WINDOW_X          920
 #define XW_MESSAGE_PINT_TEXT_WINDOW_Y          500
+
+
+//define text prompt box x,y
+#define XW_TEXT_PROMPT_BOX_WINDOW_X            100
+#define XW_TEXT_PROMPT_BOX_WINDOW_Y            100
+
 
 
 

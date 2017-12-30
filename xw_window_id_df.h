@@ -147,6 +147,9 @@
 #define XW_MESSAGE_PINT_TEXT_WINDOW_ID          "Af"
 
 
+//define prompt_box id
+
+#define XW_TEXT_PROMPT_BOX_WINDOW_ID            "Ag"
 
 
 
