@@ -28,7 +28,7 @@ int     iamge_zoom_func(image_zoom_t *data)
         outrow = data->outbuf + dy * data->outwidth;
         inrow  = data->inbuf  + sy * data->inwidth;
 
-        for(dx = 0 ;dx < data->inwidth ;dx++)
+        for(dx = 0 ;dx < data->outwidth ;dx++)
         {
             sx = (dx *  xz) >> 16;
             outrow[dx] = inrow[sx];

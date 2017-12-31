@@ -214,7 +214,7 @@ static int  xw_isp_exposure_show(void *data)
     int                         ret = 0 ;
 
     memset(&_bt,0x0,sizeof(window_node_button_t));
-    memset(&_attr,0x0,sizeof(window_node_button_t));
+    memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     memset(&_bar,0x0,sizeof(window_node_bar_t));
     memset(&_text,0x0,sizeof(window_node_text_t));
     _attr.en_node = 1;
@@ -247,7 +247,7 @@ static int  xw_isp_exposure_show(void *data)
     _bar.max_value = XW_ISP_BAR_MAX_VALUE;
     _bar.video_set.mouse_left_down = xw_isp_exposure_manul_ldown;
     memcpy(_bar.text_id,XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID));
-    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ) );
+    memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ));
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  AE manul text
 
