@@ -151,6 +151,7 @@
 
 #define XW_TEXT_PROMPT_BOX_WINDOW_ID            "Ag"
 
+#define XW_TEXT_TIME_CNT_BOX_WINDOW_ID          "Ah"
 
 
 

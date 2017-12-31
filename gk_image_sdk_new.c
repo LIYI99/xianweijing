@@ -44,16 +44,19 @@ image_sdk_t         *sdk_handle = NULL;
 
 static void*  _image_fb_init(char *dev_path,int *fd);
 static void*  _image_fb_deinit(void *mmap_p,int fd);
-static void   _image_fb_push(int xoffset,int yoffset);
+//static void   _image_fb_push(int xoffset,int yoffset);
+
+//findkey
+static int      node_id_level_re(const char *node_id);
 
 // mouse image load
 static void     _image_mouse_image_load(window_node_mouse_t *mouse);
 static void     _image_mouse_image_deload(window_node_mouse_t *mouse);
-
 static void*    _image_mouse_event_read_thread(void *data);
 
+
 //handle data proess
-static void*    _image_sdk_handle_data_process(void *data);
+//static void*    _image_sdk_handle_data_process(void *data);
 
 //prcoess node limit rect func
 static int  get_limit_rect_for_node_freshen(window_node_t *node);
@@ -272,13 +275,18 @@ void    Image_SDK_deInit(void)
 
 
 //ok
-static int inline  node_id_level_re(char *node_id){
-
+static int   node_id_level_re(const char *node_id)
+{
+ 
+    //return 0;
+    if(node_id == NULL)
+        return -1;
     int i;
     for(i = 0 ;i  < MENU_LEVEL ; i++){
-        if(node_id[i] < 'A'  || node_id[i] > 'z' )
-            break;
+        if(node_id[i] < 'A'   || node_id[i] > 'z' )
+                break;
     }
+
     return i;
 }
 //ok
@@ -296,10 +304,12 @@ static inline window_node_t  *key_find_node(window_node_t *father,char key,int l
     return temp;
 }
 //ok
-static window_node_t  *find_father_node(char *node_id,int level){
+static  window_node_t  *find_father_node(char *node_id,int level){
 
-    if(level == 2)
+    if(level == 2){
+        xw_logsrv_debug("return father node:%p\n",sdk_handle->root);
         return sdk_handle->root;
+    }
 
     window_node_t *temp  = sdk_handle->root;
 
@@ -314,10 +324,15 @@ static int  window_node_inster(window_node_t *node){
 
     int level ;
     //get window level
+    if(!node)
+        return -1;
+
     level = node_id_level_re(node->node_id);
     if(level < 2){
-        xw_logsrv_err(" node_id write erro node->node_id:%c%c%c\n",node->node_id[0],
-                node->node_id[1],node->node_id[2]);
+        xw_logsrv_err("inster node:%p,inster node node_id:%p\n",node,node->node_id);
+       // xw_logsrv_err(" node_id write erro node->node_id:%c%c%c\n",node->node_id[0],
+         //       node->node_id[1],node->node_id[2]);
+         
         return -1;
     }
 
@@ -326,7 +341,8 @@ static int  window_node_inster(window_node_t *node){
     window_node_t *ftemp = NULL,*same = NULL;
     ftemp = find_father_node(node->node_id,level);
     if(ftemp == NULL){
-        xw_logsrv_err("not find father node \n");
+        xw_logsrv_err("not find father node ftemp:%p sdk_handle->root:%p level:%d\n",ftemp,
+                sdk_handle->root,level);
         return -2;
     }
     //find same window
@@ -381,12 +397,12 @@ int    Image_SDK_Create_Button( struct user_set_node_atrr attr,
         return -5;
     }
 
-    memcpy(lq->node_id ,attr.node_id,MENU_LEVEL);
+    memcpy((void *)lq->node_id ,(void *)attr.node_id,MENU_LEVEL);
     int ret = 0;
     ret = window_node_inster(lq); 
     if(ret < 0 ){
-        object_pool_free(sdk_handle->window_node_pool,lq);
-        object_pool_free(sdk_handle->object_pool,button);
+        object_pool_free(sdk_handle->window_node_pool,(void *)lq);
+        object_pool_free(sdk_handle->object_pool,(void *)button);
         return -6;
     }
 
@@ -741,7 +757,7 @@ int     Image_SDK_Set_Node_En(char *node_id,uint8_t en)
     temp =  find_all_key_node(node_id,level);
     if(temp == NULL)
     {
-        xw_logsrv_err("not find this window :%s \n",node_id);
+        xw_logsrv_err("not find this window :%s level:%d\n",node_id,level);
 
         return -2;
     }
@@ -854,7 +870,7 @@ int     Image_SDK_Set_Node_Submenu(char *node_id,uint8_t en){
      xw_logsrv_debug("set en_submenu:%dnode id:%c%c%c level:%d in node_id:%s\n",en,
            temp->node_id[0],temp->node_id[1],temp->node_id[2],level,node_id);
 
-    return ;
+    return 0 ;
 
 
 }
@@ -1639,7 +1655,7 @@ static void freshen_image_line(void *data){
 
 #endif
 
-    int k,i,h,w,ho,wo,ret = 1;
+    int k,i,h,w,ho,wo;
     if(bt->start_x  == bt->end_x){
         h = bt->end_y - bt->start_y;
         w = bt->size;
@@ -1653,7 +1669,7 @@ static void freshen_image_line(void *data){
         wo = w;
     }
 
-    int step_x = 0;
+    //int step_x = 0;
     if(bt->this_node->freshen_arrt  == NEED_CLEAR){
 
         for(k = bt->last_y ; k < bt->last_y + ho ;k++){
@@ -2180,7 +2196,7 @@ static void image_clear_video(void)
         return ;
 
 
-    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*clear_stack[100],*last_set_inter = NULL;
+    window_node_t *node = NULL,*ft_stack[MENU_LEVEL],*clear_stack[100];
     int stack_cnt = 1,clear_cnt = 0;
     ft_stack[0] = sdk_handle->root;
     node = sdk_handle->root->s_head;
@@ -2654,7 +2670,7 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
 
     if( node->video_attr == CLOSE_DISP)
         return -2;
-    window_node_t *temp = NULL,*temp2;
+    window_node_t *temp = NULL,*temp2 = NULL;
 
     if(node->f_node == sdk_handle->root || node->f_node->video_attr != CLOSE_DISP)
     {

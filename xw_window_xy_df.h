@@ -243,11 +243,12 @@
 
 
 //define text prompt box x,y
-#define XW_TEXT_PROMPT_BOX_WINDOW_X            100
-#define XW_TEXT_PROMPT_BOX_WINDOW_Y            100
+#define XW_TEXT_PROMPT_BOX_WINDOW_X            900
+#define XW_TEXT_PROMPT_BOX_WINDOW_Y            500
 
 
-
+#define XW_TEXT_TIME_CNT_BOX_WINDOW_X               50
+#define XW_TEXT_TIME_CNT_BOX_WINDOW_Y               50
 
 
 
