@@ -3,6 +3,13 @@
 
 
 int  xw_main_isp_show(void *data);
+int  xw_main_isp_quit_show(void *data);
+
+
+
+
+int  xw_main_isp_save_param(char *path);
+
 
 
 

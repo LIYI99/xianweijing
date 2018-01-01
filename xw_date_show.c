@@ -28,6 +28,7 @@
 
 
 
+
 typedef enum{
    DATE_WINDOW_RUNING = 0,
    DATE_WINDOW_SET,
@@ -203,6 +204,7 @@ static void usr_push_video_button_set(void *data ,uint16_t *fbbuf,int scree_w ,i
 }
 
 
+static uint8_t  need_quit_thread = 0;
 
 //need thread mode run
 void*   xw_date_show(void *data)
@@ -216,7 +218,7 @@ void*   xw_date_show(void *data)
     node_attr.move_arrt     = 0;
 
     //set English font size
-    int  size_w = FONT_SIZE/2 ,size_h = FONT_SIZE, ret = 0;
+    int  size_w = FONT_SIZE/2 ,size_h = FONT_SIZE,ret = 0 ;
     
     //year
     memcpy(node_attr.node_id,XW_DATE_YEAR_WINDOW_ID,strlen(XW_DATE_YEAR_WINDOW_ID));
@@ -331,14 +333,17 @@ void*   xw_date_show(void *data)
     struct  tm  *time_now,last_time;
     memset(&last_time,0x0,sizeof(struct tm));
     
-    char    *year       = (char *)malloc(32);
+    char year[32];
+    memset(year,0x0,32);
+
     last_time.tm_mon    = 13;
     last_time.tm_hour   = 25;
     last_time.tm_min    = 61;
 
     while(1)
     {
-        
+        if(need_quit_thread != 0)
+            break;
         // at set timeing ,stop show   
         time(&tp);
         time_now = localtime(&tp);
@@ -380,23 +385,33 @@ void*   xw_date_show(void *data)
         last_time =  set_time;
         usleep(100000);
     }
-    
-    return;
+    need_quit_thread = 0;  
+    return NULL;
+
 
 }
 
 pthread_t   xw_date_id;
 
-void  xw_date_show_thread(void )
+int  xw_date_show_thread(void *data )
 {
     
     pthread_create(&xw_date_id,NULL,
             xw_date_show,NULL);
 
-    return;
-
+    return 0;
 }
 
+int     xw_date_quit_thread(void *data)
+{
+    need_quit_thread = 1;
+    pthread_join(xw_date_id,NULL);
+    need_quit_thread = 0;
+
+    
+    return 0;
+
+}
 
 
 

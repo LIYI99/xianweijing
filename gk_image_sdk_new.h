@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "gk_mouse_event.h"
 #include "object_pool.h"
+#include "xbuddy_mempool.h"
 
 #ifdef __cplusplus
     extern "C"{
@@ -244,8 +245,14 @@ typedef struct window_node_mouse{
 
 
 typedef struct  image_sdk_s{
-         
-    uint16_t        en;
+ 
+#define     SDK_WORK_STATE_QUIT     0
+#define     SDK_WORK_STATE_RUN      1
+#define     SDK_WORK_STATE_STOP     2
+    uint8_t         en;
+    uint8_t         mouse_thread_state;
+    uint8_t         event_thread_state;
+
     //video params
     uint16_t        scree_w;
     uint16_t        scree_h;
@@ -266,6 +273,7 @@ typedef struct  image_sdk_s{
     object_pool_t   *window_node_pool;
     object_pool_t   *object_pool;
     object_pool_t   *limit_rect_pool;
+    struct buddy_mem_s  *mems;
     
     //mouse check node record
     window_node_t   *last_check_node[MENU_LEVEL];
@@ -281,6 +289,8 @@ typedef struct  image_sdk_s{
 void    Image_SDK_Init(void);
 void    Image_SDK_deInit(void);
 void    Image_SDK_Run(void);
+int     Image_SDK_Reset(void);
+
 void    Image_Fb_Push(int xoffset,int yoffset);
 
 
@@ -303,6 +313,8 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
         window_node_text_t _text);
 int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
         window_node_bar_t _bar);
+
+int     Image_SDK_Destory_node(char *node_id);
 
 
 int     Image_SDK_Set_Button_Color(char *node_id ,uint16_t color);

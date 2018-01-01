@@ -7,6 +7,9 @@ void   xw_png_destory(void);
 
 uint16_t *xw_get_window_png(char *window_id);
 void  xw_get_png_hw(char *window_id,uint16_t *w,uint16_t *h);
+void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color);
+
+
 
 
 

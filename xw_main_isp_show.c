@@ -1208,12 +1208,14 @@ int  xw_main_isp_save_param(char *path)
 }
 
 
-int  xw_main_isp_de_show(void *data){
+int  xw_main_isp_quit_show(void *data){
 
-    
-    fclose(xw_isp_fp);
+    if(xw_isp_fp)  
+        fclose(xw_isp_fp);
+    xw_isp_fp = NULL;
+    if(xw_isp_p)
+        free(xw_isp_p);
     xw_isp_p = NULL;
-    free(xw_isp_p);
     return 0;
 
 }

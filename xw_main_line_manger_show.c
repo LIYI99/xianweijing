@@ -46,7 +46,7 @@ static void xw_line_show_button_ldow(void *data)
 
 #define     XW_LINE_MANGER_BUTTON_OFFSET_COLOR      0xf00f
 #define     XW_LINE_MANGER_BUTTON_LDOWN_COLOR       0xf0f0
-#define     XW_LINE_MANGER_BUTTON_LEAVE_COLOR       0xfeee
+#define     XW_LINE_MANGER_BUTTON_LEAVE_COLOR       0xfd88
 
 #define     XW_LINE_MANGER_BUTTON_SIZE              2
 
@@ -467,4 +467,11 @@ int  xw_main_line_manger_show(void *data)
     return 0;
 
 }
+int xw_main_line_quit_show(void *data)
+{
+  if(arry_set) 
+    free(arry_set );
 
+    return 0;
+
+}

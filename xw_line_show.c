@@ -140,7 +140,8 @@ static int  xw_line_t_init(void){
     if(xw_lt == NULL)
         return -1;
     memset(xw_lt,0x0,sizeof(xw_lines_t));
-    
+
+
     int ret = -1;
 
     if(XW_LINE_T_SAVEFILE_PATH != NULL)
@@ -151,6 +152,7 @@ static int  xw_line_t_init(void){
     if(ret == 0)
         return 0;
 
+
     
 
     //if not load conf file else need init all config mem
@@ -160,7 +162,7 @@ static int  xw_line_t_init(void){
         for(i = 0; i < XW_LINE_NUMS_MAX; i++)
         {
             xw_lt->lines[k][i]._attr.en_node              = 1;
-            xw_lt->lines[k][i]._attr.en_freshen           = 0;
+            xw_lt->lines[k][i]._attr.en_freshen           = NEED_CLEAR;
             xw_lt->lines[k][i]._attr.mouse_garp_reflect   = OFFSET_REFLECT | LDOWN_REFLECT|LUP_REFLECT;
             xw_lt->lines[k][i]._attr.move_arrt            = MOUSE_LDOWN_MOVE;
         }
@@ -287,7 +289,7 @@ void xw_line_show_all(void *data)
     _text.lens = 2;
 
     //ceate all line  add text win
-    int  i = 0,size_w = FONT_SIZE/2 ,size_h = FONT_SIZE;
+    int  i = 0;
     char text_buf[4];
 
     for(i = 0 ; i < XW_LINE_NUMS_MAX  ; i++ )
@@ -417,6 +419,7 @@ int  xw_lines_arry_set_order(uint16_t set_order)
                 xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.start_x,  xw_lt->lines[xw_lt->now_order][xw_lt->line_order].line.start_y );
 
     
+    Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
 
     return ret;
 }
@@ -434,13 +437,16 @@ int     xw_lines_cl_op_all(void *data)
         Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID ,1);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,1);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
+
         xw_lt->line_arry_state = 1;
+        xw_logsrv_debug("xw_lines_cl_op_all: enbale liens \n");
     }else{
 
         Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
         xw_lt->line_arry_state= 0;
+        xw_logsrv_debug("xw_lines_cl_op_all:disebe lines\n");
     }
     
     return 0;
@@ -457,7 +463,7 @@ int     xw_lines_close_all_root(void *data)
         xw_lt->lock = 0;
 
     Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);
-    //Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
+    Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,0);
     Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
     xw_lt->line_arry_state= 0;
     
@@ -524,6 +530,20 @@ int     xw_lines_set_lock(uint8_t  line_order)
         xw_lt->lock = 0;
     }
     return 0;
+}
+
+void    xw_line_quit_all(void *data){
+    
+    if(xw_fp != NULL)
+        fclose(xw_fp);
+
+    
+    if(xw_lt != NULL)
+        free(xw_lt);
+    
+    return ;
+
+
 }
 
 

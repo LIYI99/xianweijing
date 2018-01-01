@@ -40,7 +40,8 @@
 
 
 
-image_sdk_t         *sdk_handle = NULL;
+image_sdk_t             *sdk_handle = NULL;
+static  pthread_t       mouse_thread_id, process_thread_id;
 
 static void*  _image_fb_init(char *dev_path,int *fd);
 static void*  _image_fb_deinit(void *mmap_p,int fd);
@@ -81,15 +82,24 @@ static void     _image_mouse_image_load(window_node_mouse_t *mouse)
 #define     MOUSE_IMAGE_PATH_2  NULL
 
     //16bit color
-    mouse->image_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
+    //
+    mouse->image_cache = (char *)buddymem_alloc(sdk_handle->mems, mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
+    if(mouse->image_cache == NULL){
+        xw_logsrv_err("the sdk mempool not ougeht\n");
+        //mouse->image_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
+    }
     if(mouse->image_cache == NULL)
     {
         
         xw_logsrv_err("mouse load fail ");
         return ;
     }
-
-    mouse->save_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt/8);
+     
+    mouse->save_cache = (char *)buddymem_alloc(sdk_handle->mems, mouse->size *mouse->size * sdk_handle->color_fmt / 8 *2);
+    if(mouse->save_cache == NULL){
+         xw_logsrv_err("the sdk mempool not ougeht\n");
+        // mouse->save_cache = (char *)malloc(mouse->size *mouse->size * sdk_handle->color_fmt/8)
+    }
 
 
     int i,k,j,r;
@@ -140,9 +150,10 @@ static void     _image_mouse_image_deload(window_node_mouse_t *mouse)
     if(mouse == NULL)
         return;
 
-
-    free(mouse->image_cache);
-    free(mouse->save_cache);
+    buddymem_free(sdk_handle->mems, mouse->image_cache);
+    buddymem_free(sdk_handle->mems, mouse->save_cache);
+    //free(mouse->image_cache);
+    //free(mouse->save_cache);
 
     return ;
 
@@ -198,12 +209,20 @@ void    Image_SDK_Init(void){
 
     if(sdk_handle->object_pool == NULL)
         goto ERR3;
-
+    
+    //now not use
+#if 0
     sdk_handle->limit_rect_pool  =  object_pool_create(sizeof(limit_rect_t),DISP_OBJ_MAX+1,NULL);
     if(sdk_handle->limit_rect_pool == NULL)
         goto ERR4;
+#endif
 
+#define     SDK_MEM_BLOCK_SIZE      128
+#define     SDK_MEM_BLOCK_NUMS      1024
 
+    sdk_handle->mems = buddymem_create(SDK_MEM_BLOCK_SIZE,SDK_MEM_BLOCK_NUMS );
+    if(sdk_handle->mems == NULL)
+        goto ERR4;
 
     //init root node
     window_node_t *root = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
@@ -214,7 +233,9 @@ void    Image_SDK_Init(void){
     xw_logsrv_debug("window root:%p\n",root);
     //add mouse window node
     window_node_mouse_t *mouse = NULL;
-    mouse = (window_node_mouse_t *)malloc(sizeof(window_node_mouse_t));
+    
+    //mouse = (window_node_mouse_t *)malloc(sizeof(window_node_mouse_t));
+    mouse = (window_node_mouse_t *)buddymem_alloc(sdk_handle->mems,sizeof(window_node_mouse_t));
     if(mouse == NULL){
         xw_logsrv_err("fisrt get obj fail???\n");
     }
@@ -259,15 +280,28 @@ void    Image_SDK_deInit(void)
 {
     if(sdk_handle == NULL)
         return;
-    _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
-
-    if(sdk_handle->mouse_fd > 0)
-        gk_mouse_close(sdk_handle->mouse_fd); 
-
+    sdk_handle->en = 0;
+    
+    //free thread
+    pthread_join(mouse_thread_id,NULL);
+    pthread_join(process_thread_id,NULL);
+    //close font lib
+    image_text_lib_deinit();
+    //free object pool
     object_pool_destory(sdk_handle->window_node_pool);
     object_pool_destory(sdk_handle->object_pool);
+    //free mouse buf
     _image_mouse_image_deload(sdk_handle->mouse);
-    free(sdk_handle->mouse);
+    //free(sdk_handle->mouse);
+    
+    //free mem pool
+    buddymem_destroy(sdk_handle->mems);
+
+    //close dev
+    _image_fb_deinit(sdk_handle->mmap_p,sdk_handle->video_fd);
+    if(sdk_handle->mouse_fd > 0)
+        gk_mouse_close(sdk_handle->mouse_fd); 
+    //frre sdk handle
     free(sdk_handle);
     sdk_handle = NULL;
     return;
@@ -614,10 +648,12 @@ int    Image_SDK_Create_Text(struct user_set_node_atrr attr,
     text->font_size = font_size;
 
     //need change mem pool;
-#if 1
-    text->text_cache = (char *)malloc(text->lens +1); //save text 
+
+    //text->text_cache = (char *)malloc(text->lens +1); //save text 
+    text->text_cache   = (char *)buddymem_alloc(sdk_handle->mems, text->lens+1);
+
+
     memset(text->text_cache,0x0,text->lens + 1);
-#endif
 
     if(_text.video_set.data == NULL)
         text->video_set.data  = (void *)text;
@@ -701,6 +737,7 @@ int    Image_SDK_Create_Bar(struct user_set_node_atrr attr,
 }
 
 
+
 //ok
 static window_node_t  *find_all_key_node(char *node_id,int level){
 
@@ -729,6 +766,25 @@ static  inline  window_node_t    *find_frist_free_node(window_node_t *head)
 
     return temp;
 
+}
+
+int     Image_SDK_Destory_node(char *node_id)
+{
+    int level = 0;
+    level = node_id_level_re(node_id);
+    window_node_t *temp = NULL;
+    temp =  find_all_key_node(node_id,level);
+    if(temp == NULL){
+        xw_logsrv_err("func:%s line:%d not find the node:%s\n",__func__,__LINE__,node_id);
+        return -2;
+    }
+
+    if(temp->window)
+        object_pool_free(sdk_handle->object_pool,temp->window);
+    object_pool_free(sdk_handle->object_pool,(void *)temp);
+    
+    return 0;
+    
 }
 
 
@@ -2410,8 +2466,19 @@ static  void*   _image_mouse_event_read_thread(void *data)
     tv.tv_sec = 1;
     tv.tv_usec = 0 ;
     int                 retval = 0;
+    sdk_handle->mouse_thread_state = 1;
     while(1)
     {
+        //quit
+        if(sdk_handle->en == SDK_WORK_STATE_QUIT)
+            break;
+        if(sdk_handle->en == SDK_WORK_STATE_STOP){
+            usleep(100000);
+            sdk_handle->mouse_thread_state = SDK_WORK_STATE_STOP;
+            continue;
+        }
+        sdk_handle->mouse_thread_state = SDK_WORK_STATE_RUN;
+
 
         //host instret mouse
         if (sdk_handle->need_restart_mouse)
@@ -2445,6 +2512,8 @@ static  void*   _image_mouse_event_read_thread(void *data)
             sleep(1);
         }
     }
+    
+    sdk_handle->mouse_thread_state = 0;
 
     return NULL;
 }
@@ -2457,9 +2526,19 @@ static void* _image_sdk_handle_data_process_thread(void *data)
 
     GK_MOUSE_DATA _ldata;
 
+    sdk_handle->event_thread_state = 1;
 
     while(1)
     {
+        //quit
+        if(sdk_handle->en == SDK_WORK_STATE_QUIT)
+            break;
+        if(sdk_handle->en == SDK_WORK_STATE_STOP){
+            sdk_handle->event_thread_state = SDK_WORK_STATE_STOP;
+            usleep(100000);
+            continue;
+        }
+        sdk_handle->event_thread_state = SDK_WORK_STATE_RUN;
 
         if(sdk_handle->mouse_data_updated){
 
@@ -2480,6 +2559,7 @@ static void* _image_sdk_handle_data_process_thread(void *data)
 
         _image_freshen_video();
     }
+    sdk_handle->event_thread_state = 0;
 
     return NULL;
 
@@ -2788,12 +2868,11 @@ static void inline  limit_rect_free(limit_rect_t *limit)
 
 
 
-static  pthread_t   mouse_thread_id, process_thread_id;
 void    Image_SDK_Run(void)
 {
 
 
-
+    sdk_handle->en = 1;
 
     pthread_create(&mouse_thread_id,NULL,
             _image_mouse_event_read_thread,NULL);
@@ -2805,7 +2884,7 @@ void    Image_SDK_Run(void)
     pthread_create(&process_thread_id,NULL,
             _image_sdk_handle_data_process_thread,NULL);
 
-#if 1  //block use test
+#if 0  //block use test
     for(;;)
         sleep(1);
     pthread_join(mouse_thread_id,NULL);
@@ -2932,6 +3011,29 @@ void Image_Fb_Push(int xoffset,int yoffset){
 }
 
 
+int     Image_SDK_Reset(void)
+{
+    
+    sdk_handle->en = SDK_WORK_STATE_STOP;
+    while(sdk_handle->mouse_thread_state != SDK_WORK_STATE_STOP)
+        usleep(100000);
+    while(sdk_handle->event_thread_state != SDK_WORK_STATE_STOP)
+        usleep(100000);
+    
+    sdk_handle->root = NULL;
+    
+    object_pool_reset(sdk_handle->object_pool);
+    object_pool_reset(sdk_handle->window_node_pool);
+    //init root node
+    window_node_t *root = (window_node_t *)object_pool_get(sdk_handle->window_node_pool);
+    memset(root, 0x0 ,sizeof(window_node_t));
+    memcpy(root->node_id,"A",1);
+    root->en_node = 1;
+    sdk_handle->root = root;
+    sdk_handle->en = SDK_WORK_STATE_RUN;
+
+    return 0;
+}
 
 
 

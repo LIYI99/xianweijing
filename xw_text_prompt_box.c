@@ -36,12 +36,13 @@ static uint16_t *errfontsrc = NULL, *errwindow_cache = NULL,*timecntfontsrc = NU
 
 static  struct timeval  prompt_tv,time_cnt_tv;
 static  uint16_t        prompt_sec = 0,time_cnt_sec = 0;
-static pthread_t        xw_promt_box_id;
+static  pthread_t       xw_promt_box_id;
+static  uint8_t         xw_promt_quit  = 0;
 
 
 static void*    prompt_box_manger(void *data);
 
-int xw_text_prompt_box(void*data)
+int xw_text_prompt_box_show(void*data)
 {
      
     errfontsrc = (uint16_t *)malloc(sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
@@ -272,7 +273,9 @@ static void*    prompt_box_manger(void *data)
     int     timecnt = 0 ;
     char    timebuf[TIME_CNT_WINDOW_NUMS + 1];
     while(1){
-        
+       if(xw_promt_quit)
+           break;
+
         gettimeofday(&tv,NULL);
         if(tvp.tv_sec == 0){
             tvp = tv;
@@ -315,6 +318,19 @@ static void*    prompt_box_manger(void *data)
     }
     return NULL;   
 }
+int xw_text_prompt_box_quit(void*data){
+    
+    xw_promt_quit = 1;
+    pthread_join(xw_promt_box_id,NULL);
+    xw_promt_quit = 0;
+    free(errfontsrc );
+    free(errwindow_cache);
+    free(timecntfontsrc);
+    free(timewindow_cache);
+
+    return 0;
 
 
+
+}
 

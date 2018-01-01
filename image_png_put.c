@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <setjmp.h> 
-#include <png.h>
+#include "png.h"
 #include "image_argb_ayuv.h"
 
 //#include "pngconf.h"

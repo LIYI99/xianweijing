@@ -254,13 +254,13 @@ static void any_preview_mouse_ldown(void *data){
 #if 1
         
         if(n == 0)
-            xw_preview_p->preview_buf_big[0] = xw_get_window_png("testprivew-1ID");
+            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-1ID");
         else if(n == 1){
-             xw_preview_p->preview_buf_big[0] = xw_get_window_png("testprivew-2ID");
+             xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-2ID");
         }else if(n == 2){
-            xw_preview_p->preview_buf_big[0] = xw_get_window_png("testprivew-3ID");
+            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-3ID");
         }else if(n == 3){
-            xw_preview_p->preview_buf_big[0] = xw_get_window_png("testprivew-4ID");
+            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-4ID");
         }
         
 
@@ -306,7 +306,7 @@ static void only_preview_mouse_ldown(void *data)
     
     window_node_menu_t *mt  =  (window_node_menu_t *)data;
     
-    uint16_t mousex = 0,mousey = 0,n =0;
+    uint16_t mousex = 0,mousey = 0;
     mousex = mt->this_node->mouse_data.x;
     mousey = mt->this_node->mouse_data.y;
     
@@ -411,5 +411,16 @@ int xw_preview_cl_op(void *data)
 }
 
 
+int xw_preview_quit(void *data)
+{
+   if( xw_preview_p)
+       free(xw_preview_p)
+           ;
+   xw_preview_p = NULL;
+    
+   return 0;
+
+
+}
 
 
