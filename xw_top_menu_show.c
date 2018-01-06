@@ -6,7 +6,11 @@
 #include "xw_window_xy_df.h"
 #include "xw_top_menu_show.h"
 #include "gk_image_sdk_new.h"
-
+#include "xw_preview_show.h"
+#include "xw_line_show.h"
+#include "xw_text_prompt_box.h"
+#include "xw_logsrv.h"
+#include "xw_msg_prv.h"
 
 //top menu
 #define     XW_TOP_MENU_H_z     48
@@ -21,7 +25,7 @@
 
 #define     XW_SNAP_BUTTON_OFFSET_COLOR     0xf00f
 #define     XW_SNAP_BUTTON_LDOWN_COLOR      0xf0f0
-#define     XW_SNAP_BUTTON_LEAVE_COLOR      0xefee
+#define     XW_SNAP_BUTTON_LEAVE_COLOR      0xfd88
 #define     XW_SNAP_BUTTON_LIEN_SIZE        2
 
 
@@ -60,9 +64,9 @@ int  xw_top_menu_show(void *data)
     //printf("top image mem:%p\n",_mt.image_cache);
     _mt.video_set.mouse_offset = mouse_offset_top_menu;
     _mt.video_set.mouse_leave  = mouse_leave_top_menu;
-
     ret = Image_SDK_Create_Menu(_attr,_mt); 
-    
+    Image_SDK_Set_Node_Order(XW_TOP_MENU_WINDOW_ID,FIXD_ORDER);
+
 
     //snap
     window_node_button_t    _bt;
@@ -124,7 +128,7 @@ static void usr_push_video_button(void *data ,uint16_t *fbbuf,int scree_w ,int s
 {
 
     window_node_button_t *bt =  (window_node_button_t *)data;
-    printf(" video push bt->color:%x\n",bt->color); 
+    xw_logsrv_debug(" video push bt->color:%x\n",bt->color); 
     //top w line
     int i ,k ;
     for(i = bt->y; i < (bt->y+bt->size) ;i ++){
@@ -157,6 +161,8 @@ static void mouse_offset_button_snap(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_OFFSET_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
+
+
    }
 static void mouse_leave_button_snap(void *data)
 
@@ -173,19 +179,36 @@ static void mouse_ldown_button_snap(void *data)
 {
     
     window_node_button_t *bt  = (window_node_button_t *)data;
-    bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
-    bt->this_node->freshen_arrt = NEED_FRESHEN; 
+    
+     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
     //send singed to main srv
+    
+    //xw_text_promt_put("NOT SDCRAD!",3000);
+    Image_Msg_Send(IDSCAM_IMG_MSG_CAPTURE,NULL,0);
+
 }
 
-
+static uint8_t record_state = 0;
 static void mouse_ldown_button_recod(void *data)
 {
     
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
-    bt->this_node->freshen_arrt = NEED_FRESHEN; 
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
     //send singed to main srv
+    if(record_state == 0){
+        xw_time_cnt_start(1);
+        record_state = 1;
+        Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_START,NULL,0);
+
+    }else{
+        xw_time_cnt_start(0);
+        record_state = 0;
+         Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_STOP,NULL,0);
+
+    }
+
 }
 
 static uint8_t main_window_state = 0;
@@ -224,22 +247,35 @@ static void mouse_ldown_button_perview(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
-    //send signed to man srv
+    xw_text_promt_put("NOT SUPPORT!",3000);
+
+    //close line and main meuse 
+   // Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_CLEAR);
+   // Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,0);
+    //
+     xw_lines_close_all_root(NULL);
+    //Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
+    //Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID,0);
+    //usleep(100000);
+   // xw_preview_cl_op(NULL);
+
+    return ;
+
 }
 
 static void mouse_offset_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
     mt->this_node->en_submenu = 1;
-    printf("%s line:%d  \n",__func__,__LINE__);
-
+    xw_logsrv_debug("%s line:%d  \n",__func__,__LINE__);
+    
 }
 
 static void mouse_leave_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
     mt->this_node->en_submenu = 0;
-    printf("%s line:%d  \n",__func__,__LINE__);
+    xw_logsrv_debug("%s line:%d  \n",__func__,__LINE__);
 
 
 }

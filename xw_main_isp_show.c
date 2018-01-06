@@ -7,6 +7,7 @@
 #include "xw_window_xy_df.h"
 #include "xw_png_load.h"
 #include "gk_image_sdk_new.h"
+#include "xw_msg_prv.h"
 
 
 typedef struct  xw_isp_set{
@@ -149,11 +150,17 @@ static void xw_isp_exposure_auto_ldown(void *data)
         
         bt->color = XW_ISP_BUTTON_CHCEK_COLOR;
         xw_isp_p->auto_exposure = 1;
-        //add isp set func
+        
+        //add isp set func auto
+        Image_Msg_Send( IDSCAM_IMG_MSG_ENABLE_AE,NULL,0);
+
 
     }else{
         xw_isp_p->auto_exposure = 0;
         bt->color = XW_ISP_BUTTON_NOT_CHCEK_COLOR;
+        //add isp set func manlu
+        int vaule = xw_isp_p->exposure_vaule;
+        Image_Msg_Send( IDSCAM_IMG_MSG_AE_SET_TARGET_RATIO,&vaule,4);
     }
 
     bt->this_node->freshen_arrt = NEED_FRESHEN;
@@ -193,6 +200,8 @@ static void xw_isp_exposure_manul_ldown(void *data)
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     
     //add isp set func
+    int vaule = xw_isp_p->exposure_vaule;
+     Image_Msg_Send( IDSCAM_IMG_MSG_AE_SET_TARGET_RATIO,&vaule,4);
 
    // printf("bar->exposure_vaule:%d\n",bar->now_value);
     return;
@@ -278,6 +287,7 @@ static void xw_isp_white_banlance_auto_ldown(void *data)
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     Image_SDK_Set_Button_Color(XW_MANUL_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
     //add isp set func
+     Image_Msg_Send( IDSCAM_IMG_MSG_ENABLE_AWB,NULL,0);
 
     return ;
 }
@@ -292,6 +302,8 @@ static void xw_isp_white_banlance_manul_ldown(void *data)
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
     //add isp set func
+    int vaule = xw_isp_p->red_awb;
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_ONE_PUSH,&vaule,4);
     return ;
 
 
@@ -329,6 +341,9 @@ static void xw_isp_awb_colortemp_ldown(void *data)
     
     //add isp set func
     
+    int vaule ;
+    vaule = xw_isp_p->colortemp_awb;
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_COLORTEMP,&vaule,4);
 
 
     return;
@@ -365,7 +380,10 @@ static void xw_isp_awb_red_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule = xw_isp_p->red_awb;
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+
     return ;
 
 }
@@ -399,7 +417,11 @@ static void xw_isp_awb_green_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule = xw_isp_p->green_awb;
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+
+
     return ;
 
 
@@ -433,7 +455,10 @@ static void xw_isp_awb_blue_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule = xw_isp_p->blue_awb;
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+
     return ;
 
 
@@ -610,6 +635,10 @@ static void xw_isp_filck_50HZ_ldown(void *data)
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     Image_SDK_Set_Button_Color(XW_FILCKER_60H_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
     //add isp set func
+    
+    int vaule ;
+    vaule = 50;
+    Image_Msg_Send( IDSCAM_IMG_MSG_ANTIFLICKER,&vaule,4);
 
     return ;
 }
@@ -625,6 +654,9 @@ static void xw_isp_filck_60HZ_ldown(void *data)
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     Image_SDK_Set_Button_Color(XW_FILCKER_50H_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
     //add isp set func
+    int vaule ;
+    vaule =  60;
+    Image_Msg_Send( IDSCAM_IMG_MSG_ANTIFLICKER,&vaule,4);
 
     return ;
 }
@@ -708,7 +740,10 @@ static void xw_isp_denoise_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule =  xw_isp_p->denoise;
+    Image_Msg_Send( IDSCAM_IMG_MSG_DENOISE,&vaule,4);
+ 
     return ;
 
 
@@ -741,7 +776,10 @@ static void xw_isp_sharpness_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule =  xw_isp_p->sharpness;
+    Image_Msg_Send( IDSCAM_IMG_MSG_SHARPNESS,&vaule,4);
+
     return ;
 
 
@@ -775,7 +813,10 @@ static void xw_isp_brightness_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule =  xw_isp_p->brightness;
+    Image_Msg_Send( IDSCAM_IMG_MSG_BRIGHTNESS,&vaule,4);
+   
     return ;
 
 
@@ -808,7 +849,10 @@ static void xw_isp_saturation_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule =  xw_isp_p->saturation;
+    Image_Msg_Send( IDSCAM_IMG_MSG_SATURATION,&vaule,4);
+   
     return ;
 
 
@@ -841,7 +885,10 @@ static void xw_isp_contrast_ldown(void *data)
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
     //add isp set func 
-    
+    int vaule ;
+    vaule =  xw_isp_p->contrast;
+    Image_Msg_Send( IDSCAM_IMG_MSG_CONTRAST,&vaule,4);
+   
     return ;
 
 
@@ -1055,6 +1102,9 @@ static void     xw_video_filp_button_ldown(void *data)
     else
         xw_isp_p->filp = 0;
     //add video filp set func,set filp vluae
+     int vaule ;
+    vaule =  1;
+    Image_Msg_Send(IDSCAM_IMG_MSG_FLIP,&vaule,4);
 
     return ;
     
@@ -1073,6 +1123,9 @@ static void     xw_video_mirror_button_ldown(void *data)
 
     //add video mirror set func
 
+    int vaule ;
+    vaule =  1;
+    Image_Msg_Send( IDSCAM_IMG_MSG_MIRROR,&vaule,4);
 
     
     return ;
@@ -1091,7 +1144,13 @@ static void     xw_video_day_night_button_ldown(void *data)
         xw_isp_p->chroma = 1;
 
     //add video mirror set func
-    
+    int vaule ;
+    if(xw_isp_p->chroma){
+        vaule = 35;
+    }else
+        vaule = 10;
+    Image_Msg_Send( IDSCAM_IMG_MSG_HUE,&vaule,4);
+   
     return ;
 }
 
@@ -1107,7 +1166,10 @@ static void     xw_video_hdr_button_ldown(void *data)
         xw_isp_p->hdr = 1;
 
     //add video mirror set func
-    
+    int vaule ;
+    vaule = xw_isp_p->hdr;
+    Image_Msg_Send( IDSCAM_IMG_MSG_SENSOR_HDR_OP_MODE,&vaule,4);
+      
     return ;
 }
 
