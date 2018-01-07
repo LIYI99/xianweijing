@@ -7,6 +7,7 @@
 #include "xw_window_xy_df.h"
 #include "xw_png_load.h"
 #include "gk_image_sdk_new.h"
+#include "xw_logsrv.h"
 #include "xw_msg_prv.h"
 
 
@@ -96,14 +97,111 @@ int  xw_main_isp_show(void *data)
 
     int ret  = 0 ;
     //load isp data 
+    
 
     xw_isp_fp = fopen(XW_ISP_FILE_PATH ,"rw+");
+#if 0  //not need save data
     if( xw_isp_fp )
     {
         ret = fread(xw_isp_p,1,sizeof(xw_isp_set_t),xw_isp_fp);
     }
-    //init default
-    if(ret <= 0)
+#endif
+    
+    int ndata,size = 4;
+    
+    //get ae mode
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ENABLE_AE,NULL,size);
+    if(ret >= 0){
+        xw_isp_p->auto_exposure = ret;
+    }else{
+        xw_isp_p->auto_exposure     = 1;
+    }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AE_GET_TARGET_RATIO,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->exposure_vaule = ndata;
+    }else{
+        xw_isp_p->exposure_vaule = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ENABLE_AWB,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->auto_awb = ret;
+    }else{
+        xw_isp_p->auto_awb = 1;
+    }
+
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_COLORTEMP,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->colortemp_awb = ndata;
+    }else{
+        xw_isp_p->colortemp_awb = 300;
+    }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CONTRAST,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->contrast = ndata;
+    }else{
+        xw_isp_p->contrast = 30;
+    }
+
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SATURATION,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->saturation = ndata;
+    }else{
+        xw_isp_p->saturation = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_BRIGHTNESS,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->brightness = ndata;
+    }else{
+        xw_isp_p->brightness = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_DENOISE,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->denoise = ndata;
+    }else{
+        xw_isp_p->denoise = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SHARPNESS,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->sharpness = ndata;
+    }else{
+        xw_isp_p->sharpness = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_RGB_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->red_awb = ndata;
+    }else{
+        xw_isp_p->red_awb = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_HUE,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->chroma = ndata;
+    }else{
+        xw_isp_p->chroma = 30;
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ANTIFLICKER,(void *)&ndata,size);
+    if(ret >= 0){
+        
+        if(ndata == 50)
+            xw_isp_p->filcker = 1;
+        else
+            xw_isp_p->filcker = 0;
+
+    }else{
+        xw_isp_p->filcker = 1;
+    }
+#if 0
+if(ret <= 0)
     {
         //AE
         xw_isp_p->auto_exposure     = 1;
@@ -129,8 +227,7 @@ int  xw_main_isp_show(void *data)
         xw_isp_p->mirror            = 0;
         xw_isp_p->hdr               = 0;
     }
-    //add menu
-
+#endif
     ret = xw_isp_exposure_show(NULL);
     ret = xw_isp_white_banlance_show(NULL);
     //return ;
@@ -141,10 +238,13 @@ int  xw_main_isp_show(void *data)
     return  0;
 }
 
+//static window_node_button_t    *auto_ae_bt = NULL;
 static void xw_isp_exposure_auto_ldown(void *data)
 {
     
     window_node_button_t *bt  = (window_node_button_t *)data;
+//    if(auto_ae_bt == NULL)
+  //       auto_ae_bt = bt; 
     if(xw_isp_p->auto_exposure == 0)
     {
         
@@ -167,21 +267,21 @@ static void xw_isp_exposure_auto_ldown(void *data)
     return ;
 }
 
+
 static void xw_isp_exposure_manul_ldown(void *data)
 {
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
-    if(xw_isp_p->auto_exposure == 1)
-        return ;
-
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+    
+   
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6 * 5))
     {
         
         xw_isp_p->exposure_vaule += XW_ISP_BAR_STEP ;  
         if(xw_isp_p->exposure_vaule >  XW_ISP_BAR_MAX_VALUE ){
             xw_isp_p->exposure_vaule = XW_ISP_BAR_MAX_VALUE;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->exposure_vaule >= XW_ISP_BAR_STEP )
         {
@@ -189,11 +289,19 @@ static void xw_isp_exposure_manul_ldown(void *data)
         }else{
             xw_isp_p->exposure_vaule = 0;
         }
+    }else{
+        return ;
     }
-    
-    bar->now_value = xw_isp_p->exposure_vaule;
+    if(xw_isp_p->auto_exposure == 1)
+    {
+       
+        xw_isp_p->auto_exposure= 0;
+        Image_SDK_Set_Button_Color(XW_AUTO_EXPOUSURE_WINDOW_ID,XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+        Image_SDK_Set_Node_En_Freshen(XW_AUTO_EXPOUSURE_WINDOW_ID,NEED_FRESHEN);
+    }
 
     
+    bar->now_value = xw_isp_p->exposure_vaule;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
     char text[5];
     sprintf( text,"%d",bar->now_value);
@@ -271,7 +379,7 @@ static int  xw_isp_exposure_show(void *data)
     sprintf(text_buf,"%d",xw_isp_p->exposure_vaule);
     Image_SDK_Set_Text_Node_Text(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
     
-    return 0;
+    return ret;
 
 }
 
@@ -313,17 +421,15 @@ static void xw_isp_awb_colortemp_ldown(void *data)
 {
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
-    if(xw_isp_p->auto_awb == 1)
-        return ;
-
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+   
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->colortemp_awb += XW_ISP_BAR_STEP * 10 ;  
         if(xw_isp_p->colortemp_awb >  XW_ISP_BAR_MAX_VALUE * 10 ){
             xw_isp_p->colortemp_awb = XW_ISP_BAR_MAX_VALUE * 10;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->colortemp_awb >= XW_ISP_BAR_STEP * 10 )
         {
@@ -331,7 +437,20 @@ static void xw_isp_awb_colortemp_ldown(void *data)
         }else{
             xw_isp_p->colortemp_awb = 0;
         }
+    }else{
+        return;
     }
+
+    if(xw_isp_p->auto_awb == 1){
+        
+        Image_SDK_Set_Button_Color(XW_MANUL_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+        Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+        Image_SDK_Set_Node_En_Freshen(XW_MANUL_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        Image_SDK_Set_Node_En_Freshen(XW_AUTO_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        xw_isp_p->auto_awb = 0;
+        //return ;
+    }
+
     
     bar->now_value = xw_isp_p->colortemp_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
@@ -355,16 +474,15 @@ static void xw_isp_awb_red_ldown(void *data)
 {
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
-    if(xw_isp_p->auto_awb == 1)
-        return ;
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+    
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->red_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->red_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->red_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->red_awb >= XW_ISP_BAR_STEP  )
         {
@@ -372,8 +490,21 @@ static void xw_isp_awb_red_ldown(void *data)
         }else{
             xw_isp_p->red_awb = 0;
         }
+    }else{
+        
+        return ;
     }
-    
+    if(xw_isp_p->auto_awb == 1){
+        
+        Image_SDK_Set_Button_Color(XW_MANUL_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+        Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+        Image_SDK_Set_Node_En_Freshen(XW_MANUL_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        Image_SDK_Set_Node_En_Freshen(XW_AUTO_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        xw_isp_p->auto_awb = 0;
+        //return ;
+    }
+
+
     bar->now_value = xw_isp_p->red_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
     char text[6];
@@ -392,16 +523,15 @@ static void xw_isp_awb_green_ldown(void *data)
 {
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
-    if(xw_isp_p->auto_awb == 1)
-        return ;
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+    
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->green_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->green_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->green_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->green_awb >= XW_ISP_BAR_STEP  )
         {
@@ -409,7 +539,19 @@ static void xw_isp_awb_green_ldown(void *data)
         }else{
             xw_isp_p->green_awb = 0;
         }
+    }else{
+        return ;
     }
+    if(xw_isp_p->auto_awb == 1){
+        
+        Image_SDK_Set_Button_Color(XW_MANUL_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+        Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+        Image_SDK_Set_Node_En_Freshen(XW_MANUL_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        Image_SDK_Set_Node_En_Freshen(XW_AUTO_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        xw_isp_p->auto_awb = 0;
+        //return ;
+    }
+
     
     bar->now_value = xw_isp_p->green_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
@@ -430,16 +572,14 @@ static void xw_isp_awb_green_ldown(void *data)
 static void xw_isp_awb_blue_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
-    if(xw_isp_p->auto_awb == 1)
-        return ;
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+        if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->blue_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->blue_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->blue_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->blue_awb >= XW_ISP_BAR_STEP  )
         {
@@ -447,8 +587,21 @@ static void xw_isp_awb_blue_ldown(void *data)
         }else{
             xw_isp_p->blue_awb = 0;
         }
+    }else{
+    
+        return;
     }
     
+    if(xw_isp_p->auto_awb == 1){
+        
+        Image_SDK_Set_Button_Color(XW_MANUL_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+        Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+        Image_SDK_Set_Node_En_Freshen(XW_MANUL_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        Image_SDK_Set_Node_En_Freshen(XW_AUTO_WHITE_BALANCE_WINDOW_ID,NEED_FRESHEN);
+        xw_isp_p->auto_awb = 0;
+        //return ;
+    }
+
     bar->now_value = xw_isp_p->blue_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
     char text[6];
@@ -617,7 +770,7 @@ static int  xw_isp_white_banlance_show(void *data)
     sprintf(text_buf,"%d",xw_isp_p->blue_awb);
     Image_SDK_Set_Text_Node_Text(XW_ISP_BLUE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
     
-    return 0;
+    return ret;
 
 
 }
@@ -709,7 +862,7 @@ static int  xw_isp_filck_show(void *data)
     memcpy(_attr.node_id, XW_FILCKER_60H_WINDOW_ID ,strlen(XW_FILCKER_60H_WINDOW_ID));
     ret = Image_SDK_Create_Button(_attr,_bt); 
 
-    return 0;
+    return ret;
 }
 
 
@@ -717,14 +870,14 @@ static void xw_isp_denoise_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->denoise += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->denoise >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->denoise = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->denoise >= XW_ISP_BAR_STEP  )
         {
@@ -732,6 +885,8 @@ static void xw_isp_denoise_ldown(void *data)
         }else{
             xw_isp_p->denoise = 0;
         }
+    }else{
+        return;
     }
     
     bar->now_value = xw_isp_p->denoise;
@@ -753,14 +908,14 @@ static void xw_isp_sharpness_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->sharpness += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->sharpness >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->sharpness = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->sharpness >= XW_ISP_BAR_STEP  )
         {
@@ -768,6 +923,8 @@ static void xw_isp_sharpness_ldown(void *data)
         }else{
             xw_isp_p->sharpness = 0;
         }
+    }else{
+        return ;
     }
     
     bar->now_value = xw_isp_p->sharpness;
@@ -790,14 +947,14 @@ static void xw_isp_brightness_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->brightness += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->brightness >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->brightness = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->brightness >= XW_ISP_BAR_STEP  )
         {
@@ -805,6 +962,8 @@ static void xw_isp_brightness_ldown(void *data)
         }else{
             xw_isp_p->brightness = 0;
         }
+    }else{
+        return;
     }
     
     bar->now_value = xw_isp_p->brightness;
@@ -826,14 +985,14 @@ static void xw_isp_saturation_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->saturation += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->saturation >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->saturation = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->saturation >= XW_ISP_BAR_STEP  )
         {
@@ -841,6 +1000,9 @@ static void xw_isp_saturation_ldown(void *data)
         }else{
             xw_isp_p->saturation = 0;
         }
+    }else{
+    
+        return ;
     }
     
     bar->now_value = xw_isp_p->saturation;
@@ -862,14 +1024,14 @@ static void xw_isp_contrast_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/2))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
     {
         
         xw_isp_p->contrast += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->contrast >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->contrast = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else{
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
 
         if(xw_isp_p->contrast >= XW_ISP_BAR_STEP  )
         {
@@ -877,6 +1039,9 @@ static void xw_isp_contrast_ldown(void *data)
         }else{
             xw_isp_p->contrast = 0;
         }
+    }else{
+    
+        return ;
     }
     
     bar->now_value = xw_isp_p->contrast;
@@ -1036,7 +1201,7 @@ static int  xw_isp_frequen_show(void *data)
     Image_SDK_Set_Text_Node_Text(XW_ISP_CONTRAST_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
 
 
-    return 0;
+    return ret;
 
 }
 
@@ -1240,7 +1405,7 @@ static int  xw_video_frequen_show(void *data)
     
 
     
-    return 0;
+    return ret;
 
 
 

@@ -10,10 +10,10 @@
 #include <linux/fb.h>
 #include <pthread.h>
 
-#include"gk_image_sdk_new.h"
-#include"image_text_put.h"
-#include"xw_logsrv.h"
-
+#include "gk_image_sdk_new.h"
+#include "image_text_put.h"
+#include "xw_logsrv.h"
+#include "image_zoom_func.h"
 //device info set 
 #define     VO_SCREE_W          1920
 #define     VO_SCREE_H          1080
@@ -317,8 +317,13 @@ static int   node_id_level_re(const char *node_id)
         return -1;
     int i;
     for(i = 0 ;i  < MENU_LEVEL ; i++){
-        if(node_id[i] < 'A'   || node_id[i] > 'z' )
-                break;
+        if( (node_id[i] >= 'A' && node_id[i] <= 'Z' )|| (node_id[i] <='z' && node_id[i] >= 'a'))
+            continue;
+        else
+            break;
+
+        //       ( node_id[i] < 'A'   || node_id[i] > 'z' )
+          //      break;
     }
 
     return i;
@@ -1126,7 +1131,7 @@ static inline int image_line_xy_analysis(void *data,
             && mdata.y >= (bt->start_y - size) && mdata.y <= (bt->start_y + h + size)){
 
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        xw_logsrv_debug("line x:%d y:%d ",bt->start_x,bt->start_y);
+        //xw_logsrv_debug("line x:%d y:%d ",bt->start_x,bt->start_y);
         //debug_node_id(bt->this_node);
         return 1;
     }
@@ -1175,7 +1180,7 @@ static inline int image_bar_xy_analysis(void *data,
         //add mouse data
 
         bt->this_node->mouse_data = sdk_handle->mouse_new_data; 
-        xw_logsrv_debug("check bar \n"); 
+        //xw_logsrv_debug("check bar \n"); 
         return 1;
     }
     else 
@@ -1198,7 +1203,17 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         return ;
 
     int ks;
-
+    
+    if(sdk_handle->check_level_cnt != 0){ 
+        if(sdk_handle->mouse_new_data.event == sdk_handle->last_check_node[sdk_handle->check_level_cnt-1]->last_event
+                && sdk_handle->mouse_new_data.event != GK_MOUSE_OFFSET)
+        {
+           // xw_logsrv_debug("######### only one event ###### mouse event:%d\n",sdk_handle->mouse_new_data.event);
+            sdk_handle->last_check_node[sdk_handle->check_level_cnt-1]->mouse_data = sdk_handle->mouse_new_data;
+            return ;
+        }
+    }
+    
     //clear sdk hanlde save mouse check node buf
     for(ks = 0 ; ks < MENU_LEVEL ; ks++)
         sdk_handle->check_node[ks] = NULL;
@@ -1209,10 +1224,17 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
             break;
         sdk_handle->last_check_node[ks]->check_node = 0;
     }
+    //clear last check node cnt
+    sdk_handle->check_level_cnt = 0;
+
+
 
     window_node_t  *node = NULL,*save_node[MENU_LEVEL+1],*ft_stack[MENU_LEVEL] ;
     memset(save_node,0x0,sizeof(void *) * MENU_LEVEL+1);
     int check_cnt = 0,ret = 0,stack_cnt = 1;
+    
+   
+
 
     ft_stack[0] = sdk_handle->root;
 
@@ -1254,7 +1276,7 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
                 save_node[check_cnt] = node;
                 check_cnt++;
 
-                xw_logsrv_debug("check node_id:%c%c%c node:%p check_cnt:%d mouserx:%d mousry;%d \n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
+              //  xw_logsrv_debug("check node_id:%c%c%c node:%p check_cnt:%d mouserx:%d mousry;%d \n\n",node->node_id[0],node->node_id[1], node->node_id[2],node,check_cnt,mdata.x,mdata.y);
             }
         }
 
@@ -1274,14 +1296,13 @@ static void   _image_analysis_mdata(GK_MOUSE_DATA mdata)
         }else{
             node = node->next;
         }
-
         if(node == NULL && stack_cnt > 0 ){
             stack_cnt--;
             node = ft_stack[stack_cnt]->next;
 
             //if sub windows not check ,than those tarlve mouse envet eof       
             if(check_cnt != 0 && node){
-                xw_logsrv_debug("quit tarlve mouse decitc\n");
+               // xw_logsrv_debug("quit tarlve mouse decitc\n");
                 //debug_node_id(node);
                 break;
             }
@@ -1440,9 +1461,8 @@ static void  _image_window_func_run(void *data)
     for(k = 0; k < MENU_LEVEL ; k++){
         sdk_handle->last_check_node[k] = NULL;
     }
-    //clear flag and save
+    //save node
     for(k = 0 ;k < sdk_handle->check_level_cnt; k++){
-        sdk_handle->check_node[k]->check_node = 0;
         sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
     }
 
@@ -1451,7 +1471,7 @@ static void  _image_window_func_run(void *data)
     node = sdk_handle->check_node[sdk_handle->check_level_cnt -1];
 
     //clear levevl save 
-    sdk_handle->check_level_cnt = 0; 
+   //sdk_handle->check_level_cnt = 0; 
 
     if(!node->en_node)
         return;
@@ -1497,18 +1517,7 @@ static void  _image_window_func_run(void *data)
         default:
             break;
     }
-#if 0
-    //clear buf
-    for(k = 0; k < MENU_LEVEL ; k++){
-        sdk_handle->last_check_node[k] = NULL;
-    }
-    //clear flag and save
-    for(k = 0 ;k < sdk_handle->check_level_cnt; k++){
-        sdk_handle->check_node[k]->check_node = 0;
-        sdk_handle->last_check_node[k] = sdk_handle->check_node[k];
-    }
-    sdk_handle->check_level_cnt = 0; 
-#endif
+    
     return ;
 
 }
@@ -1904,8 +1913,8 @@ static void freshen_image_bar(void *data){
                 *(buf+ sdk_handle->scree_w*k + i) = 0xFd88;    
         }
         int vl = bt->w * bt->now_value/bt->max_value;
-        xw_logsrv_debug("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
-                bt->bar_color);
+        //xw_logsrv_debug("xxxx bar bar now need push bar lens:%d  bt->w:%d now_value:%d color:%d\n",vl,bt->w,bt->now_value,
+          //      bt->bar_color);
         for(k = bt->y ; k < (bt->h + bt->y) ;k++){
             for(i = bt->x ;  i < ( bt->x + vl )  ; i++ )
                 *(buf+ sdk_handle->scree_w*k + i) = bt->bar_color;    
@@ -2121,7 +2130,9 @@ static void freshen_image_mouse(void)
 #endif
     bt->x_last = bt->x;
     bt->y_last = bt->y;
-
+    
+    //xw_logsrv_debug("%dupdate mmap\n",__LINE__);
+    sdk_handle->mmap_updated = 1;
     return ;
 }
 
@@ -2141,7 +2152,9 @@ static inline void _image_freshen(window_node_t *node)
 
         return;
     }
-
+    
+    sdk_handle->mmap_updated = 1;
+    
 
     switch(node->win_type){
 
@@ -2183,7 +2196,7 @@ static void image_freshen_set_sub_freshen(window_node_t *node)
 
         }
     }
-    xw_logsrv_debug("&&&&&move############ node id:%c%c%c \n",node->node_id[0],node->node_id[1],node->node_id[2]);
+    //xw_logsrv_debug("&&&&&move############ node id:%c%c%c \n",node->node_id[0],node->node_id[1],node->node_id[2]);
 
 
 
@@ -2438,8 +2451,34 @@ static void  image_put_video(void)
     return ;
 
 }
+#if 1
+extern  uint16_t *lcd_mem;
 
 
+static void test_zoom_lcd(void)
+{
+    
+    image_zoom_t    data;
+    data.outbuf     = lcd_mem;//(uint16_t *)malloc(1024*600*2);
+    data.outwidth   = 1024;
+    data.outheight  = 600;
+    data.inwidth    = 1920;
+    data.inheight   = 1080;
+    data.inbuf      = (uint16_t*)sdk_handle->mmap_p;//xw_get_window_png("testprivew-1ID");
+    
+    iamge_zoom_func(&data);
+    //Image_SDK_Set_Node_En("Ax",1);
+   // Image_SDK_Set_Node_En_Freshen("Ax",NEED_FRESHEN);
+
+    //usleep(100000);
+
+    return ;
+
+
+
+}
+
+#endif
 
 static void  _image_freshen_video(void)
 {
@@ -2447,6 +2486,8 @@ static void  _image_freshen_video(void)
     image_clear_video();
     image_put_video();
     freshen_image_mouse();
+    sdk_handle->mmap_updated = 0;
+    
     return ;
 
 }
@@ -2497,6 +2538,8 @@ static  void*   _image_mouse_event_read_thread(void *data)
             tv.tv_sec = 1;
             tv.tv_usec = 0;
             retval = select(sdk_handle->mouse_fd+1,&readfds,NULL,NULL,&tv);
+            if(retval <= 0)
+                continue;
             if(FD_ISSET(sdk_handle->mouse_fd,&readfds))
             {
 
@@ -2708,7 +2751,7 @@ static void  _image_all_window_comper_intersection_attr(void)
 
 
     window_node_t *node = NULL,*ft_stack[MENU_LEVEL];
-    int stack_cnt = 1,clear_cnt = 0;
+    int stack_cnt = 1;
     ft_stack[0] = sdk_handle->root;
 
     node = sdk_handle->root->s_head;
@@ -2750,14 +2793,15 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
 
     if( node->video_attr == CLOSE_DISP)
         return -2;
-    window_node_t *temp = NULL,*temp2 = NULL;
+    window_node_t *temp = NULL;
+    //*temp2 = NULL;
 
     if(node->f_node == sdk_handle->root || node->f_node->video_attr != CLOSE_DISP)
     {
         temp = node->prev;
     }else if(node->f_node->video_attr == CLOSE_DISP){
         temp  = node->f_node->prev;
-        temp2 = node->prev;
+        //temp2 = node->prev;
     }else{
         ;
     }
@@ -2803,37 +2847,6 @@ static int  get_limit_rect_for_node_freshen(window_node_t *node)
         }
     }
 
-#if 0
-    // now not count
-    for(;temp2; temp2  =  temp2->prev){
-
-        if(temp->en_node == 0 || temp->video_state == CLEAR_STATE ||
-                temp->video_attr == CLOSE_DISP)
-            continue;
-
-        //count insterince
-        if(compler_image(node,temp))
-        {
-            if( update_param_get(temp,&save) != 0)
-                continue;
-
-            limit  = (limit_rect_t *)object_pool_get(sdk_handle->window_node_pool);
-            limit->x = save.x;
-            limit->y = save.y;
-            limit->h = save.end_y - save.y;
-            limit->w = save.end_x - save.x;
-            if(node->limit == NULL){
-                node->limit = limit;
-            }else{
-                for(templimit = node->limit; templimit->next != NULL; templimit = templimit->next)
-                    ;
-                templimit->next = limit;
-                limit->prev = templimit;
-            }
-        }
-        //get limit q
-    }
-#endif
     return 0;
 
 }
@@ -2927,17 +2940,55 @@ static void*  _image_fb_init(char *dev_path,int *fd)
         return NULL;
     }
 
-    varInfo.xres = VO_SCREE_W;
-    varInfo.yres = VO_SCREE_H;
+    varInfo.xres =  VO_SCREE_W;
+    varInfo.yres =  VO_SCREE_H;
+    varInfo.xres_virtual = VO_SCREE_W;
+    varInfo.yres_virtual = VO_SCREE_H;
     varInfo.bits_per_pixel = VO_COLOR_FMT;
+    varInfo.width = VO_SCREE_W;
+    varInfo.height = VO_SCREE_H;
 
     if(ioctl(fbHandle, FBIOGET_VSCREENINFO, &varInfo) < 0)
+    {
+        xw_logsrv_err("Cannot put var screen info\n.");
+        close (fbHandle);
+        *fd = -1;
+        return NULL;
+    }
+    varInfo.xres =  VO_SCREE_W;
+    varInfo.yres =  VO_SCREE_H;
+    varInfo.xres_virtual = VO_SCREE_W;
+    varInfo.yres_virtual =  VO_SCREE_H;
+    varInfo.bits_per_pixel = VO_COLOR_FMT;
+    varInfo.width = 1024; //VO_SCREE_W;
+    varInfo.height = 600;//VO_SCREE_H;
+
+    //varInfo.xres_virtual = 1920;
+    //varInfo.yres_virtual = 1080;
+   // varInfo.xres = 1024;
+   // varInfo.yres = 600;
+   // varInfo.width = 1920;
+   // varInfo.height = 1080;
+#if 1
+    if(ioctl(fbHandle, FBIOPUT_VSCREENINFO, &varInfo) < 0)
     {
         xw_logsrv_err("Cannot get var screen info\n.");
         close (fbHandle);
         *fd = -1;
         return NULL;
     }
+
+#endif
+#if 1
+    if(ioctl(fbHandle, FBIOGET_VSCREENINFO, &varInfo) < 0)
+    {
+        xw_logsrv_err("Cannot put var screen info\n.");
+        close (fbHandle);
+        *fd = -1;
+        return NULL;
+    }
+#endif
+
 
     xw_logsrv_debug("framebuffer: %d x %d @ %d -- %dbpp\n", varInfo.xres, varInfo.yres,
             fixInfo.line_length, varInfo.bits_per_pixel);
