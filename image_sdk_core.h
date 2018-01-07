@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <pthread.h>
 #include "image_mouse_event.h"
-#include "object_pool.h"
-#include "xbuddy_mempool.h"
+#include "image_object_pool.h"
+#include "image_xbuddy_mempool.h"
 
 #ifdef __cplusplus
     extern "C"{

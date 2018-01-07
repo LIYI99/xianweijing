@@ -9,7 +9,6 @@
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 #include <pthread.h>
-
 #include "image_sdk_core.h"
 #include "image_text_put.h"
 #include "xw_logsrv.h"
@@ -890,8 +889,8 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id, NODE_FRESHEN_ARRT en_freshe
         return -2;
     }
     temp->freshen_arrt = en_freshen;
-    xw_logsrv_debug("temp set freansh_arrt:%d,node_id:%c%c%c\n",temp->freshen_arrt,temp->node_id[0],
-            temp->node_id[1],temp->node_id[2]); 
+    //xw_logsrv_debug("temp set freansh_arrt:%d,node_id:%c%c%c\n",temp->freshen_arrt,temp->node_id[0],
+      //      temp->node_id[1],temp->node_id[2]); 
     return 0;
 
 }

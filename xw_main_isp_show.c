@@ -9,6 +9,7 @@
 #include "image_sdk_core.h"
 #include "xw_logsrv.h"
 #include "xw_msg_prv.h"
+#include "xw_config.h"
 
 
 typedef struct  xw_isp_set{
@@ -45,8 +46,9 @@ FILE            *xw_isp_fp = NULL;
 #define         XW_ISP_FILE_PATH    "/usr/local/bin/isp.cnf"
 
 
-#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR           0xfd88
-#define     XW_ISP_BUTTON_CHCEK_COLOR               0xf0f0
+#define     XW_ISP_BUTTON_NOT_CHCEK_COLOR           CON_SELECT_WINDOW_NOTCHECK_COLOR 
+#define     XW_ISP_BUTTON_CHCEK_COLOR               CON_SELECT_WINDOW_CHECK_COLOR  
+
 #define     XW_ISP_BUTTON_H                         10
 #define     XW_ISP_BUTTON_W                         18
 
@@ -54,15 +56,15 @@ FILE            *xw_isp_fp = NULL;
 #define     XW_VIDEO_SET_BUTTON_H                   45
 #define     XW_VIDEO_SET_BUTTON_W                   45
 
-#define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR             0xfd88
-#define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR             0xf2e6
-#define     XW_VIDEO_SET_BUTTON_OFFSET_COLOR            0xf45e
+#define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR         CON_BUTTON_LEAVE_COLOR  
+#define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR         CON_BUTTON_LDOWN_COLOR 
+#define     XW_VIDEO_SET_BUTTON_OFFSET_COLOR        CON_BUTTON_OFFSET_COLOR  
 #define     XW_VIDEO_SET_BUTTON_SIZE                    2
 
 
 
-#define     XW_ISP_BAR_WIN_COLOR                    0xfd88
-#define     XW_ISP_BAR_COLOR                        0xf45e
+#define     XW_ISP_BAR_WIN_COLOR                    CON_BAR_WIN_COLOR  
+#define     XW_ISP_BAR_COLOR                        CON_BAR_LINE_COLOR
 #define     XW_ISP_BAR_LINE_H                       6
 #define     XW_ISP_BAR_LINE_W                       120
 #define     XW_ISP_BAR_MAX_VALUE                    100
@@ -70,8 +72,8 @@ FILE            *xw_isp_fp = NULL;
 
 
 
-#define     XW_ISP_BAR_TEXT_WIN_COLOR               0xfd88
-#define     XW_ISP_BAR_TEXT_FONT_COLOR              0xf2e6
+#define     XW_ISP_BAR_TEXT_WIN_COLOR               CON_FONT_WIN_COLOR
+#define     XW_ISP_BAR_TEXT_FONT_COLOR              CON_FONT_TEXT_COLOR 
 
 
 static int  xw_isp_exposure_show(void *data);
