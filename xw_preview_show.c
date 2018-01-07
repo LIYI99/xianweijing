@@ -130,7 +130,7 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
             image_rgba8888_to_ayuv(incolor,&test_color); 
             //test_color =0xffff;
         }
-        xw_logsrv_debug("ayuv:0x%x",test_color);
+//        xw_logsrv_debug("ayuv:0x%x",test_color);
 
         for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
                 k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++){

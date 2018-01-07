@@ -11,6 +11,8 @@
 #include "xw_text_prompt_box.h"
 #include "xw_logsrv.h"
 #include "xw_msg_prv.h"
+#include "xw_config.h"
+
 
 //top menu
 #define     XW_TOP_MENU_H_z     48
@@ -23,11 +25,10 @@
 #define     XW_SNAP_BUTTON_H                45 
 #define     XW_SNAP_BUTTON_W                75
 
-#define     XW_SNAP_BUTTON_OFFSET_COLOR     0xf00f
-#define     XW_SNAP_BUTTON_LDOWN_COLOR      0xf0f0
-#define     XW_SNAP_BUTTON_LEAVE_COLOR      0xfd88
-#define     XW_SNAP_BUTTON_LIEN_SIZE        2
-
+#define     XW_SNAP_BUTTON_OFFSET_COLOR    CON_BUTTON_OFFSET_COLOR
+#define     XW_SNAP_BUTTON_LDOWN_COLOR     CON_BUTTON_LDOWN_COLOR
+#define     XW_SNAP_BUTTON_LEAVE_COLOR     CON_BUTTON_LEAVE_COLOR   
+#define     XW_SNAP_BUTTON_LIEN_SIZE       CON_BUTTON_LINE_SIZE   
 
 static void usr_push_video_button(void *data ,uint16_t *fbbuf,int scree_w ,int scree_h);
 
@@ -197,10 +198,17 @@ static void mouse_ldown_button_recod(void *data)
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     //send singed to main srv
+    int ret  = 0;
     if(record_state == 0){
+        ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+        if(ret <= 0){
+            xw_text_promt_put("NOT SDCRAD!",3000);
+            return ;
+        }
+        ret = Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_START,NULL,0);
         xw_time_cnt_start(1);
         record_state = 1;
-        Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_START,NULL,0);
+
 
     }else{
         xw_time_cnt_start(0);
@@ -208,6 +216,8 @@ static void mouse_ldown_button_recod(void *data)
          Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_STOP,NULL,0);
 
     }
+    
+    return ;
 
 }
 

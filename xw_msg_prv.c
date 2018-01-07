@@ -36,7 +36,7 @@ int Image_Msg_Start(void)
 int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
 {
     
-    int ret  ;
+    int ret = 0  ;
     if(NULL != data){
         ret  = *(int *)data;
     }

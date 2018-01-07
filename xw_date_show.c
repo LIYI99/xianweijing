@@ -10,11 +10,12 @@
 #include "xw_date_show.h"
 #include "image_sdk_core.h"
 #include "xw_logsrv.h"
-//
-#define FONT_SIZE                   16
-#define FONT_WIN_COLOR              0xfd88
-#define FONT_COLOR                  0xf2e6
+#include "xw_config.h"
 
+//
+#define FONT_SIZE                  CON_FONT_SIZE   
+#define FONT_WIN_COLOR             CON_FONT_WIN_COLOR 
+#define FONT_COLOR                 CON_FONT_TEXT_COLOR 
 //
 #define DATE_SET_UP_WINDOW_H        30
 #define DATE_SET_UP_WINDOW_W        260
