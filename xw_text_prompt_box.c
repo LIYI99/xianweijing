@@ -291,7 +291,7 @@ static void*    prompt_box_manger(void *data)
             {
                 timecnt++;
                 sprintf(timebuf,"%04d",timecnt);
-                xw_logsrv_debug("time cnt:%s\n",timebuf);
+                //xw_logsrv_debug("time cnt:%s\n",timebuf);
                 time_text_to_image(timebuf);
                 //Image_SDK_Set_Node_En(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,1);
                 Image_SDK_Set_Node_En_Freshen(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,NEED_FRESHEN);

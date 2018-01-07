@@ -11,7 +11,7 @@ typedef     enum{
     GK_MOUSE_RIGHT_DOWN,
     GK_MOUSE_RIGHT_UP,
     GK_MOUSE_LEAVE,
-       GK_MOUSE_DEL,
+    GK_MOUSE_DEL,
 }GK_MOUSE_EVENT;
 
 

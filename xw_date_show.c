@@ -178,7 +178,7 @@ static void usr_push_video_button_set(void *data ,uint16_t *fbbuf,int scree_w ,i
 {
 
     window_node_button_t *bt =  (window_node_button_t *)data;
-    printf(" video push bt->color:%x\n",bt->color); 
+    //printf(" video push bt->color:%x\n",bt->color); 
     //top w line
     int i ,k ;
     for(i = bt->y; i < (bt->y+bt->size) ;i ++){

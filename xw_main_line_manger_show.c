@@ -348,7 +348,7 @@ int  xw_main_line_manger_show(void *data)
     memset(&_button,0x0,sizeof(window_node_button_t));
     _button.x     = XW_LINE_SHOW_WINDOW_X ;
     _button.y     = XW_LINE_SHOW_WINDOW_Y ;
-    _button.color = 0xfeee;
+    _button.color = XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.w     = 45;
     _button.h     = 45;
     _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
@@ -363,7 +363,7 @@ int  xw_main_line_manger_show(void *data)
     //lock 
     _button.x    =  XW_LINE_LOCK_WINDOW_X ;
     _button.y     =  XW_LINE_LOCK_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
     _button.w     = 45;
@@ -379,7 +379,7 @@ int  xw_main_line_manger_show(void *data)
     //create set arry 
     _button.x  =     XW_LINE_CHOICE_WINDOW_X ;
     _button.y     =  XW_LINE_CHOICE_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)arry_set[arry_now].png_p;
     _button.w     = arry_set[arry_now].w;
@@ -397,7 +397,7 @@ int  xw_main_line_manger_show(void *data)
     // set size
      _button.x    =  XW_LINE_SET_SIZE_WINDOW_X ;
     _button.y     =  XW_LINE_SET_SIZE_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)size_set[size_now].png_p;
     _button.w     = size_set[size_now].w;
@@ -413,7 +413,7 @@ int  xw_main_line_manger_show(void *data)
     // color set
     _button.x    =  XW_LINE_SET_COLOR_WINDOW_X ;
     _button.y     =  XW_LINE_SET_COLOR_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)color_set[color_now].png_p;
     _button.w     = color_set[color_now].w;
@@ -426,7 +426,7 @@ int  xw_main_line_manger_show(void *data)
    //select line
     _button.x    =  XW_LINE_SELECT_LINE_WINDOW_X ;
     _button.y     =  XW_LINE_SELECT_LINE_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)select_set[select_now].png_p;
     
@@ -439,7 +439,7 @@ int  xw_main_line_manger_show(void *data)
    //clean line
     _button.x     =  XW_LINE_CLAER_WINDOW_X ;
     _button.y     =  XW_LINE_CLAER_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =   XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
     _button.video_set.mouse_left_down = xw_line_clear_button_ldow;
@@ -454,7 +454,7 @@ int  xw_main_line_manger_show(void *data)
     //lines param save
     _button.x     =  XW_LINE_SAVE_WINDOW_X ;
     _button.y     =  XW_LINE_SAVE_WINDOW_Y ;
-    _button.color =  0xfeee;
+    _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
     _button.video_set.mouse_left_down =  xw_line_save_button_ldow;

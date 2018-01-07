@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#define MOUSE_STEP      4
+#define MOUSE_STEP      1
 #define DEBUG           1
 
 static  GK_MOUSE_DATA  s_event;
@@ -41,7 +41,7 @@ int  gk_mouse_open(char *path,unsigned int scree_w,unsigned int scree_h,unsigned
     fd = open(path,O_RDONLY);
     if(fd < 0 )
         return -1;
-#ifdef DEBUG
+#ifdef _DEBUG
     printf("screew:%d scree_h:%d speed_w:%d mouse speed_h:%d dev path:%s\n",
             mouse_t.scree_w,mouse_t.scree_h,mouse_t.mouse_step_w ,mouse_t.mouse_step_h,path);
 #endif
@@ -82,11 +82,11 @@ int  gk_mouse_read_data(int fd,GK_MOUSE_DATA *data)
     type = buf[0]&0x7;
     
     if( buf[1] > 0 ){
-        data->x += (128 > buf[1]) ? mouse_t.mouse_step_w : ( 0 - mouse_t.mouse_step_w); 
+        data->x += (128 > buf[1]) ? mouse_t.mouse_step_w*(buf[1] - 0) : ( 0 - (mouse_t.mouse_step_w * 256-buf[1])); 
     }
     
     if( buf[2] > 0 ){
-        data->y += (128 > buf[2]) ? (0 - mouse_t.mouse_step_h ) : ( mouse_t.mouse_step_h);
+        data->y += (128 > buf[2]) ? (0 - mouse_t.mouse_step_h*(buf[2] -0) ) : ( mouse_t.mouse_step_h*(256-buf[2]));
     }
 
     if(buf[3] > 0){
@@ -124,8 +124,8 @@ int  gk_mouse_read_data(int fd,GK_MOUSE_DATA *data)
         data->event = GK_MOUSE_RIGHT_DOWN;
     }
         s_event =  *data;
-#ifdef DEBUG_
-    printf(" sencod:events type:%d x:%d y:%d  x->bu[1]:%d,y->buf[2]\n",data->event,data->x,data->y,buf[1],buf[2]);
+#ifdef _DEBUG
+    printf(" sencod:events type :%d get datatype:%d x:%d y:%d  x->bu[1]:%d,y->buf[2]:%d\n",data->event, type,data->x,data->y,buf[1],buf[2]);
 #endif
     return  0 ;
 

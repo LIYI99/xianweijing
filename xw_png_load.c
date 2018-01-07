@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "xw_png_load.h"
 #include "image_png_put.h"
 #include "xw_window_id_df.h"
 #include "xw_logsrv.h"
+#include "image_zoom_func.h"
 #define  PNG_LOAD_ALIGN             4
 
 typedef struct  xw_window_png{
@@ -137,7 +139,32 @@ struct  rgb{
 
 
 
+static void  test_200M_60M_zoom(void){
 
+    sleep(1);
+    
+    image_zoom_t    data;
+    data.outbuf     = (uint16_t *)malloc(1024*600*2);
+    data.outwidth   = 1024;
+    data.outheight  = 600;
+    data.inwidth    = 1920;
+    data.inheight   = 1080;
+    data.inbuf      = xw_get_window_png("testprivew-1ID");
+
+    struct timeval tv,tv1;
+    gettimeofday(&tv,NULL);
+    int i = 0;
+    for(i = 0 ;i < 100;i++)
+        iamge_zoom_func(&data);
+    
+
+    gettimeofday(&tv1,NULL);
+    xw_logsrv_debug("zoom 100 times,use:%ld usec\n",
+            (tv1.tv_sec - tv.tv_sec)*1000000 - tv1.tv_usec);
+
+    return ;
+
+}
 
 
 
@@ -372,14 +399,18 @@ int     xw_png_load_all(void)
     xw_color_change_func(p,w*h,0x112,0xfeee);
 
     
-    ret  =  xw_window_png_add("/usr/local/bin/png/main_test.png", "testprivew-1ID");
+   // ret  =  xw_window_png_add("/usr/local/bin/png/main_test.png", "testprivew-1ID");
 
 
     //test preview 
 
-#if 0
+
     //sprintf(id,"%s_%s",XW_LINE_SELECT_LINE_WINDOW_ID,"H3");
-    ret = xw_window_png_add("/usr/local/bin/testimage/16.png", "testprivew-1ID");
+#if 0
+    ret = xw_window_png_add("/usr/local/bin/testimage/test_6.png", "testprivew-1ID");
+    
+   // test_200M_60M_zoom();
+
     ret = xw_window_png_add("/usr/local/bin/testimage/17.png", "testprivew-2ID");
     ret = xw_window_png_add("/usr/local/bin/testimage/18.png", "testprivew-3ID");
     ret = xw_window_png_add("/usr/local/bin/testimage/19.png", "testprivew-4ID");

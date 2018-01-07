@@ -9,7 +9,7 @@ basic_log_t *xw_logsrv_get(void );
 
 #define DEBUG   1
 
-#define xw_logsrv_err(format,...)          basic_log_error_core(LOGS_ERR,xw_logsrv_get(),format,##__VA_ARGS__)
+#define xw_logsrv_err(format,...)           basic_log_error_core(LOGS_ERR,xw_logsrv_get(),format,##__VA_ARGS__)
 
 #if DEBUG 
     #define xw_logsrv_debug(format,...)        basic_log_error_core(LOGS_DEBUG,xw_logsrv_get(),format,##__VA_ARGS__)

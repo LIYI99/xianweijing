@@ -4,7 +4,7 @@
 #include "xw_window_xy_df.h"
 #include "xw_png_load.h"
 #include "gk_image_sdk_new.h"
-
+#include "xw_logsrv.h"
 #define     MAIN_MENU_H         396
 #define     MAIN_MENU_W         813
 #define     MAIN_MENU_COLOR     0x0
@@ -17,17 +17,13 @@ static void mouse_leave_main_menu_func(void *data)
     mt->this_node->freshen_arrt = NEED_CLEAR;
     mt->this_node->en_node = 0;
     mt->this_node->en_submenu = 0;
-    //printf("func:%s line:%d\n",__func__,__LINE__);
     return ;
 }
 
 static void mouse_offset_main_menu_func(void *data)
 {
     window_node_menu_t *mt  = (window_node_menu_t *)data;
-    //mt->this_node->en_submenu = 1;
-    //mt->this_node->en_node = 0;
-   // printf("func:%s line:%d\n",__func__,__LINE__);
-    return ;
+      return ;
 }
 
 
@@ -46,14 +42,13 @@ int xw_main_menu_show(void *data)
     mt.y    = XW_MAIN_WINDOW_Y;
     
     xw_get_png_hw(XW_MAIN_WINDOW_ID,&mt.w,&mt.h);
-    //printf("main menu w:%d ,h:%d\n",mt.w,mt.h); 
+   
     mt.image_cache = (char *)xw_get_window_png(XW_MAIN_WINDOW_ID);
     mt.video_set.mouse_offset =  NULL;//mouse_offset_main_menu_func;
 
     mt.video_set.mouse_leave  =  mouse_leave_main_menu_func;
     int ret = 0;
     ret = Image_SDK_Create_Menu(_attr,mt);
-   // printf("create main menu show ret:%d\n",ret); 
     return ret ;
 
 }

@@ -36,12 +36,12 @@
 #define GK_VIDEO_MODE(W,H,F,PI) (((PI<<31)&0x80000000)|((F<<24)&0x3F000000)| \
     (((W/4)<<12)&0x00FFF000)|((H/2)&0x00000FFF))
 
-#define VI_INPUT_WIDTH       1920
-#define VI_INPUT_HEIGHT      1080
+#define VI_INPUT_WIDTH        1920
+#define VI_INPUT_HEIGHT       1080
 #define VI_INPUT_FPS         25
 
-#define VENC_STREAM1_WIDTH   1920
-#define VENC_STREAM1_HEIGHT  1080
+#define VENC_STREAM1_WIDTH    1920
+#define VENC_STREAM1_HEIGHT   1080
 #define VENC_STREAM2_WIDTH   720
 #define VENC_STREAM2_HEIGHT  576
 #define VENC_STREAM3_WIDTH    0           //VENC_STREAM1_WIDTH
@@ -127,7 +127,7 @@ static GADI_VENC_StreamFormatT streamFormats[GADI_VENC_STREAM_NUM] = {
     },
     {
         .streamId   = GADI_VENC_STREAM_FORTH,
-        .encodeType = GADI_VENC_TYPE_OFF,
+        .encodeType = GADI_VENC_TYPE_MJPEG,
         .channelId  = GADI_VENC_CHANNEL_1,
         .flipRotate = 0,
         .width      = VENC_STREAM4_WIDTH,
@@ -273,8 +273,8 @@ static GADI_VENC_ChannelsParamsT chansParams ={
     .chan3Height             = 0,
     .chan3DeintlcForIntlcVin = 0,
     .chan4Type               = GADI_VENC_CHANNEL_TYPE_PREVIEW ,
-    .chan4Width              =  0,//VENC_STREAM1_WIDTH,
-    .chan4Height             =  0,//VENC_STREAM1_HEIGHT,
+    .chan4Width              =  1280,//VENC_STREAM1_WIDTH,
+    .chan4Height             = 720, //VENC_STREAM1_HEIGHT,
     .chan4DeintlcForIntlcVin = 0,
     .intlcScan               = 0,
 };
@@ -286,6 +286,25 @@ static GADI_VENC_ChannelsParamsT chansParams ={
 //** Local Functions Declaration
 //*****************************************************************************
 //*****************************************************************************
+
+int gdm_vout_en(int type)
+{
+    
+    GADI_VOUT_SettingParamsT    voutParams;
+    voutParams = voParams[0];
+    voutParams.deviceType = type;
+    
+    //err = gadi_vout_get_params(voHandle,&voutParams);
+    
+    GADI_ERR err;
+    err = gadi_vout_set_params(voHandle, &voutParams);
+    if(err != GADI_OK){
+        GADI_ERROR("set vout fail\n");
+    }
+    
+    return err;
+
+}
 
 
 GADI_ERR gdm_venc_init(void)
@@ -615,7 +634,15 @@ GADI_ERR gdm_vout_open(void)
         return retVal;
     }
     GADI_ERROR("test ovHandle:%p\n",voHandle);
+    
+    //set fb channle
+    GADI_VOUT_SelectFbParamsT   fbPar;
+    
+    fbPar.voutChannel = 0;
+    fbPar.fbChannel = 0;
+    gadi_vout_select_fb(voHandle,&fbPar);
 
+    
     return retVal;
 }
 
@@ -658,6 +685,9 @@ GADI_ERR gdm_vout_setup(void)
             return retVal;
         }
     }
+    
+    printf("return gmd channnel:%d voParams.resoluMode:%d voParams.devicetype:%d\n",
+                i,voParams[i].resoluMode,voParams[i].deviceType);
 
     return retVal;
 }
@@ -718,6 +748,9 @@ GADI_ERR gdm_vout_setup_after(void)
     {
         printf("gadi_isp_open() failed! ret = %d\n", retVal);
     }
+    
+    
+
 
     return retVal;
 }
@@ -765,6 +798,125 @@ GADI_ERR gdm_vout_setup_after(void)
     return retVal;
 }
 
+static void isp_nighttoday(GADI_U32 value)
+{
+    GADI_ISP_AeAttrT    aeAttr;
+    GADI_ISP_ContrastAttrT contrastAttr;
+    GADI_ISP_SensorModelEnumT sensorModel;
+
+	gadi_isp_get_sensor_model(ispHandle,&sensorModel);
+
+    gadi_isp_set_day_night_mode(1);
+
+    gadi_isp_set_meter_mode(2);
+
+    if(sensorModel == GADI_ISP_SENSOR_IMX122)   //imx222
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = 25;
+        aeAttr.gainMax        = 36;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 96;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+//add by WRD
+    else if(sensorModel == GADI_ISP_SENSOR_GC0328)   //gc0328
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_25;
+        aeAttr.gainMax        = 36;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 72;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+    else if(sensorModel == GADI_ISP_SENSOR_JXH65)   //jxh65
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_25;
+        aeAttr.gainMax        = 48;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 64;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+     else if(sensorModel == GADI_ISP_SENSOR_SC1235)   //SC1235
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_25;
+        aeAttr.gainMax        = 48;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 64;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+    else if(sensorModel == GADI_ISP_SENSOR_JXK02)   //JXK02
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_15;
+        aeAttr.gainMax        = 36;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 64;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+    else if(sensorModel == GADI_ISP_SENSOR_JXK03)   //JXK03
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_15;
+        aeAttr.gainMax        = 36;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 64;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+     else if(sensorModel == GADI_ISP_SENSOR_SC3035)   //SC3035
+    {
+        gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+        aeAttr.shutterTimeMin = 8000;//1024;
+        aeAttr.shutterTimeMax = GADI_VI_FPS_20;
+        aeAttr.gainMax        = 42;
+        aeAttr.gainMin        = 1;
+        contrastAttr.enableAuto     = 1;
+        contrastAttr.manualStrength = 128;
+        contrastAttr.autoStrength   = 64;//96;
+        gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+        gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+    }
+    else//others
+    {
+         gadi_isp_get_ae_attr(ispHandle, &aeAttr);
+         aeAttr.shutterTimeMin = 8000;//1024;
+         aeAttr.shutterTimeMax = GADI_VI_FPS_25;
+         aeAttr.gainMax        = 33;
+         aeAttr.gainMin        = 1;
+         contrastAttr.enableAuto     = 1;
+         contrastAttr.manualStrength = 128;
+         contrastAttr.autoStrength   = 64;//96;
+         gadi_isp_set_contrast_attr(ispHandle, &contrastAttr);
+         gadi_isp_set_ae_attr(ispHandle, &aeAttr);
+     }
+//end
+}
 
 
  int gdm_isp_start(void)
@@ -790,6 +942,8 @@ GADI_ERR gdm_vout_setup_after(void)
         printf("gadi_isp_start() failed! ret = %d\n", retVal);
     }
     
+    isp_nighttoday(0);
+
     ispStart = TRUE;
     return retVal;
 }
@@ -803,11 +957,20 @@ void* gdm_read_encode_streams(void *arg)
     int chn, i;
     GADI_CHN_AttrT  chnAttr;
     GADI_VENC_StreamT stream;
+    FILE *fp = NULL;
+    
+    char* buf[128];
+    record_enable = 0;
+
+    FILE *jfp = NULL;
+
+    
+
 
     if(record_enable){
         /* open a new file to write */
         remove(record_file_name);
-        if ((fd = open(record_file_name, O_WRONLY | O_CREAT, 0644)) == -1){
+        if ((fp = fopen(record_file_name,"wr+")) == -1){
             printf("open %s failed.\n", record_file_name);
             return NULL;
         }
@@ -841,9 +1004,23 @@ void* gdm_read_encode_streams(void *arg)
                 else{
                     if(record_enable){
                         /*record encode stream 0.*/
-                        if(stream.stream_id == GADI_VENC_STREAM_FIRST){
-                            if (write(fd, stream.addr, stream.size) != stream.size){
+                        if(stream.stream_id == GADI_VENC_STREAM_FIRST)
+                        {
+                            if (fwrite(stream.addr,1, stream.size,fp) != stream.size){
                                 printf("record: write file error, len=%d\n",stream.size);
+                            }
+                        }else if(stream.pic_type == 5){
+                            
+                                        
+                            sprintf(buf,"./test_%d.jpeg",stream.frame_num%10);
+                            printf("filename:%s\n",buf);
+                            jfp  = fopen(buf,"wr+");
+
+                            if(jfp){
+                                fwrite(stream.addr,1,stream.size,jfp);
+                                fclose(jfp);
+                            }else{
+                                printf("open file fail \n");
                             }
                         }
                     }
@@ -927,6 +1104,7 @@ int  gk_device_init(void* data)
 
     gdm_vi_setup(); //ok
     gdm_vout_setup(); //ok
+    
     gdm_venc_setup();
     gdm_vout_setup_after();
     
@@ -939,8 +1117,7 @@ int  gk_device_init(void* data)
         }
     }
     gadi_venc_print_params(vencHandle);
-
-   
+     
     err = gdm_isp_init();
     if(err < 0)
     {
@@ -951,14 +1128,13 @@ int  gk_device_init(void* data)
         printf("gdm_isp_open failed.\n");
         return -1;
     }
-
+  
     err = gdm_isp_start();
     if((err < 0) && (GADI_ISP_ERR_FEATURE_NOT_SUPPORTED != err)){
         printf("gdm_isp_start failed.\n");
         return -1;
     }
     
-    //set video fb channel
     fb_select();
 
     return 0;

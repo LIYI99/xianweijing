@@ -149,4 +149,42 @@ void    object_pool_deinfo(object_pool_t *s,object_node_init func){
 
 }
 
+int     object_pool_reset(object_pool_t *s)
+{
+    if(!s)
+        return -1;
+    s->usecnts = 0;
+    
+
+    //reset mem
+    memset(s->pool,0x0,(sizeof(struct qnode)+s->object_size)*s->max);
+
+     //init and pop data node in queue
+    int i = 0;
+    struct qnode *nodep = NULL,*temp =NULL;
+    void *datap  = NULL;
+
+       for( i = 0;  i < s->max ;i++){
+        nodep =  (struct qnode *)(s->pool + s->object_size*i);
+
+        datap = ((void *)nodep) + sizeof(struct qnode);
+        if(s->_init){
+            s->_init(datap);
+        }
+        if(s->head == NULL){
+            s->head = nodep;
+            s->end = nodep;
+            s->head->next = nodep;
+            //s->end->prev = nodep;
+        }else{
+            temp = s->head;
+            s->head = nodep;
+            s->head->next = temp;
+            temp->prev = s->head;
+        }
+    }
+
+    return 0;
+}
+
 

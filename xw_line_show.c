@@ -434,12 +434,15 @@ int     xw_lines_cl_op_all(void *data)
 
      if(xw_lt->line_arry_state == 0)
      {
+        xw_logsrv_debug("xw_lines_cl_op_all line:%d:  state:%denbale liens \n",__LINE__,xw_lt->line_arry_state);
+
+
         Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID ,1);
         Image_SDK_Set_Node_Submenu( XW_LINE_RARR_WINDOW_ID,1);
         Image_SDK_Set_Node_En_Freshen( XW_LINE_RARR_WINDOW_ID,NEED_FRESHEN);
 
         xw_lt->line_arry_state = 1;
-        xw_logsrv_debug("xw_lines_cl_op_all: enbale liens \n");
+        xw_logsrv_debug("line:%d\n",__LINE__);
     }else{
 
         Image_SDK_Set_Node_En( XW_LINE_RARR_WINDOW_ID,0);

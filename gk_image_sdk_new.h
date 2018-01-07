@@ -260,10 +260,10 @@ typedef struct  image_sdk_s{
     uint16_t        disp_fps;
     int             video_fd;
     void            *mmap_p;
-    
+    uint8_t         mmap_updated; 
     //mouse
     int             mouse_fd;
-    GK_MOUSE_DATA   mouse_new_data; 
+    GK_MOUSE_DATA   mouse_new_data;
     uint8_t         need_restart_mouse;
     uint8_t         mouse_data_updated;
     

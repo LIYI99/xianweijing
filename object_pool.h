@@ -37,6 +37,7 @@ object_pool_t*  object_pool_create(unsigned int object_size,unsigned int max,
 void    object_pool_destory(object_pool_t *s);
 void*   object_pool_get(object_pool_t *s);
 void   object_pool_free(object_pool_t *s,void* p);
+int     object_pool_reset(object_pool_t *s);
 
 void    object_pool_deinfo(object_pool_t *s,object_node_init func);
 

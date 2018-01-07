@@ -128,7 +128,7 @@ static void usr_push_video_button(void *data ,uint16_t *fbbuf,int scree_w ,int s
 {
 
     window_node_button_t *bt =  (window_node_button_t *)data;
-    xw_logsrv_debug(" video push bt->color:%x\n",bt->color); 
+    //xw_logsrv_debug(" video push bt->color:%x\n",bt->color); 
     //top w line
     int i ,k ;
     for(i = bt->y; i < (bt->y+bt->size) ;i ++){
@@ -247,17 +247,15 @@ static void mouse_ldown_button_perview(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
-    xw_text_promt_put("NOT SUPPORT!",3000);
+   // xw_text_promt_put("NOT SUPPORT!",3000);
 
-    //close line and main meuse 
-   // Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_CLEAR);
-   // Image_SDK_Set_Node_En(XW_MAIN_WINDOW_ID,0);
-    //
      xw_lines_close_all_root(NULL);
+
+
     //Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
     //Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID,0);
     //usleep(100000);
-   // xw_preview_cl_op(NULL);
+    xw_preview_cl_op(NULL);
 
     return ;
 
