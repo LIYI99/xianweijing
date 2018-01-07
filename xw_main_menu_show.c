@@ -3,7 +3,7 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "xw_png_load.h"
-#include "gk_image_sdk_new.h"
+#include "image_sdk_core.h"
 #include "xw_logsrv.h"
 #define     MAIN_MENU_H         396
 #define     MAIN_MENU_W         813

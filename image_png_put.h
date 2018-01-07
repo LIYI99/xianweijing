@@ -4,7 +4,8 @@
 
 
 
-int  image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h,uint32_t *w);
+int  image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h,uint32_t *w,uint8_t flags);
+
 
 
 
