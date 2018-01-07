@@ -7,7 +7,7 @@
 #include "xw_text_prompt_box.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
-#include "gk_image_sdk_new.h"
+#include "image_sdk_core.h"
 #include "image_zoom_func.h"
 #include "image_text_put.h"
 #include "xw_logsrv.h"

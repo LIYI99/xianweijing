@@ -5,7 +5,7 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "xw_top_menu_show.h"
-#include "gk_image_sdk_new.h"
+#include "image_sdk_core.h"
 #include "xw_preview_show.h"
 #include "xw_line_show.h"
 #include "xw_text_prompt_box.h"
