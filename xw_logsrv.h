@@ -1,7 +1,7 @@
 #ifndef __XW_LOGSRV_H__
 #define __XW_LOGSRV_H__
 #include <stdint.h>
-#include "logsrv.h"
+#include "image_logsrv.h"
 int     xw_logsrv_init(char *path,uint16_t level);
 int     xw_logsrv_deinit(void );
 basic_log_t *xw_logsrv_get(void );

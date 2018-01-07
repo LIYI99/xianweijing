@@ -1,5 +1,4 @@
 #include "xw_logsrv.h"
-#include "logsrv.h"
 
 #define     XW_LOG_INFO_PATH        "/usr/local/bin/logs/message"
 #define     XW_LOG_NAME             "xw_log"
