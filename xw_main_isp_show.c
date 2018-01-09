@@ -68,7 +68,8 @@ FILE            *xw_isp_fp = NULL;
 #define     XW_ISP_BAR_LINE_H                       6
 #define     XW_ISP_BAR_LINE_W                       120
 #define     XW_ISP_BAR_MAX_VALUE                    100
-#define     XW_ISP_BAR_STEP                         10
+#define     XW_ISP_BAR_STEP                         1
+#define     XW_ISP_BAR_STEP_B                       10
 
 
 
@@ -177,12 +178,30 @@ int  xw_main_isp_show(void *data)
         xw_isp_p->sharpness = 30;
     }
 
-    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_RGB_GAIN,(void *)&ndata,size);
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_RED_GAIN,(void *)&ndata,size);
     if(ret >= 0){
         xw_isp_p->red_awb = ndata;
     }else{
         xw_isp_p->red_awb = 30;
     }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_GREEN_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->green_awb = ndata;
+    }else{
+        xw_isp_p->green_awb = 30;
+    }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_BLUE_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->blue_awb = ndata;
+    }else{
+        xw_isp_p->blue_awb = 30;
+    }
+
+
+
+
 
     ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_HUE,(void *)&ndata,size);
     if(ret >= 0){
@@ -283,7 +302,7 @@ static void xw_isp_exposure_manul_ldown(void *data)
         if(xw_isp_p->exposure_vaule >  XW_ISP_BAR_MAX_VALUE ){
             xw_isp_p->exposure_vaule = XW_ISP_BAR_MAX_VALUE;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->exposure_vaule >= XW_ISP_BAR_STEP )
         {
@@ -424,14 +443,14 @@ static void xw_isp_awb_colortemp_ldown(void *data)
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
    
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*5))
     {
         
         xw_isp_p->colortemp_awb += XW_ISP_BAR_STEP * 10 ;  
         if(xw_isp_p->colortemp_awb >  XW_ISP_BAR_MAX_VALUE * 10 ){
             xw_isp_p->colortemp_awb = XW_ISP_BAR_MAX_VALUE * 10;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->colortemp_awb >= XW_ISP_BAR_STEP * 10 )
         {
@@ -477,14 +496,14 @@ static void xw_isp_awb_red_ldown(void *data)
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->red_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->red_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->red_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->red_awb >= XW_ISP_BAR_STEP  )
         {
@@ -493,8 +512,12 @@ static void xw_isp_awb_red_ldown(void *data)
             xw_isp_p->red_awb = 0;
         }
     }else{
-        
-        return ;
+        int va = 0;
+         va = (bar->this_node->mouse_data.x - bar->x)* 10 /(bar->w) ;
+
+         xw_isp_p->red_awb = va * XW_ISP_BAR_STEP_B; 
+         if(xw_isp_p->red_awb > XW_ISP_BAR_MAX_VALUE)
+             xw_isp_p->red_awb = XW_ISP_BAR_MAX_VALUE;
     }
     if(xw_isp_p->auto_awb == 1){
         
@@ -515,7 +538,7 @@ static void xw_isp_awb_red_ldown(void *data)
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->red_awb;
-    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RED_GAIN,&vaule,4);
 
     return ;
 
@@ -526,14 +549,14 @@ static void xw_isp_awb_green_ldown(void *data)
     
     window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-    if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+    if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->green_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->green_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->green_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->green_awb >= XW_ISP_BAR_STEP  )
         {
@@ -563,7 +586,7 @@ static void xw_isp_awb_green_ldown(void *data)
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->green_awb;
-    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_GREEN_GAIN,&vaule,4);
 
 
     return ;
@@ -574,14 +597,14 @@ static void xw_isp_awb_green_ldown(void *data)
 static void xw_isp_awb_blue_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
-        if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+        if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->blue_awb += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->blue_awb >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->blue_awb = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->blue_awb >= XW_ISP_BAR_STEP  )
         {
@@ -612,7 +635,7 @@ static void xw_isp_awb_blue_ldown(void *data)
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->blue_awb;
-    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,&vaule,4);
+    Image_Msg_Send( IDSCAM_IMG_MSG_AWB_SET_BLUE_GAIN,&vaule,4);
 
     return ;
 
@@ -872,14 +895,14 @@ static void xw_isp_denoise_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->denoise += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->denoise >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->denoise = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->denoise >= XW_ISP_BAR_STEP  )
         {
@@ -910,14 +933,14 @@ static void xw_isp_sharpness_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->sharpness += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->sharpness >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->sharpness = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->sharpness >= XW_ISP_BAR_STEP  )
         {
@@ -949,14 +972,14 @@ static void xw_isp_brightness_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->brightness += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->brightness >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->brightness = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->brightness >= XW_ISP_BAR_STEP  )
         {
@@ -987,14 +1010,14 @@ static void xw_isp_saturation_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->saturation += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->saturation >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->saturation = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->saturation >= XW_ISP_BAR_STEP  )
         {
@@ -1026,14 +1049,14 @@ static void xw_isp_contrast_ldown(void *data)
 {
      window_node_bar_t *bar  = (window_node_bar_t *)data;
     
-     if(bar->this_node->mouse_data.x > (bar->x + bar->w/6*5))
+     if(bar->this_node->mouse_data.x > (bar->x + bar->w/8*7))
     {
         
         xw_isp_p->contrast += XW_ISP_BAR_STEP  ;  
         if(xw_isp_p->contrast >  XW_ISP_BAR_MAX_VALUE  ){
             xw_isp_p->contrast = XW_ISP_BAR_MAX_VALUE ;
         }
-    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/6)){
+    }else if(bar->this_node->mouse_data.x < (bar->x + bar->w/8)){
 
         if(xw_isp_p->contrast >= XW_ISP_BAR_STEP  )
         {
@@ -1305,19 +1328,9 @@ static void     xw_video_day_night_button_ldown(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
-    if(xw_isp_p->chroma == 0)
-        xw_isp_p->chroma = 0;
-    else
-        xw_isp_p->chroma = 1;
-
     //add video mirror set func
-    int vaule ;
-    if(xw_isp_p->chroma){
-        vaule = 35;
-    }else
-        vaule = 10;
-    Image_Msg_Send( IDSCAM_IMG_MSG_HUE,&vaule,4);
-   
+    int vaule  = 0;
+    Image_Msg_Send(IDSCAM_IMG_MSG_SET_BW_MODE,&vaule,4);
     return ;
 }
 

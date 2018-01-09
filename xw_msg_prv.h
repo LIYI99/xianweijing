@@ -1,6 +1,12 @@
 #ifndef __IMAGE_MSG_PRV_H__
 #define __IMAGE_MSG_PRV_H__
 
+
+#ifdef  __cplusplus
+    extern  "C"{
+#endif
+    
+
 typedef enum
 {
 	IDSCAM_IMG_MSG_CAPTURE = 1,
@@ -41,23 +47,33 @@ typedef enum
     IDSCAM_IMG_MSG_DENOISE,
     IDSCAM_IMG_MSG_GET_DENOISE,
 
-    IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN,
-    IDSCAM_IMG_MSG_AWB_GET_RGB_GAIN,
-
+    IDSCAM_IMG_MSG_AWB_SET_RED_GAIN,
+    IDSCAM_IMG_MSG_AWB_GET_RED_GAIN,
+    
+    IDSCAM_IMG_MSG_AWB_SET_GREEN_GAIN,
+    IDSCAM_IMG_MSG_AWB_GET_GREEN_GAIN,
+    
+    IDSCAM_IMG_MSG_AWB_SET_BLUE_GAIN,
+    IDSCAM_IMG_MSG_AWB_GET_BLUE_GAIN,
+    
     IDSCAM_IMG_MSG_AWB_SET_COLORTEMP,
     IDSCAM_IMG_MSG_AWB_GET_COLORTEMP,
 
     IDSCAM_IMG_MSG_MIRROR,
     IDSCAM_IMG_MSG_FLIP,
-	
+    
     IDSCAM_IMG_MSG_SET_BW_MODE,
 	IDSCAM_IMG_MSG_SENSOR_HDR_OP_MODE,
-
-	IDSCAM_IMG_MSG_GET_SDCARD_STATE,
-    IDSCAM_EVENT_MSG_SDCARD_STATE,
     
+    IDSCAM_IMG_MSG_GET_SDCARD_STATE,
+    
+    IDSCAM_EVENT_MSG_SDCARD_STATE,
     IDSCAM_EVENT_GET_CAPTURE_FILENAME,
 	IDSCAM_EVENT_GET_RECORED_FILENAME,
+    
+    IDSCAM_IMG_MSG_GET_CAPTURE_POINT,
+    
+    
     IDSCAM_IMG_MSG_EXIT,
 }img_msg_cmd_t;
 
@@ -65,6 +81,10 @@ int     Image_Msg_Start(void);
 int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len);
 int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len);
 int     Image_Msg_Proess(img_msg_cmd_t cmd,void *dat,int len);
+
+#ifdef  __cplusplus
+}
+#endif
 
     
 

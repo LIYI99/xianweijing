@@ -121,7 +121,7 @@ int  xw_top_menu_show(void *data)
     _bt.video_set.mouse_left_down = mouse_ldown_button_set;
     ret = Image_SDK_Create_Button(_attr,_bt);
     
-    return 0;
+    return ret;
     
 }
 
@@ -184,10 +184,14 @@ static void mouse_ldown_button_snap(void *data)
      bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     //send singed to main srv
-    
-    //xw_text_promt_put("NOT SDCRAD!",3000);
+    int ret  = 0;
+    ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+    if(ret <= 0){
+        xw_text_promt_put("NOT SDCRAD!",3000);
+        return ;
+    }
     Image_Msg_Send(IDSCAM_IMG_MSG_CAPTURE,NULL,0);
-
+    return ;
 }
 
 static uint8_t record_state = 0;
@@ -213,7 +217,7 @@ static void mouse_ldown_button_recod(void *data)
     }else{
         xw_time_cnt_start(0);
         record_state = 0;
-         Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_STOP,NULL,0);
+        Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_STOP,NULL,0);
 
     }
     
@@ -246,9 +250,6 @@ static void mouse_ldown_button_set(void *data)
         main_window_state = 0;
     }
 
-    //printf("set button  \n");
-
-    //send signed to man srv
 }
 
 static void mouse_ldown_button_perview(void *data)
@@ -257,16 +258,15 @@ static void mouse_ldown_button_perview(void *data)
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
-   // xw_text_promt_put("NOT SUPPORT!",3000);
-
-     xw_lines_close_all_root(NULL);
-
-
-    //Image_SDK_Set_Node_En_Freshen(XW_LINE_RARR_WINDOW_ID,NEED_CLEAR);
-    //Image_SDK_Set_Node_En(XW_LINE_RARR_WINDOW_ID,0);
-    //usleep(100000);
+    int ret;
+    ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+    if(ret <= 0){
+        xw_text_promt_put("NOT SDCRAD!",3000);
+        return ;
+    }
+    
+    xw_lines_close_all_root(NULL);
     xw_preview_cl_op(NULL);
-
     return ;
 
 }
@@ -275,16 +275,13 @@ static void mouse_offset_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
     mt->this_node->en_submenu = 1;
-    xw_logsrv_debug("%s line:%d  \n",__func__,__LINE__);
-    
+       
 }
 
 static void mouse_leave_top_menu(void *data)
 {
     window_node_menu_t *mt = (window_node_menu_t *)data;
     mt->this_node->en_submenu = 0;
-    xw_logsrv_debug("%s line:%d  \n",__func__,__LINE__);
-
 
 }
 

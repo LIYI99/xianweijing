@@ -7,6 +7,9 @@
  *  return      0: sesscure
  *          other: fail
  * */
+#ifdef  __cplusplus
+    extern  "C"{
+#endif
 
 int socket_msg_init(void);
 
@@ -33,7 +36,7 @@ int  socket_send_sharpness(  int vaule);
 int  socket_send_denoise(  int vaule);
 int  socket_send_hue(  int vaule);
 int  socket_send_awb_red(  int vaule);
-int  socket_send_awb_gree(  int vaule);
+int  socket_send_awb_green(  int vaule);
 int  socket_send_awb_blue(  int vaule);
 int  socket_send_awb_color_temp(  int vaule);
 int  socket_send_hdr(  int vaule);
@@ -55,13 +58,26 @@ int  socket_get_sharpness(  int *vaule , int len);
 int  socket_get_denoise(  int *vaule , int len);
 int  socket_get_hue(  int *vaule , int len);
 int  socket_get_awb_red(  int *vaule , int len);
-int  socket_get_awb_gree(  int *vaule , int len);
+int  socket_get_awb_green(  int *vaule , int len);
 int  socket_get_awb_blue(  int *vaule , int len);
 int  socket_get_awb_color_temp(  int *vaule , int len);
 int  socket_get_sdcard_state(  int *vaule , int len);
 int  socket_get_get_carture_filename(char *s,int len);
 int  socket_get_get_recoder_filename(char *s ,int len );
 
+//use get snap point
+struct image_get{
+    void*   buf[4];
+    int     nums;
+};
+
+int  socket_get_get_snap_point(void* data ,int len);
+
+
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 

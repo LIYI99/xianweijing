@@ -40,7 +40,7 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
     if(NULL != data){
         ret  = *(int *)data;
     }
-    xw_logsrv_debug("SEND MSG CMD:%d,SET VALUE:%d\n",cmd,ret);
+    xw_logsrv_err("SEND MSG CMD:%d,SET VALUE:%d\n",cmd,ret);
     
     ret  = 0;
 
@@ -101,9 +101,17 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
             ret = socket_send_denoise(  *(int *)data);
 
             break;
-        case IDSCAM_IMG_MSG_AWB_SET_RGB_GAIN:
+        case IDSCAM_IMG_MSG_AWB_SET_RED_GAIN:
             ret = socket_send_awb_red(  *(int *)data);
             break;
+        case IDSCAM_IMG_MSG_AWB_SET_GREEN_GAIN:
+            ret = socket_send_awb_green(  *(int *)data);
+            break;
+        case IDSCAM_IMG_MSG_AWB_SET_BLUE_GAIN:
+            ret = socket_send_awb_blue(  *(int *)data);
+            break;
+
+
         case IDSCAM_IMG_MSG_AWB_SET_COLORTEMP:
             ret = socket_send_awb_color_temp(*(int *)data);
 
@@ -134,7 +142,7 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
 
 
     }
-    return 0;
+    return ret;
 }
 
 int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
@@ -191,9 +199,14 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
             ret =   socket_get_denoise(  (int *)data , len/sizeof(int));
 
             break;
-        case IDSCAM_IMG_MSG_AWB_GET_RGB_GAIN:
+        case IDSCAM_IMG_MSG_AWB_GET_RED_GAIN:
             ret =   socket_get_awb_red(   (int *)data , len/sizeof(int));
-
+            break;
+        case IDSCAM_IMG_MSG_AWB_GET_GREEN_GAIN:
+            ret =   socket_get_awb_green(   (int *)data , len/sizeof(int));
+            break;
+        case IDSCAM_IMG_MSG_AWB_GET_BLUE_GAIN:
+            ret =   socket_get_awb_blue(   (int *)data , len/sizeof(int));
             break;
         case IDSCAM_IMG_MSG_AWB_GET_COLORTEMP: 
             ret =   socket_get_awb_color_temp( (int *)data , len/sizeof(int));
@@ -207,6 +220,10 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
             break;
         case IDSCAM_EVENT_GET_RECORED_FILENAME: 
             ret =   socket_get_get_recoder_filename((char *)data ,len );
+        
+        case IDSCAM_IMG_MSG_GET_CAPTURE_POINT: 
+            ret =   socket_get_get_snap_point(data ,len);
+
 
             break;
         default:
@@ -214,7 +231,7 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
 
 
     }
-    xw_logsrv_debug("GET MSG CMD:%d get ret:%d\n",cmd,ret);
+    xw_logsrv_err("GET MSG CMD:%d get ret:%d\n",cmd,ret);
     
     return ret;
 }

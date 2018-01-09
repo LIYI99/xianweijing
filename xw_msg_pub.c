@@ -42,7 +42,7 @@ int  socket_send_sharpness(  int vaule){ return -1;}
 int  socket_send_denoise(  int vaule){ return -1;}
 int  socket_send_hue(  int vaule){ return -1;}
 int  socket_send_awb_red(  int vaule){ return -1;}
-int  socket_send_awb_gree(  int vaule){ return -1;}
+int  socket_send_awb_green(  int vaule){ return -1;}
 int  socket_send_awb_blue(  int vaule){ return -1;}
 int  socket_send_awb_color_temp(  int vaule){ return -1;}
 int  socket_send_hdr(  int vaule){ return -1;}
@@ -64,12 +64,15 @@ int  socket_get_sharpness(  int *vaule , int len){ return -1;}
 int  socket_get_denoise(  int *vaule , int len){ return -1;}
 int  socket_get_hue(  int *vaule , int len){ return -1;}
 int  socket_get_awb_red(  int *vaule , int len){ return -1;}
-int  socket_get_awb_gree(  int *vaule , int len){ return -1;}
+int  socket_get_awb_green(  int *vaule , int len){ return -1;}
 int  socket_get_awb_blue(  int *vaule , int len){ return -1;}
 int  socket_get_awb_color_temp(  int *vaule , int len){ return -1;}
 int  socket_get_sdcard_state(  int *vaule , int len){ return -1;}
 int  socket_get_get_carture_filename(char *s,int len){ return -1;}
 int  socket_get_get_recoder_filename(char *s ,int len ){ return -1;}
+
+// < 0 fail
+int  socket_get_get_snap_point(void* data ,int len){ return -1 ;}
 
 
 
