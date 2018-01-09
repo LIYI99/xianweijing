@@ -48,14 +48,17 @@ static  void  mouse_ldown_button_settime(void *data)
 {
     
     window_node_button_t *bt  = (window_node_button_t *)data;
-    bt->color =0xf00f;
-    bt->this_node->freshen_arrt = NEED_FRESHEN;
-
-
+   
     if(_state == DATE_WINDOW_RUNING ){
+        bt->color = CON_BUTTON_LDOWN_COLOR;
+        bt->this_node->freshen_arrt = NEED_FRESHEN;
         _state = DATE_WINDOW_SET;
         return;
     }
+
+    bt->color = 0xfd88;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+
     time_t  tmp = 0 ;
 
     tmp = mktime(&set_time);
@@ -70,6 +73,7 @@ static  void  mouse_ldown_button_settime(void *data)
 }
 
 static void mouse_offset_settime_func(void *data){
+    return ;
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color =0xf0f0;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
@@ -77,14 +81,16 @@ static void mouse_offset_settime_func(void *data){
 }
 
 static void mouse_leave_settime_func(void *data){
+    return;
     window_node_button_t *bt  = (window_node_button_t *)data;
-    bt->color = 0xefee;
+    bt->color = 0xd88;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     return;
 }
 
 
 static void mouse_lup_settime_func(void *data){
+    return;
     window_node_button_t *bt  = (window_node_button_t *)data;
     bt->color = 0xf0f0;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
@@ -317,8 +323,8 @@ void*   xw_date_show(void *data)
     bt.y                =  XW_DATE_SET_WINDOW_Y ;
     bt.w                =  DATE_SET_WINDOW_W;
     bt.h                =  DATE_SET_WINDOW_H;
-    bt.color            =  0;
-    bt.size             =  2;
+    bt.color            =  FONT_WIN_COLOR ;
+    bt.size             =  3;
     bt.user_video_freshen = usr_push_video_button_set;
     bt.video_set.mouse_left_down = mouse_ldown_button_settime;
     bt.video_set.mouse_leave = mouse_leave_settime_func;

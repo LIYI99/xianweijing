@@ -8,6 +8,7 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "image_argb_ayuv.h"
+#include "xw_msg_prv.h"
 #include "xw_logsrv.h"
 
 #define  XW_IMAGE_ANY_PEVIEW_WIN_W          1920/2 + 20 
@@ -82,15 +83,24 @@ static void argb_to_ayuv(uint16_t *argb, uint16_t *ayuv)
 }
 
 
+struct getmage_p{
+    void*   magep_p[4];
+    int     nums;
+};
+
 static void any_preview_freshen(void *data,uint16_t *fbbuf,
-        int scree_w,int scree_h){
+        int scree_w,int scree_h)
+{
     
-    if(xw_preview_p == NULL )        return ;
+    if(xw_preview_p == NULL )        
+        return ;
+    
    
+
     window_node_menu_t *mt  =  (window_node_menu_t *)data;
     int i,k,j,nh,nw;
     uint16_t *imagep = NULL;
-   
+    
     //clear
     if(mt->this_node->freshen_arrt == NEED_CLEAR)
     {
@@ -105,50 +115,9 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
     
     if(xw_preview_p->preview_now_state != 1)
         return;
-#if 1 //test mode
-    uint16_t    test_color;
-    uint32_t    incolor = 0xff0000ff; //read
-
-
-
-    image_rgba8888_to_ayuv(incolor,&test_color); 
-    for(i = 0; i < 4 ; i ++){
-        
-        nw = i%2;
-        nh = i/2;
-        if(i == 1){
-            incolor = 0xffff0000; //bule 
-            image_rgba8888_to_ayuv(incolor,&test_color); 
-        
-            //test_color = 0xff00;
-        }else if(i == 2){
-            incolor = 0xff00ff00; //green
-            image_rgba8888_to_ayuv(incolor,&test_color); 
-            //test_color = 0xf0f0;
-        }else if(i == 3){
-            incolor = 0xffffffff; 
-            image_rgba8888_to_ayuv(incolor,&test_color); 
-            //test_color =0xffff;
-        }
-//        xw_logsrv_debug("ayuv:0x%x",test_color);
-
-        for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
-                k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++){
-            for(j = (mt->x + nw*(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )); 
-                    j < (mt->x + XW_SMALL_IMAGE_W + nw *(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )) ; j++){
-                *(fbbuf + scree_w * k + j) = test_color;       
-            }
-        }    
-
-    
-    }
-
-    xw_preview_p->samll_cnt_nums_last =  xw_preview_p->samll_cnt_nums;
-    xw_preview_p->samll_cnt_nums = 0;
-
-#else
     //freshen
-    for(i = 0; i < xw_preview_p->samll_cnt_nums ; i ++){
+    for(i = 0; i < xw_preview_p->samll_cnt_nums ; i ++)
+    {
         imagep = xw_preview_p->preview_buf_samll[i];
         if(imagep == NULL)
             break;
@@ -169,13 +138,13 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
     }
     xw_preview_p->samll_cnt_nums_last =  xw_preview_p->samll_cnt_nums;
     xw_preview_p->samll_cnt_nums = 0;
-#endif
     return ;
 }
 
 
 static void only_preview_freshen(void *data,uint16_t *fbbuf,
-        int scree_w,int scree_h){
+        int scree_w,int scree_h)
+{
     
     window_node_menu_t *mt  =  (window_node_menu_t *)data;
     int i,k,j,nh,nw;
@@ -215,7 +184,11 @@ static void only_preview_freshen(void *data,uint16_t *fbbuf,
 
 static void any_preview_mouse_ldown(void *data){
     
-    
+   
+
+    //now not support big puture preivew
+    return ;
+
     struct  timeval tv1;
     // signle check not run 
     gettimeofday(&tv1,NULL);
@@ -248,24 +221,11 @@ static void any_preview_mouse_ldown(void *data){
     else 
         n = 3;
     //test
-    if(xw_preview_p->samll_cnt_nums_last >= 0 ){
+    if(xw_preview_p->samll_cnt_nums_last >= 0 )
+    {
         
         // if get data fuc ,data save xw_preveiew_p
-#if 1
-        
-        if(n == 0)
-            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-1ID");
-        else if(n == 1){
-             xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-2ID");
-        }else if(n == 2){
-            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-3ID");
-        }else if(n == 3){
-            xw_preview_p->preview_buf_big[0] = (uint16_t *)xw_get_window_png("testprivew-4ID");
-        }
-        
 
-        xw_preview_p->big_cnt_nums = 1;
-#endif
         if(xw_preview_p->preview_buf_big[0] == NULL)
             return ;
 
@@ -278,18 +238,19 @@ static void any_preview_mouse_ldown(void *data){
         xw_preview_p->preview_now_state = 2; 
     }else{
         
-        //not doing
     }
-    //add get data buf func
 
-    //
     return ;
 }
 
 static void only_preview_mouse_ldown(void *data)
 {
     
+    return;
+
+    
     struct  timeval tv1;
+
     // signle check not run 
     gettimeofday(&tv1,NULL);
     if(xw_preview_p->tv_b.tv_usec == 0){
@@ -362,7 +323,7 @@ int xw_preview_show(void *data)
     
 
     //create preivew next button
-
+    
 
     //create preivew prev button
 
@@ -379,12 +340,28 @@ int xw_preview_show(void *data)
 
 int xw_preview_cl_op(void *data)
 {
+    
+    struct getmage_p mage_p;
+    mage_p.nums = 0;
+
+    int ret  = 0;
     if(xw_preview_p == NULL)
         return -1;
     if(xw_preview_p->preview_now_state == 0){
         //open any
         //get data buf save the handle 
        
+        ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CAPTURE_POINT,(void *)&mage_p,sizeof(struct getmage_p));
+        if(ret < 0)
+        {
+            xw_logsrv_err("not get image proint\n");
+            return -2;    
+        }
+        for(ret  = 0 ; ret < mage_p.nums;ret++)
+        {
+            xw_preview_p->preview_buf_samll[ret] = mage_p.magep_p[ret];
+        }
+        xw_preview_p->samll_cnt_nums = mage_p.nums;
         //set node open
         Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANY_WINDOW_ID ,1);
         Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,  NEED_FRESHEN);
