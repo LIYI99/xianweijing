@@ -52,9 +52,14 @@ FILE            *xw_isp_fp = NULL;
 #define     XW_ISP_BUTTON_H                         10
 #define     XW_ISP_BUTTON_W                         18
 
+#define     XW_ISP_BUTTON_REST_H                    32
+#define     XW_ISP_BUTTON_REST_W                    39
+
+
 
 #define     XW_VIDEO_SET_BUTTON_H                   45
 #define     XW_VIDEO_SET_BUTTON_W                   45
+
 
 #define     XW_VIDEO_SET_BUTTON_LEAVE_COLOR         CON_BUTTON_LEAVE_COLOR  
 #define     XW_VIDEO_SET_BUTTON_LDOWN_COLOR         CON_BUTTON_LDOWN_COLOR 
@@ -82,6 +87,7 @@ static int  xw_isp_white_banlance_show(void *data);
 static int  xw_isp_filck_show(void *data);
 static int  xw_isp_frequen_show(void *data);
 static int  xw_video_frequen_show(void *data);
+static int  xw_isp_reset_show(void *data);
 
 
 
@@ -117,8 +123,9 @@ int  xw_main_isp_show(void *data)
     if(ret >= 0){
         xw_isp_p->auto_exposure = ret;
     }else{
-        xw_isp_p->auto_exposure     = 1;
+        xw_isp_p->auto_exposure = 1;
     }
+
     
     ret = Image_Msg_Get(IDSCAM_IMG_MSG_AE_GET_TARGET_RATIO,(void *)&ndata,size);
     if(ret >= 0){
@@ -255,8 +262,9 @@ if(ret <= 0)
     ret = xw_isp_filck_show(NULL);
     ret = xw_isp_frequen_show(NULL);
     ret = xw_video_frequen_show(NULL);
+    ret  = xw_isp_reset_show(NULL);
 
-    return  0;
+    return  ret ;
 }
 
 //static window_node_button_t    *auto_ae_bt = NULL;
@@ -324,13 +332,16 @@ static void xw_isp_exposure_manul_ldown(void *data)
     
     bar->now_value = xw_isp_p->exposure_vaule;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[5];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
-    
+#endif
+
     //add isp set func
     int vaule = xw_isp_p->exposure_vaule;
      Image_Msg_Send( IDSCAM_IMG_MSG_AE_SET_TARGET_RATIO,&vaule,4);
+
 
    // printf("bar->exposure_vaule:%d\n",bar->now_value);
     return;
@@ -475,10 +486,12 @@ static void xw_isp_awb_colortemp_ldown(void *data)
     
     bar->now_value = xw_isp_p->colortemp_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
-    
+#endif
+
     //add isp set func
     
     int vaule ;
@@ -532,9 +545,11 @@ static void xw_isp_awb_red_ldown(void *data)
 
     bar->now_value = xw_isp_p->red_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->red_awb;
@@ -580,9 +595,12 @@ static void xw_isp_awb_green_ldown(void *data)
     
     bar->now_value = xw_isp_p->green_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->green_awb;
@@ -629,9 +647,12 @@ static void xw_isp_awb_blue_ldown(void *data)
 
     bar->now_value = xw_isp_p->blue_awb;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule = xw_isp_p->blue_awb;
@@ -954,9 +975,12 @@ static void xw_isp_sharpness_ldown(void *data)
     
     bar->now_value = xw_isp_p->sharpness;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule =  xw_isp_p->sharpness;
@@ -993,9 +1017,12 @@ static void xw_isp_brightness_ldown(void *data)
     
     bar->now_value = xw_isp_p->brightness;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule =  xw_isp_p->brightness;
@@ -1032,9 +1059,12 @@ static void xw_isp_saturation_ldown(void *data)
     
     bar->now_value = xw_isp_p->saturation;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule =  xw_isp_p->saturation;
@@ -1071,9 +1101,12 @@ static void xw_isp_contrast_ldown(void *data)
     
     bar->now_value = xw_isp_p->contrast;
     bar->this_node->freshen_arrt = NEED_FRESHEN;
+#if 0
     char text[6];
     sprintf( text,"%d",bar->now_value);
     Image_SDK_Set_Text_Node_Text(bar->text_id, text,strlen(text));
+#endif
+
     //add isp set func 
     int vaule ;
     vaule =  xw_isp_p->contrast;
@@ -1424,6 +1457,195 @@ static int  xw_video_frequen_show(void *data)
 
 
 
+}
+
+
+static void     xw_isp_reset_button_ldown(void *data)
+{
+
+    window_node_button_t *bt  = (window_node_button_t *)data;
+    bt->color = XW_VIDEO_SET_BUTTON_LDOWN_COLOR;
+    bt->this_node->freshen_arrt = NEED_FRESHEN;
+    //send reset signel to device serv
+    int vaule ,ret = 0,size = 4,ndata;
+    vaule =  1;
+    ret = Image_Msg_Send( IDSCAM_IMG_MSG_RESET_ISP,&vaule,4);
+    if(ret < 0){
+        xw_logsrv_err("send reset signle fail \n");
+        return ;
+    }
+    
+    //reset isp
+    //
+    //AE
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ENABLE_AE,NULL,size);
+    if(ret >= 0)
+    {
+        if(ret != xw_isp_p->auto_exposure){
+            xw_isp_p->auto_exposure = ret;
+            //set color
+            if(xw_isp_p->auto_exposure){
+               Image_SDK_Set_Button_Color(XW_AUTO_EXPOUSURE_WINDOW_ID,
+                        XW_ISP_BUTTON_CHCEK_COLOR );
+            }else{
+                Image_SDK_Set_Button_Color(XW_AUTO_EXPOUSURE_WINDOW_ID,
+                        XW_ISP_BUTTON_NOT_CHCEK_COLOR );
+            }
+        }
+    }
+    
+    //MANULE AE
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AE_GET_TARGET_RATIO,(void *)&ndata,size);
+    if(ret >= 0)
+    {
+     //   ndata = 70; //test
+        xw_isp_p->exposure_vaule = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_MANUL_EXPOUSURE_WINDOW_ID,ndata);
+    }
+    
+    //AUDO AWB
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ENABLE_AWB,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->auto_awb = ret;
+        if(xw_isp_p->auto_awb){
+            Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID,
+                        XW_ISP_BUTTON_CHCEK_COLOR );
+
+        }else{
+            Image_SDK_Set_Button_Color(XW_AUTO_WHITE_BALANCE_WINDOW_ID,
+                        XW_ISP_BUTTON_NOT_CHCEK_COLOR );
+        }
+    }
+
+    //TEMPCOLOR
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_COLORTEMP,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->colortemp_awb = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_COLOR_TEMP_WINDOW_ID ,ndata);
+
+    }
+    //CONTRAST
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CONTRAST,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->contrast = ndata;
+         Image_SDK_Set_Bar_Vaule(XW_ISP_CONTRAST_WINDOW_ID ,ndata);
+
+    }
+
+    //SATRU
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SATURATION,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->saturation = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_SATURATION_WINDOW_ID, ndata);
+
+    }
+    //BR
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_BRIGHTNESS,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->brightness = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_BRIGHTNESS_WINDOW_ID, ndata);
+
+    }
+    //DENOISE
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_DENOISE,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->denoise = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_DENOISE_WINDOW_ID ,ndata);
+
+    }
+    
+    //
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SHARPNESS,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->sharpness = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_SHARPNESS_WINDOW_ID,  ndata);
+
+    }
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_RED_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->red_awb = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_ISP_RED_WINDOW_ID ,ndata);
+
+    }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_GREEN_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->green_awb = ndata;
+        Image_SDK_Set_Bar_Vaule( XW_ISP_GREEN_WINDOW_ID,   ndata);
+
+    }
+    
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_AWB_GET_BLUE_GAIN,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->blue_awb = ndata;
+        Image_SDK_Set_Bar_Vaule( XW_ISP_BLUE_WINDOW_ID ,  ndata);
+
+    }
+
+#if 0
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_HUE,(void *)&ndata,size);
+    if(ret >= 0){
+        xw_isp_p->chroma = ndata;
+        Image_SDK_Set_Bar_Vaule(XW_MANUL_EXPOUSURE_WINDOW_ID,ndata);
+
+    }else{
+        xw_isp_p->chroma = 30;
+    }
+#endif
+
+    ret = Image_Msg_Get(IDSCAM_IMG_MSG_GET_ANTIFLICKER,(void *)&ndata,size);
+    if(ret >= 0)
+    {
+        ndata = 50;   
+        if(ndata == 50){
+            xw_isp_p->filcker = 1;
+            Image_SDK_Set_Button_Color(XW_FILCKER_60H_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+            Image_SDK_Set_Button_Color(XW_FILCKER_50H_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+
+        }else{
+            xw_isp_p->filcker = 0;
+            Image_SDK_Set_Button_Color(XW_FILCKER_60H_WINDOW_ID, XW_ISP_BUTTON_CHCEK_COLOR);
+            Image_SDK_Set_Button_Color(XW_FILCKER_50H_WINDOW_ID, XW_ISP_BUTTON_NOT_CHCEK_COLOR);
+
+        }
+
+    }
+
+    Image_SDK_Set_Node_En_Freshen(XW_MAIN_WINDOW_ID,NEED_FRESHEN);
+    return ;
+
+}
+
+
+
+static int  xw_isp_reset_show(void *data)
+
+{
+    window_node_button_t        _bt;
+    struct user_set_node_atrr   _attr;
+    int                         ret = 0 ;
+
+    memset(&_bt,0x0,sizeof(window_node_button_t));
+    memset(&_attr,0x0,sizeof(window_node_button_t));
+    _attr.en_node = 1;
+    //create filp button
+    _bt.x = XW_ISP_RESET_WINDOW_X;
+    _bt.y = XW_ISP_RESET_WINDOW_Y;
+    _bt.w = XW_ISP_BUTTON_REST_W ; 
+    _bt.h = XW_ISP_BUTTON_REST_H ;
+    _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
+    _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
+    
+    _bt.video_set.mouse_left_down = xw_isp_reset_button_ldown;
+    _bt.video_set.mouse_offset = xw_video_set_button_offset;
+    _bt.video_set.mouse_leave = xw_video_set_button_leave;
+    _bt.user_video_freshen = usr_push_isp_video_button;
+    memcpy(_attr.node_id, XW_ISP_RESET_WINDOW_ID,strlen(XW_ISP_RESET_WINDOW_ID));
+    ret = Image_SDK_Create_Button(_attr,_bt); 
+
+    return ret;
 }
 
 

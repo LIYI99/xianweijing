@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "image_sdk_core.h"
 #include "xw_window_id_df.h"
@@ -84,8 +85,10 @@ static void argb_to_ayuv(uint16_t *argb, uint16_t *ayuv)
 
 
 struct getmage_p{
-    void*   magep_p[4];
-    int     nums;
+    uint8_t     mode;          // 0:firtst get,1:next 2:prve  3: only singbit saml      
+    uint8_t     order;          // sigl : 0 - 3 //,4:next 5:prve
+    void*       magep_p[4];
+    int         nums;
 };
 
 static void any_preview_freshen(void *data,uint16_t *fbbuf,
@@ -115,22 +118,41 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
     
     if(xw_preview_p->preview_now_state != 1)
         return;
+    
+    if(xw_preview_p->samll_cnt_nums == 0)
+        return;
     //freshen
     for(i = 0; i < xw_preview_p->samll_cnt_nums ; i ++)
     {
         imagep = xw_preview_p->preview_buf_samll[i];
-        if(imagep == NULL)
-            break;
+#if 0
+        // if(imagep == NULL)
+        //   break;
+#endif
         nw = i%2;
         nh = i/2;
 
-
-        for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
-                k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++){
-            for(j = (mt->x + nw*(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )); 
-                    j < (mt->x + XW_SMALL_IMAGE_W + nw *(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )) ; j++){
-                *(fbbuf + scree_w * k + j) = *imagep++;       
+        if(imagep != NULL){
+            for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
+                    k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++)
+            {
+                for(j = (mt->x + nw*(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )); 
+                        j < (mt->x + XW_SMALL_IMAGE_W + nw *(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )) ; j++)
+                {
+                    *(fbbuf + scree_w * k + j) = *imagep++;       
+                }
             }
+        }else{
+            for( k = (mt->y + nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE )) ; 
+                    k < (mt->y + XW_SMALL_IMAGE_H +  nh*(XW_SMALL_IMAGE_H + XW_IAMGE_ANY_CUT_LINE ))  ; k++)
+            {
+                for(j = (mt->x + nw*(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )); 
+                        j < (mt->x + XW_SMALL_IMAGE_W + nw *(XW_SMALL_IMAGE_W + XW_IAMGE_ANY_CUT_LINE )) ; j++)
+                {
+                    *(fbbuf + scree_w * k + j) = 0x0; //clear       
+                }
+            }
+
         }    
         xw_preview_p->preview_buf_samll[i] = NULL;
 
@@ -147,7 +169,7 @@ static void only_preview_freshen(void *data,uint16_t *fbbuf,
 {
     
     window_node_menu_t *mt  =  (window_node_menu_t *)data;
-    int i,k,j,nh,nw;
+    int i,k,j;
     uint16_t *imagep = NULL;
    
     //clear
@@ -173,7 +195,7 @@ static void only_preview_freshen(void *data,uint16_t *fbbuf,
             for(j = mt->x ;j < mt->x + mt->w ;j++)
                 *(fbbuf + scree_w*k + j) = *imagep++;;
     }
-    xw_logsrv_debug("test xxxxx k:%d j:%d\n",k,j); 
+    // xw_logsrv_debug("test xxxxx k:%d j:%d\n",k,j); 
     mt->this_node->video_state = VIDEO_STATE;
 
     //xw_preview_p->preview_buf_big[0] = NULL;
@@ -243,6 +265,61 @@ static void any_preview_mouse_ldown(void *data){
     return ;
 }
 
+
+static void any_next_mouse_ldown(void *data)
+{
+
+    window_node_menu_t  *mt  = (window_node_menu_t *)data;
+    mt->this_node->freshen_arrt = NEED_FRESHEN;
+    int ret  = 0 ;
+    struct getmage_p mage_p;
+    mage_p.mode = 1;  //next any buffer
+    mage_p.nums = 0;
+    mage_p.order= 0;
+    ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CAPTURE_POINT,(void *)&mage_p,sizeof(struct getmage_p));
+    if(ret < 0)
+        return ;
+    if(mage_p.nums == 0)
+        return ;
+    for(ret  = 0 ; ret < mage_p.nums;ret++)
+    {
+            xw_preview_p->preview_buf_samll[ret] = (uint16_t *)mage_p.magep_p[ret];
+    }
+    xw_preview_p->samll_cnt_nums = mage_p.nums;
+    xw_preview_p->preview_now_state = 1;
+    Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,NEED_FRESHEN);
+
+    return ;
+}
+
+static void any_prev_mouse_ldown(void *data)
+{
+
+    window_node_menu_t  *mt  = (window_node_menu_t *)data;
+    mt->this_node->freshen_arrt = NEED_FRESHEN;
+    int ret  = 0 ;
+    struct getmage_p mage_p;
+    mage_p.mode = 2;  //next any buffer
+    mage_p.nums = 0;
+    mage_p.order= 0;
+    ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CAPTURE_POINT,(void *)&mage_p,sizeof(struct getmage_p));
+    if(ret < 0)
+        return ;
+    if(mage_p.nums == 0)
+        return ;
+    for(ret  = 0 ; ret < mage_p.nums;ret++)
+    {
+            xw_preview_p->preview_buf_samll[ret] = (uint16_t *)mage_p.magep_p[ret];
+    }
+    xw_preview_p->samll_cnt_nums = mage_p.nums;
+    xw_preview_p->preview_now_state = 1;
+    Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,NEED_FRESHEN);
+
+    return ;
+}
+
+
+
 static void only_preview_mouse_ldown(void *data)
 {
     
@@ -284,6 +361,9 @@ static void only_preview_mouse_ldown(void *data)
     return ;
 }
 
+
+
+
 int xw_preview_show(void *data)
 {
     
@@ -320,14 +400,39 @@ int xw_preview_show(void *data)
     _mt.video_set.mouse_left_down = only_preview_mouse_ldown;
     memcpy(_attr.node_id,XW_PERVIEW_IMAGE_ONLY_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_ONLY_WINDOW_ID ) );
     Image_SDK_Create_Menu(_attr,_mt);
-    
-
+   
     //create preivew next button
-    
+    memset(&_mt,0x0,sizeof(window_node_menu_t));
+    memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
+
+
 
     //create preivew prev button
+   
+#if 0
+    _mt.x = XW_PERVIEW_IMAGE_ANEXT_WINDOW_X ; 
+    _mt.y = XW_PERVIEW_IMAGE_ANEXT_WINDOW_Y;
+    _mt.w = 300;
+    _mt.h = 100; 
+    _mt.color = 0x0;
+    _mt.user_video_freshen = NULL;
+    _mt.video_set.mouse_left_down = any_next_mouse_ldown;
+;
+    memcpy(_attr.node_id,XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID ) );
+    Image_SDK_Create_Menu(_attr,_mt);
 
+    _mt.x = XW_PERVIEW_IMAGE_APRE_WINDOW_X ; 
+    _mt.y = XW_PERVIEW_IMAGE_APER_WINDOW_Y;
+    _mt.w = 300;
+    _mt.h = 100; 
+    _mt.color = 0x0;
+    _mt.user_video_freshen = NULL;
+    _mt.video_set.mouse_left_down = any_prev_mouse_ldown;
+;
+    memcpy(_attr.node_id,XW_PERVIEW_IMAGE_APER_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_APER_WINDOW_ID ) );
+    Image_SDK_Create_Menu(_attr,_mt);
 
+#endif
 
 
 
@@ -350,7 +455,7 @@ int xw_preview_cl_op(void *data)
     if(xw_preview_p->preview_now_state == 0){
         //open any
         //get data buf save the handle 
-       
+        mage_p.mode = 0 ; //friset get
         ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_CAPTURE_POINT,(void *)&mage_p,sizeof(struct getmage_p));
         if(ret < 0)
         {
@@ -359,7 +464,7 @@ int xw_preview_cl_op(void *data)
         }
         for(ret  = 0 ; ret < mage_p.nums;ret++)
         {
-            xw_preview_p->preview_buf_samll[ret] = mage_p.magep_p[ret];
+            xw_preview_p->preview_buf_samll[ret] = (uint16_t *)mage_p.magep_p[ret];
         }
         xw_preview_p->samll_cnt_nums = mage_p.nums;
         //set node open

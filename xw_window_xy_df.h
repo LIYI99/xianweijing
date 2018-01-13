@@ -202,6 +202,13 @@
 #define XW_AUTO_EXPOUSURE_WINDOW_X          XW_MAIN_WINDOW_X + 237
 #define XW_AUTO_EXPOUSURE_WINDOW_Y          XW_MAIN_WINDOW_Y + 26
 
+
+#define XW_ISP_RESET_WINDOW_X                XW_MAIN_WINDOW_X + 337
+#define XW_ISP_RESET_WINDOW_Y                XW_MAIN_WINDOW_Y + 13
+
+
+
+
 //line menu window xy def
 
 #define XW_LINE_RARR_WINDOW_X               10
@@ -229,11 +236,18 @@
 
 //#define image  preview  window
 
-#define XW_PERVIEW_IMAGE_ANY_WINDOW_X          400
-#define XW_PERVIEW_IMAGE_ANY_WINDOW_Y          250
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_X           400
+#define XW_PERVIEW_IMAGE_ANY_WINDOW_Y           250
 
-#define XW_PERVIEW_IMAGE_ONLY_WINDOW_X         0
-#define XW_PERVIEW_IMAGE_ONLY_WINDOW_Y         0
+#define XW_PERVIEW_IMAGE_ONLY_WINDOW_X          0
+#define XW_PERVIEW_IMAGE_ONLY_WINDOW_Y          0
+
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOW_X         800
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOW_Y         300
+
+#define XW_PERVIEW_IMAGE_APRE_WINDOW_X         800
+#define XW_PERVIEW_IMAGE_APER_WINDOW_Y         300
+
 
 
 

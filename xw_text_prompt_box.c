@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 #include "xw_text_prompt_box.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
@@ -12,13 +13,14 @@
 #include "image_text_put.h"
 #include "xw_logsrv.h"
 #include "xw_png_load.h"
+#include "xw_msg_prv.h"
 
 
 #define     SRC_FONT_W              8 
 #define     SRC_FONT_H              16
 #define     PROMPT_WINDOW_H         48
 #define     PROMPT_WINDOW_W         24      //   12 nums text
-#define     PROMPT_WINDOW_NUMS      12
+#define     PROMPT_WINDOW_NUMS      24
 #define     BOX_WINDOW_COLOR        0x0
 #define     BOX_TEXT_COLOR          0xf00f
 
@@ -37,7 +39,7 @@ static uint16_t *errfontsrc = NULL, *errwindow_cache = NULL,*timecntfontsrc = NU
 static  struct timeval  prompt_tv,time_cnt_tv;
 static  uint16_t        prompt_sec = 0,time_cnt_sec = 0;
 static  pthread_t       xw_promt_box_id;
-static  uint8_t         xw_promt_quit  = 0;
+static  uint8_t         xw_promt_quit  = 0,need_put_snap_name = 0,need_put_recod_name = 0;
 
 
 static void*    prompt_box_manger(void *data);
@@ -173,7 +175,7 @@ static int  text_to_image(char *s)
 
 int xw_text_promt_put(char *s,int msec){
 
-
+    
     text_to_image(s);
     gettimeofday(&prompt_tv,NULL);
     prompt_sec = msec/1000;
@@ -266,7 +268,7 @@ static void*    prompt_box_manger(void *data)
     time_cnt_tv.tv_usec = 0 ;
 
     
-
+    int ret = 0 ;
     struct  timeval tv,tvp,tvs;
     tv.tv_sec = 0 ;
     tvp.tv_sec = 0 ;
@@ -311,13 +313,39 @@ static void*    prompt_box_manger(void *data)
                 Image_SDK_Set_Node_En_Freshen(XW_TEXT_PROMPT_BOX_WINDOW_ID,NEED_CLEAR);
             }
         }
-       
+#if 1
+        if(need_put_snap_name)
+        {
+            
+            char xbuf[25];
+            ret  = Image_Msg_Get(IDSCAM_EVENT_GET_CAPTURE_FILENAME,xbuf, 25);
+            if(ret >= 0){
+                 xw_text_promt_put(xbuf,2000);
+            }
+            need_put_snap_name = 0;
+        }
+
+        if(need_put_recod_name)
+        {
+            
+            char xbuf[25];
+            ret  = Image_Msg_Get(IDSCAM_EVENT_GET_RECORED_FILENAME,xbuf, 25);
+            if(ret >= 0){
+                 xw_text_promt_put(xbuf,2000);
+            }
+            need_put_recod_name = 0;
+        }
+
+
+#endif
+
         usleep(200000);
         tvp = tv;
 
     }
     return NULL;   
 }
+
 int xw_text_prompt_box_quit(void*data){
     
     xw_promt_quit = 1;
@@ -332,5 +360,19 @@ int xw_text_prompt_box_quit(void*data){
 
 
 
+}
+
+
+int xw_snap_name_put(char *s)
+{
+    need_put_snap_name = 1;
+    return 0;
+}
+
+
+int xw_record_name_put(char *s)
+{
+    need_put_recod_name = 1;
+      return 0;
 }
 

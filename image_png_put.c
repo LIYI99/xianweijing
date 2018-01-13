@@ -260,7 +260,7 @@ void inline   rgba8888_to_rgba4444_test(uint32_t *in, uint16_t *put)
     // printf("1test:%x\n",test);
    // test  = test | ((xx >>28) << 8) | (((xx << 8 )>>28) << 4) | ((xx << 16)>>28) ;  
         
-    printf("16bit xr:%d  g:%d b:%d a:%d put:%x test:%x in 32:%x\n",y->r,y->g,y->b,y->a,*put,test,*in); 
+    //printf("16bit xr:%d  g:%d b:%d a:%d put:%x test:%x in 32:%x\n",y->r,y->g,y->b,y->a,*put,test,*in); 
     return ;
 
 }
@@ -314,7 +314,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
     //malloc row data mem
     row_tmp  = png_malloc(png_ptr, png_get_rowbytes(png_ptr,
                 info_ptr));
-    printf("test---------now the rowbytes:%d\n",png_get_rowbytes(png_ptr,info_ptr));
+//    printf("test---------now the rowbytes:%d\n",png_get_rowbytes(png_ptr,info_ptr));
     int pix_bytes =0 ;
     pix_bytes ;
         //get IHDR  info
@@ -410,7 +410,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                     // rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, (uint16_t *)getp);
                     getp++;
                
-#if 1 
+#if 0 
                     if(py == 0 && px == 0){
                             
                             struct  rgba8888 *testy = NULL ;
@@ -429,7 +429,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                 } 
             } 
         } 
-        printf("result:%d\n",result);
+     //   printf("result:%d\n",result);
         row = NULL;
         png_free(png_ptr, row_tmp);
     }else{

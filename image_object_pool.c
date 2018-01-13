@@ -90,7 +90,7 @@ void*   object_pool_get(object_pool_t *s){
     
     void *p = ((void *)node) + sizeof(struct qnode);
     
-    //memset(p,0x0,s->object_size) ;
+    memset(p,0x0,s->object_size) ;
     return  p;
     //((void *)node) + sizeof(struct qnode);
 

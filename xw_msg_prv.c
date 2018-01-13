@@ -66,6 +66,7 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
             break;
         case    IDSCAM_IMG_MSG_AE_SET_TARGET_RATIO:
             ret = socket_send_ae_manule( *(int *)data);
+            break;
 
         case IDSCAM_IMG_MSG_ENABLE_AWB:
             ret = socket_send_awb_auto(  );

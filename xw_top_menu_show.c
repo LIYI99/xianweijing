@@ -50,7 +50,9 @@ int  xw_top_menu_show(void *data)
     
     struct  user_set_node_atrr _attr;
     
+    
     int ret = 0;
+    memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     //top menu
     memcpy(_attr.node_id,XW_TOP_MENU_WINDOW_ID,strlen(XW_TOP_MENU_WINDOW_ID));
     _attr.en_freshen = NEED_FRESHEN;
@@ -185,12 +187,14 @@ static void mouse_ldown_button_snap(void *data)
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     //send singed to main srv
     int ret  = 0;
-    ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+    ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SDCARD_STATE,NULL,0);
     if(ret <= 0){
         xw_text_promt_put("NOT SDCRAD!",3000);
         return ;
     }
     Image_Msg_Send(IDSCAM_IMG_MSG_CAPTURE,NULL,0);
+    xw_snap_name_put(NULL);
+
     return ;
 }
 
@@ -204,7 +208,7 @@ static void mouse_ldown_button_recod(void *data)
     //send singed to main srv
     int ret  = 0;
     if(record_state == 0){
-        ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+        ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SDCARD_STATE,NULL,0);
         if(ret <= 0){
             xw_text_promt_put("NOT SDCRAD!",3000);
             return ;
@@ -218,6 +222,7 @@ static void mouse_ldown_button_recod(void *data)
         xw_time_cnt_start(0);
         record_state = 0;
         Image_Msg_Send(IDSCAM_IMG_MSG_RECORED_STOP,NULL,0);
+        xw_record_name_put(NULL);
 
     }
     
@@ -259,7 +264,7 @@ static void mouse_ldown_button_perview(void *data)
     bt->color = XW_SNAP_BUTTON_LDOWN_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN; 
     int ret;
-    ret  = Image_Msg_Get(IDSCAM_EVENT_MSG_SDCARD_STATE,NULL,0);
+    ret  = Image_Msg_Get( IDSCAM_IMG_MSG_GET_SDCARD_STATE ,NULL,0);
     if(ret <= 0){
         xw_text_promt_put("NOT SDCRAD!",3000);
         return ;

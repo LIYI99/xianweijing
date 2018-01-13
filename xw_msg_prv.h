@@ -72,7 +72,7 @@ typedef enum
 	IDSCAM_EVENT_GET_RECORED_FILENAME,
     
     IDSCAM_IMG_MSG_GET_CAPTURE_POINT,
-    
+    IDSCAM_IMG_MSG_RESET_ISP, 
     
     IDSCAM_IMG_MSG_EXIT,
 }img_msg_cmd_t;

@@ -225,7 +225,7 @@ typedef struct window_node_bar{
     uint32_t        bar_color;
     window_func_t   video_set;
     win_func_usr    user_video_freshen;
-
+    uint8_t         nohavetext;
     char            text_id[MENU_LEVEL];   //be related text windows
 }window_node_bar_t;
 
@@ -284,8 +284,6 @@ typedef struct  image_sdk_s{
 }image_sdk_t;
 
 
-
-
 void    Image_SDK_Init(void);
 void    Image_SDK_deInit(void);
 void    Image_SDK_Run(void);
@@ -327,6 +325,8 @@ int     Image_SDK_Set_Node_Disp(char *node_id,NODE_VIDEO_ATTR _attr);
 int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshen);
 int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
 int     Image_SDK_Set_Text_Node_Xy(char *node_id,uint16_t x,uint16_t y);
+int     Image_SDK_Set_Bar_Vaule(char *node_id,uint16_t vaule);
+
 
 
 //define debug 

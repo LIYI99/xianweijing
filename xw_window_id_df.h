@@ -64,8 +64,6 @@
 
 #define XW_ISP_CONTRAST_WINDOW_ID           "AaK"
 #define XW_ISP_CONTRAST_TEXT_WINDOW_ID      "AaJ"
-
-
 //
 #define XW_FILCKER_50H_WINDOW_ID            "AaG"
 #define XW_FILCKER_60H_WINDOW_ID            "AaF"
@@ -76,6 +74,9 @@
 #define XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID   "AaB"
 
 #define XW_AUTO_EXPOUSURE_WINDOW_ID         "AaC"
+
+//define ISP reset
+#define XW_ISP_RESET_WINDOW_ID              "AaA"
 
 
 
@@ -142,6 +143,9 @@
 
 #define XW_PERVIEW_IMAGE_ANY_WINDOW_ID          "Ad"
 #define XW_PERVIEW_IMAGE_ONLY_WINDOW_ID         "Ae"
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID         "Ak"
+#define XW_PERVIEW_IMAGE_APER_WINDOW_ID          "Aj"
+
 
 //#define imagessege info window
 #define XW_MESSAGE_PINT_TEXT_WINDOW_ID          "Af"
