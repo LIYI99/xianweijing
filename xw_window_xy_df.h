@@ -1,12 +1,10 @@
 #ifndef __XW_WINDOW_XY_DF_H__
 #define __XW_WINDOW_XY_DF_H__
 
+//1080P
 //dedfine   main menu window
 #define XW_MAIN_WINDOW_X           1504             
 #define XW_MAIN_WINDOW_Y           150
-
-
-
 
 //deinfine line set button
 #define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X +  224
@@ -231,9 +229,6 @@
 #define XW_SET_WINDOW_X             XW_TOP_MENU_WINDOW_X + 321
 #define XW_SET_WINDOW_Y             XW_TOP_MENU_WINDOW_Y + 1
 
-
-
-
 //#define image  preview  window
 
 #define XW_PERVIEW_IMAGE_ANY_WINDOW_X           400
@@ -263,6 +258,268 @@
 
 #define XW_TEXT_TIME_CNT_BOX_WINDOW_X               50
 #define XW_TEXT_TIME_CNT_BOX_WINDOW_Y               50
+
+///////////////////1024 * 600 LCD////////////////////////
+
+
+#define XW_MAIN_WINDOWS_X           1504             
+#define XW_MAIN_WINDOWS_Y           150
+
+//deinfine line set button
+#define XW_LINE_SHOW_WINDOWS_X       XW_MAIN_WINDOWS_X +  224
+#define XW_LINE_SHOW_WINDOWS_Y       XW_MAIN_WINDOWS_Y +  669
+#define XW_LINE_CHOICE_WINDOWS_X      XW_MAIN_WINDOWS_X + 35
+#define XW_LINE_CHOICE_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 669
+#define XW_LINE_LOCK_WINDOWS_X        XW_MAIN_WINDOWS_X + 129       
+#define XW_LINE_LOCK_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 669    
+
+#define XW_LINE_SET_SIZE_WINDOWS_X      XW_MAIN_WINDOWS_X +   129
+#define XW_LINE_SET_SIZE_WINDOWS_Y      XW_MAIN_WINDOWS_Y +   747
+#define XW_LINE_SET_COLOR_WINDOWS_X       XW_MAIN_WINDOWS_X + 35   
+#define XW_LINE_SET_COLOR_WINDOWS_Y       XW_MAIN_WINDOWS_Y + 747   
+
+#define XW_LINE_SELECT_LINE_WINDOWS_X      XW_MAIN_WINDOWS_X + 225 
+#define XW_LINE_SELECT_LINE_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 747  
+
+#define XW_LINE_CLAER_WINDOWS_X          XW_MAIN_WINDOWS_X +  319
+#define XW_LINE_CLAER_WINDOWS_Y          XW_MAIN_WINDOWS_Y + 745
+
+#define XW_LINE_SAVE_WINDOWS_X           XW_MAIN_WINDOWS_X + 319
+#define XW_LINE_SAVE_WINDOWS_Y           XW_MAIN_WINDOWS_Y + 669
+
+
+//define video param settings
+#define XW_VIDEO_ZOOZ_BOOST_WINDOWS_X      XW_MAIN_WINDOWS_X + 0   
+#define XW_VIDEO_ZOOZ_BOOST_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 0 
+
+
+#define XW_VIDEO_FILP_WINDOWS_X            XW_MAIN_WINDOWS_X + 33   
+#define XW_VIDEO_FILP_WINDOWS_Y              XW_MAIN_WINDOWS_Y + 593 
+
+#define XW_VIDEO_MIRROR_WINDOWS_X            XW_MAIN_WINDOWS_X + 128 
+#define XW_VIDEO_MIRROR_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 593
+
+
+#define XW_VIDEO_NIGHGT_WINDOWS_X          XW_MAIN_WINDOWS_X + 224
+#define XW_VIDEO_NIGHGT_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 593
+
+#define XW_VIDEO_HDR_WINDOWS_X        XW_MAIN_WINDOWS_X + 319
+#define XW_VIDEO_HDR_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 593
+
+
+//#define XW_VIDEO_DAY_WINDOWS_X        XW_MAIN_WINDOWS_X + 0 
+//#define XW_VIDEO_DAY_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 0 
+
+
+
+//#define XW_VIDEO_UNLOCK_WINDOWS_X     XW_MAIN_WINDOWS_X + 0 
+//#define XW_VIDEO_UNLOCK_WINDOWS_Y     XW_MAIN_WINDOWS_Y + 0 
+
+
+
+
+//define date text window id 
+#define XW_DATE_YEAR_WINDOWS_X        XW_MAIN_WINDOWS_X + 116  
+#define XW_DATE_YEAR_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 498
+
+
+
+#define XW_DATE_MONN_WINDOWS_X         XW_MAIN_WINDOWS_X + 173       
+#define XW_DATE_MONN_WINDOWS_Y          XW_MAIN_WINDOWS_Y + 498     
+
+
+#define XW_DATE_DAY_WINDOWS_X            XW_MAIN_WINDOWS_X + 212
+#define XW_DATE_DAY_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 498
+
+
+#define XW_DATE_HOUR_WINDOWS_X               XW_MAIN_WINDOWS_X + 264
+#define XW_DATE_HOUR_WINDOWS_Y               XW_MAIN_WINDOWS_Y + 498
+
+
+#define XW_DATE_MIN_WINDOWS_X               XW_MAIN_WINDOWS_X + 303
+#define XW_DATE_MIN_WINDOWS_Y              XW_MAIN_WINDOWS_Y + 498
+
+
+#define XW_DATE_SEC_WINDOWS_X               XW_MAIN_WINDOWS_X + 341
+#define XW_DATE_SEC_WINDOWS_Y                XW_MAIN_WINDOWS_Y + 498
+
+#define XW_DATE_SET_UP_WINDOWS_X            XW_MAIN_WINDOWS_X + 116 
+#define XW_DATE_SET_UP_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 479
+
+
+#define XW_DATE_SET_DOWN_WINDOWS_X          XW_MAIN_WINDOWS_X + 116
+#define XW_DATE_SET_DOWN_WINDOWS_Y          XW_MAIN_WINDOWS_Y + 539
+
+#define XW_DATE_SET_WINDOWS_X          XW_MAIN_WINDOWS_X + 3
+#define XW_DATE_SET_WINDOWS_Y          XW_MAIN_WINDOWS_Y + 479
+
+
+
+
+
+//define isp set window id
+#define XW_ISP_COLOR_TEMP_WINDOWS_X         XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_COLOR_TEMP_WINDOWS_Y         XW_MAIN_WINDOWS_Y + 439
+#define XW_ISP_COLOR_TEMP_TEXT_WINDOWS_X    XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_COLOR_TEMP_TEXT_WINDOWS_Y    XW_MAIN_WINDOWS_Y + 434
+
+
+
+#define XW_ISP_BLUE_WINDOWS_X            XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_BLUE_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 409
+#define XW_ISP_BLUE_TEXT_WINDOWS_X       XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_BLUE_TEXT_WINDOWS_Y       XW_MAIN_WINDOWS_Y + 404
+
+   
+
+#define XW_ISP_RED_WINDOWS_X             XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_RED_WINDOWS_Y             XW_MAIN_WINDOWS_Y + 347   //347
+#define XW_ISP_RED_TEXT_WINDOWS_X        XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_RED_TEXT_WINDOWS_Y        XW_MAIN_WINDOWS_Y + 344    //344
+
+
+#define XW_ISP_GREEN_WINDOWS_X           XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_GREEN_WINDOWS_Y           XW_MAIN_WINDOWS_Y + 379   //379
+
+
+#define XW_ISP_GREEN_TEXT_WINDOWS_X      XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_GREEN_TEXT_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 374   //374
+
+
+
+//freq func
+
+#define XW_ISP_DENOISE_WINDOWS_X         XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_DENOISE_WINDOWS_Y         XW_MAIN_WINDOWS_Y + 317
+#define XW_ISP_DENOISE_TEXT_WINDOWS_X    XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_DENOISE_TEXT_WINDOWS_Y    XW_MAIN_WINDOWS_Y + 312
+  
+
+
+#define XW_ISP_SHARPNESS_WINDOWS_X           XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_SHARPNESS_WINDOWS_Y           XW_MAIN_WINDOWS_Y + 287
+#define XW_ISP_SHARPNESS_TEXT_WINDOWS_X      XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_SHARPNESS_TEXT_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 282
+
+
+
+#define XW_ISP_BRIGHTNESS_WINDOWS_X         XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_BRIGHTNESS_WINDOWS_Y         XW_MAIN_WINDOWS_Y + 256
+#define XW_ISP_BRIGHTNESS_TEXT_WINDOWS_X    XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_BRIGHTNESS_TEXT_WINDOWS_Y    XW_MAIN_WINDOWS_Y + 251
+
+
+
+#define XW_ISP_SATURATION_WINDOWS_X         XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_SATURATION_WINDOWS_Y         XW_MAIN_WINDOWS_Y + 225
+#define XW_ISP_SATURATION_TEXT_WINDOWS_X    XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_SATURATION_TEXT_WINDOWS_Y    XW_MAIN_WINDOWS_Y + 220
+
+
+
+
+#define XW_ISP_CONTRAST_WINDOWS_X           XW_MAIN_WINDOWS_X + 193
+#define XW_ISP_CONTRAST_WINDOWS_Y           XW_MAIN_WINDOWS_Y + 195
+#define XW_ISP_CONTRAST_TEXT_WINDOWS_X      XW_MAIN_WINDOWS_X + 350
+#define XW_ISP_CONTRAST_TEXT_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 190
+
+
+
+//#define XW_ISP_GAMMA_WINDOWS_X              XW_MAIN_WINDOWS_X + 0
+//#define XW_ISP_GAMMA_WINDOWS_Y              XW_MAIN_WINDOWS_Y + 0
+//#define XW_ISP_GAMMA_TEXT_WINDOWS_X         XW_MAIN_WINDOWS_X + 0
+//#define XW_ISP_GAMMA_TEXT_WINDOWS_Y         XW_MAIN_WINDOWS_Y + 0
+
+
+
+//filck
+#define XW_FILCKER_50H_WINDOWS_X            XW_MAIN_WINDOWS_X + 237
+#define XW_FILCKER_50H_WINDOWS_Y            XW_MAIN_WINDOWS_Y + 124
+
+
+#define XW_FILCKER_60H_WINDOWS_X             XW_MAIN_WINDOWS_X + 351
+#define XW_FILCKER_60H_WINDOWS_Y             XW_MAIN_WINDOWS_Y + 124
+  
+
+
+#define XW_AUTO_WHITE_BALANCE_WINDOWS_X      XW_MAIN_WINDOWS_X + 237
+#define XW_AUTO_WHITE_BALANCE_WINDOWS_Y      XW_MAIN_WINDOWS_Y + 92
+
+#define XW_MANUL_WHITE_BALANCE_WINDOWS_X     XW_MAIN_WINDOWS_X + 352
+#define XW_MANUL_WHITE_BALANCE_WINDOWS_Y     XW_MAIN_WINDOWS_Y + 92
+
+
+
+#define XW_AE_MANUL_WINDOWS_X                XW_MAIN_WINDOWS_X + 193
+#define XW_AE_MANUL_WINDOWS_Y                XW_MAIN_WINDOWS_Y + 62
+#define XW_MANUL_EXPOUSURE_TEXT_WINDOWS_X    XW_MAIN_WINDOWS_X + 350
+#define XW_MANUL_EXPOUSURE_TEXT_WINDOWS_Y    XW_MAIN_WINDOWS_Y + 55
+ 
+
+#define XW_AUTO_EXPOUSURE_WINDOWS_X          XW_MAIN_WINDOWS_X + 237
+#define XW_AUTO_EXPOUSURE_WINDOWS_Y          XW_MAIN_WINDOWS_Y + 26
+
+
+#define XW_ISP_RESET_WINDOWS_X                XW_MAIN_WINDOWS_X + 337
+#define XW_ISP_RESET_WINDOWS_Y                XW_MAIN_WINDOWS_Y + 13
+
+
+
+
+//line menu window xy def
+
+#define XW_LINE_RARR_WINDOWS_X               10
+#define XW_LINE_RARR_WINDOWS_Y               10
+
+//top MENU window xy def
+#define XW_TOP_MENU_WINDOWS_X                1504
+#define XW_TOP_MENU_WINDOWS_Y                50
+
+//#define   snap recod set perview
+#define XW_SNAP_WINDOWS_X            XW_TOP_MENU_WINDOWS_X + 0
+#define XW_SNAP_WINDOWS_Y            XW_TOP_MENU_WINDOWS_Y + 1
+
+#define XW_RECOD_WINDOWS_X           XW_TOP_MENU_WINDOWS_X + 107
+#define XW_RECOD_WINDOWS_Y           XW_TOP_MENU_WINDOWS_Y + 1
+
+#define XW_PERVIEW_WINDOWS_X         XW_TOP_MENU_WINDOWS_X + 214
+#define XW_PERVIEW_WINDOWS_Y         XW_TOP_MENU_WINDOWS_Y + 1
+
+#define XW_SET_WINDOWS_X             XW_TOP_MENU_WINDOWS_X + 321
+#define XW_SET_WINDOWS_Y             XW_TOP_MENU_WINDOWS_Y + 1
+
+//#define image  preview  window
+
+#define XW_PERVIEW_IMAGE_ANY_WINDOWS_X           400
+#define XW_PERVIEW_IMAGE_ANY_WINDOWS_Y           250
+
+#define XW_PERVIEW_IMAGE_ONLY_WINDOWS_X          0
+#define XW_PERVIEW_IMAGE_ONLY_WINDOWS_Y          0
+
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOWS_X         800
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOWS_Y         300
+
+#define XW_PERVIEW_IMAGE_APRE_WINDOWS_X         800
+#define XW_PERVIEW_IMAGE_APER_WINDOWS_Y         300
+
+
+
+
+//#define imagessege info window
+#define XW_MESSAGE_PINT_TEXT_WINDOWS_X          920
+#define XW_MESSAGE_PINT_TEXT_WINDOWS_Y          500
+
+
+//define text prompt box x,y
+#define XW_TEXT_PROMPT_BOX_WINDOWS_X            900
+#define XW_TEXT_PROMPT_BOX_WINDOWS_Y            500
+
+
+#define XW_TEXT_TIME_CNT_BOX_WINDOWS_X               50
+#define XW_TEXT_TIME_CNT_BOX_WINDOWS_Y               50
+
+
+
 
 
 

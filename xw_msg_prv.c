@@ -133,6 +133,9 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
             ret = socket_send_hdr(  *(int *)data);
 
             break;
+        case IDSCAM_IMG_MSG_RESET_ISP:
+            ret = socket_send_reset_isp();
+            break;
         case IDSCAM_IMG_MSG_EXIT:
             //ret = socket_send_exit(clt_fd );
 
@@ -221,7 +224,7 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
             break;
         case IDSCAM_EVENT_GET_RECORED_FILENAME: 
             ret =   socket_get_get_recoder_filename((char *)data ,len );
-        
+            break; 
         case IDSCAM_IMG_MSG_GET_CAPTURE_POINT: 
             ret =   socket_get_get_snap_point(data ,len);
 
