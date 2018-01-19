@@ -14,16 +14,29 @@
 #include "xw_config.h"
 
 
-//top menu
-#define     XW_TOP_MENU_H_z     48
-#define     XW_TOP_MENU_W_z     60
+//top menu 1080P
 #define     XW_TOP_MENU_H       48
 #define     XW_TOP_MENU_W       396
+
+//1024
+#define     SXW_TOP_MENU_H       48
+#define     SXW_TOP_MENU_W       396
+
 
 
 //snap  recod set pereivew button
 #define     XW_SNAP_BUTTON_H                45 
 #define     XW_SNAP_BUTTON_W                75
+
+
+//1024
+#define     SXW_SNAP_BUTTON_H                45 
+#define     SXW_SNAP_BUTTON_W                75
+
+
+
+
+
 
 #define     XW_SNAP_BUTTON_OFFSET_COLOR    CON_BUTTON_OFFSET_COLOR
 #define     XW_SNAP_BUTTON_LDOWN_COLOR     CON_BUTTON_LDOWN_COLOR
