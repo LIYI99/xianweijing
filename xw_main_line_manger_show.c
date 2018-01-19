@@ -8,6 +8,7 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "xw_logsrv.h"
+#include "xw_config.h"
 
 struct  xw_line_ui_set{
         uint8_t     order;
@@ -214,6 +215,8 @@ static void xw_line_clear_button_ldow(void *data)
     return;
 }
 
+
+
 static void xw_line_save_button_ldow(void *data)
 {
     
@@ -221,7 +224,7 @@ static void xw_line_save_button_ldow(void *data)
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->color = XW_LINE_MANGER_BUTTON_LDOWN_COLOR ;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
-    ret =  xw_save_line_data(NULL);
+    ret =  xw_save_line_data(LINE_SET_PARAMS_FILE_PATH);
 
 
     return;

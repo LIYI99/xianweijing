@@ -22,8 +22,8 @@
 #define DATE_SET_DOWN_WINDOW_H      30
 #define DATE_SET_DOWN_WINDOW_W      260
 
-#define DATE_SET_WINDOW_W             80
-#define DATE_SET_WINDOW_H             80
+#define DATE_SET_WINDOW_W           80
+#define DATE_SET_WINDOW_H           80
 
 
 
