@@ -235,7 +235,8 @@ typedef struct window_node_mouse{
     uint16_t        y_last;        //old
     uint16_t        x;
     uint16_t        y;
-    uint16_t        size;
+    uint16_t        size;       //h
+    uint16_t        size_w;     //w
     uint32_t        color;
     char            *image_p;
     char            *image_cache;
@@ -261,6 +262,9 @@ typedef struct  image_sdk_s{
     int             video_fd;
     void            *mmap_p;
     uint8_t         mmap_updated; 
+    
+    uint16_t        font_w;                 //window text font size
+    uint16_t        font_h;
     //mouse
     int             mouse_fd;
     GK_MOUSE_DATA   mouse_new_data;
@@ -283,8 +287,33 @@ typedef struct  image_sdk_s{
     window_node_mouse_t *mouse;
 }image_sdk_t;
 
+//init param
 
-void    Image_SDK_Init(void);
+typedef struct sdk_init_param{
+    //srcee
+    uint16_t    srcee_w;
+    uint16_t    srcee_h;
+    uint16_t    color_fmt;
+    
+    //window font size
+    uint16_t    font_w;
+    uint16_t    font_h;
+
+    //mouse
+    uint16_t    mouse_w;
+    uint16_t    mouse_h;
+    char        mouse_path[64];
+    char        mouse_pathv2[64];
+    
+}sdk_init_param_t;
+
+
+
+void    Image_SDK_Init(sdk_init_param_t *param);
+
+
+
+//void    Image_SDK_Init(void);
 void    Image_SDK_deInit(void);
 void    Image_SDK_Run(void);
 int     Image_SDK_Reset(void);
