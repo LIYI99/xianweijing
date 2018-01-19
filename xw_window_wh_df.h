@@ -24,8 +24,8 @@
 #define     XW_MAIN_MENU_W                     813
 
 //1024 * 600
-#define     XW_SMAIN_MENU_H                     396
-#define     XW_SMAIN_MENU_W                     813
+#define     SXW_MAIN_MENU_H                     396
+#define     SXW_MAIN_MENU_W                     813
 
 
 //main menu buton and check window and bar and text
@@ -92,6 +92,45 @@
 //1024 * 600 font
 #define     SXW_WINDOW_FONT_SIZE_H               16
 #define     SXW_WINDOW_FONT_SIZE_W               8
+
+
+//1920 1080 image preview window w h def
+#define     XW_PERVIEW_WINDOW_ANY_W             123
+#define     XW_PERVIEW_WINDOW_ANY_H             123
+#define     XW_PERVIEW_WINDOW_ONLY_W            123
+#define     XW_PERVIEW_WINDOW_ONLY_H            123
+#define     XW_PERVIEW_WINDOW_ANEXT_W           123
+#define     XW_PERVIEW_WINDOW_ANEXT_H           123
+
+//104 *600
+#define     SXW_PERVIEW_WINDOW_ANY_W            123
+#define     SXW_PERVIEW_WINDOW_ANY_H            123
+#define     SXW_PERVIEW_WINDOW_ONLY_W           123
+#define     SXW_PERVIEW_WINDOW_ONLY_H           123
+#define     SXW_PERVIEW_WINDOW_ANEXT_W          123
+#define     SXW_PERVIEW_WINDOW_ANEXT_H          123
+
+
+//define message info put window font size
+//1080
+#define     XW_TEXT_PROMPT_BOX_FONT_W           24
+#define     XW_TEXT_PROMPT_BOX_FONT_H           48
+#define     XW_TEXT_TIME_CNT_BOX_FONT_W         24
+#define     XW_TEXT_TIME_CNT_BOX_FONT_H         48
+
+//600
+#define     SXW_TEXT_PROMPT_BOX_FONT_W           8
+#define     SXW_TEXT_PROMPT_BOX_FONT_H           16
+#define     SXW_TEXT_TIME_CNT_BOX_FONT_W         8
+#define     SXW_TEXT_TIME_CNT_BOX_FONT_H         16
+
+
+
+
+
+
+
+
 
 
 

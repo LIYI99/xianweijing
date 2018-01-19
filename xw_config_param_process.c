@@ -28,11 +28,21 @@ typedef struct node_def_hanlde{
 
 node_def_hanlde_t   *def_params = NULL;
 
+static void xw_node_params_add_1080P(void);
+static void xw_node_params_add_600P(void);
+
+
+
 
 
 static void inline  xw_node_def_add(char *node_id,uint16_t x,uint16_t y,uint16_t w,uint16_t h)
 {
     
+    if(strlen(node_id) > (NODE_ID_MAX_LEN -1) )
+    {
+        xw_logsrv_err("input node_id too long :%s\n",node_id);
+        return;
+    }
     strcpy(def_params->node_params[def_params->cnt].node_id,node_id);
     def_params->node_params[def_params->cnt].x = x;
     def_params->node_params[def_params->cnt].y = y;
@@ -57,119 +67,470 @@ int xw_config_def_params_init(srcee_mode_type mode)
         return -2;
     memset(def_params,0x0,sizeof(node_def_hanlde_t));
     def_params->mode = mode;
-    
+     
     if(def_params->mode == SRCEE_MODE_1080)
     {
-        //main mune        
-        xw_node_def_add(XW_MAIN_WINDOW_ID,XW_MAIN_WINDOW_X,XW_MAIN_NUME_H,XW_MAIN_MENU_W);
+        //ada main mueu        
+        xw_node_def_add(XW_MAIN_WINDOW_ID,XW_MAIN_WINDOW_X,XW_MAIN_WINDOW_Y,XW_MAIN_MENU_W,XW_MAIN_MENU_H);
         
-        //line manger
+        //line manger of main
+        
+        //close of open lines
         xw_node_def_add(XW_LINE_SHOW_WINDOW_ID ,XW_LINE_SHOW_WINDOW_X,
                 XW_LINE_SHOW_WINDOW_Y,XW_MAINOF_BUTTON_W ,XW_MAINOF_BUTTON_H);
-        
+        //selec lines array   
         xw_node_def_add(XW_LINE_CHOICE_WINDOW_ID, XW_LINE_CHOICE_WINDOW_X,XW_LINE_CHOICE_WINDOW_Y,XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
         
+        //set line size
         xw_node_def_add(XW_LINE_SET_SIZE_WINDOW_ID ,XW_LINE_SET_SIZE_WINDOW_X,
                 XW_LINE_SET_SIZE_WINDOW_Y,XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
         
+        //set line color
         xw_node_def_add( XW_LINE_SET_COLOR_WINDOW_ID,XW_LINE_SET_COLOR_WINDOW_X,XW_LINE_SET_COLOR_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
-
+       
+        //select line
         xw_node_def_add( XW_LINE_SELECT_LINE_WINDOW_ID  ,XW_LINE_SELECT_LINE_WINDOW_X,XW_LINE_SELECT_LINE_WINDOW_Y,
-                XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
-        
+            XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
+         
+        //line lock or video lock
         xw_node_def_add(XW_LINE_LOCK_WINDOW_ID,XW_LINE_LOCK_WINDOW_X,XW_LINE_LOCK_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
-
+        
+        //line clear
         xw_node_def_add(XW_LINE_CLEAR_WINDOW_ID ,XW_LINE_CLAER_WINDOW_X,XW_LINE_CLAER_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
 
+        
+        //line params save
         xw_node_def_add(XW_LINE_SAVE_WINDOW_ID,XW_LINE_SAVE_WINDOW_X,XW_LINE_SAVE_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
         
-        //video advanced settings
+        //add video set button of main 
         
+        //filp
         xw_node_def_add(XW_VIDEO_FILP_WINDOW_ID,XW_VIDEO_FILP_WINDOW_X,XW_VIDEO_FILP_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
         
+        //mirror
         xw_node_def_add(XW_VIDEO_MIRROR_WINDOW_ID ,XW_VIDEO_MIRROR_WINDOW_X,XW_VIDEO_MIRROR_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
 
-       
+       //night or day
         xw_node_def_add(XW_VIDEO_NIGHGT_WINDOW_ID ,XW_VIDEO_NIGHGT_WINDOW_X,XW_VIDEO_NIGHGT_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
- 
+    
+        //hdr
         xw_node_def_add(XW_VIDEO_HDR_WINDOW_ID,XW_VIDEO_HDR_WINDOW_X,XW_VIDEO_HDR_WINDOW_Y,
                 XW_MAINOF_BUTTON_W,XW_MAINOF_BUTTON_H);
         
-        //ISP 
+        //isp  set button of main  
+        
+        //color temp
         xw_node_def_add(XW_ISP_COLOR_TEMP_WINDOW_ID ,XW_ISP_COLOR_TEMP_WINDOW_X,XW_ISP_COLOR_TEMP_WINDOW_Y,
                 SXW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID  ,XW_ISP_COLOR_TEMP_TEXT_WINDOW_X,
                 XW_ISP_COLOR_TEMP_TEXT_WINDOW_Y,XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
-
+        //wab bule
         xw_node_def_add(XW_ISP_BLUE_WINDOW_ID   ,XW_ISP_BLUE_WINDOW_X,XW_ISP_BLUE_WINDOW_Y,
                 SXW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_BLUE_TEXT_WINDOW_ID ,XW_ISP_BLUE_TEXT_WINDOW_X,XW_ISP_BLUE_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
-
+        //wab red
         xw_node_def_add(XW_ISP_RED_WINDOW_ID,XW_ISP_RED_WINDOW_X,XW_ISP_RED_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_RED_TEXT_WINDOW_ID ,XW_ISP_RED_TEXT_WINDOW_X,XW_ISP_RED_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
-
+        
+        // wab green 
         xw_node_def_add( XW_ISP_GREEN_WINDOW_ID   ,XW_ISP_GREEN_WINDOW_X,XW_ISP_GREEN_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_GREEN_TEXT_WINDOW_ID ,XW_ISP_GREEN_TEXT_WINDOW_X,XW_ISP_GREEN_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
-
+        //denoise
         xw_node_def_add(XW_ISP_DENOISE_WINDOW_ID ,XW_ISP_DENOISE_WINDOW_X,XW_ISP_DENOISE_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_DENOISE_TEXT_WINDOW_ID ,XW_ISP_DENOISE_TEXT_WINDOW_X,XW_ISP_DENOISE_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
         
-
-        ///
+        //sharpness
         xw_node_def_add(XW_ISP_SHARPNESS_WINDOW_ID ,XW_ISP_SHARPNESS_WINDOW_X,XW_ISP_SHARPNESS_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
-        xw_node_def_add(XW_ISP_SHARPNESS_TEXT_WINDOW_ID  ,XW_ISP_SHARPNESS_TEXT_TEXT_WINDOW_X,XW_ISP_SHARPNESS_TEXT_WINDOW_Y,
+        xw_node_def_add(XW_ISP_SHARPNESS_TEXT_WINDOW_ID  ,XW_ISP_SHARPNESS_TEXT_WINDOW_X,XW_ISP_SHARPNESS_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
 
-        
+        //brightness
         xw_node_def_add(XW_ISP_BRIGHTNESS_WINDOW_ID  ,XW_ISP_BRIGHTNESS_WINDOW_X,XW_ISP_BRIGHTNESS_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add( XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID  ,XW_ISP_BRIGHTNESS_TEXT_WINDOW_X,XW_ISP_BRIGHTNESS_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
 
-
+        //staturation
         xw_node_def_add(XW_ISP_SATURATION_WINDOW_ID ,XW_ISP_SATURATION_WINDOW_X,XW_ISP_SATURATION_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_SATURATION_TEXT_WINDOW_ID ,XW_ISP_SATURATION_TEXT_WINDOW_X,XW_ISP_SATURATION_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
 
-   
+        //contrast
         xw_node_def_add(XW_ISP_CONTRAST_WINDOW_ID ,XW_ISP_CONTRAST_WINDOW_X,XW_ISP_CONTRAST_WINDOW_Y,
                 XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_CONTRAST_TEXT_WINDOW_ID  ,XW_ISP_CONTRAST_TEXT_WINDOW_X,XW_ISP_CONTRAST_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
     
+        //manu ae
+        xw_node_def_add( XW_MANUL_EXPOUSURE_WINDOW_ID   ,XW_AE_MANUL_WINDOW_X,XW_AE_MANUL_WINDOW_X,
+               XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add( XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID, XW_MANUL_EXPOUSURE_TEXT_WINDOW_X ,
+                XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y,XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+    
+       //
+       //50hz filcker 
+       xw_node_def_add( XW_FILCKER_50H_WINDOW_ID ,XW_FILCKER_50H_WINDOW_X,XW_FILCKER_50H_WINDOW_Y,
+                XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
+        
+       //60hz filcker
+       xw_node_def_add( XW_FILCKER_60H_WINDOW_ID ,XW_FILCKER_60H_WINDOW_X,XW_FILCKER_60H_WINDOW_Y,
+                XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
+        
+        //auto wab
+        xw_node_def_add( XW_AUTO_WHITE_BALANCE_WINDOW_ID ,XW_AUTO_WHITE_BALANCE_WINDOW_X ,XW_AUTO_WHITE_BALANCE_WINDOW_Y,
+                XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
+        
+        //auto ae
+        xw_node_def_add( XW_AUTO_EXPOUSURE_WINDOW_ID,XW_AUTO_EXPOUSURE_WINDOW_X,XW_AUTO_EXPOUSURE_WINDOW_Y,
+                XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
+        
+        //isp reset
+       xw_node_def_add( XW_ISP_RESET_WINDOW_ID, XW_ISP_RESET_WINDOW_X,XW_ISP_RESET_WINDOW_Y,
+               XW_MAINOF_BUTTON_REST_W, XW_MAINOF_BUTTON_REST_H);
 
 
+       //date set button of main
+       //year
+        xw_node_def_add(XW_DATE_YEAR_WINDOW_ID ,XW_DATE_YEAR_WINDOW_X,XW_DATE_YEAR_WINDOW_Y,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+        //moon
+        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,XW_DATE_DAY_WINDOW_X ,XW_DATE_DAY_WINDOW_Y ,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+       
+        //day
+        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,XW_DATE_DAY_WINDOW_X ,XW_DATE_DAY_WINDOW_Y ,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+       
+
+        //hour
+        xw_node_def_add(XW_DATE_HOUR_WINDOW_ID ,XW_DATE_HOUR_WINDOW_X,XW_DATE_HOUR_WINDOW_Y,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+
+        //min
+        xw_node_def_add(XW_DATE_MIN_WINDOW_ID ,XW_DATE_MIN_WINDOW_X,XW_DATE_MIN_WINDOW_Y,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+        
+        //sec
+        xw_node_def_add(XW_DATE_SEC_WINDOW_ID,XW_DATE_SEC_WINDOW_X,XW_DATE_SEC_WINDOW_Y,
+                XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
+        
+        //set up
+        xw_node_def_add(XW_DATE_SET_UP_WINDOW_ID ,XW_DATE_SET_UP_WINDOW_X ,XW_DATE_SET_UP_WINDOW_Y,
+                XW_MAINOF_DATE_SET_UP_W, XW_MAINOF_DATE_SET_UP_H);
+    
+        //set down
+        xw_node_def_add(XW_DATE_SET_DOWN_WINDOW_ID ,XW_DATE_SET_DOWN_WINDOW_X ,XW_DATE_SET_DOWN_WINDOW_Y,
+                XW_MAINOF_DATE_SET_DOWN_W, XW_MAINOF_DATE_SET_DOWN_H);
+
+        //set all
+        xw_node_def_add(XW_DATE_SET_WINDOW_ID ,XW_DATE_SET_WINDOW_X ,XW_DATE_SET_WINDOW_Y,
+                XW_MAINOF_DATE_SET_BUTTON_W,   XW_MAINOF_DATE_SET_BUTTON_H);
+
+        //top meun
+        //
+        xw_node_def_add(XW_TOP_MENU_WINDOW_ID,XW_TOP_MENU_WINDOW_X,XW_TOP_MENU_WINDOW_Y,XW_TOP_MENU_W,XW_TOP_MENU_H);
+        //snap
+        xw_node_def_add( XW_SNAP_WINDOW_ID   , XW_SNAP_WINDOW_X ,XW_SNAP_WINDOW_Y, 
+                XW_TOPOF_BUTTON_W ,XW_TOPOF_BUTTON_H);
+        //recod
+        xw_node_def_add(XW_RECOD_WINDOW_ID, XW_RECOD_WINDOW_X,XW_RECOD_WINDOW_Y,
+                XW_TOPOF_BUTTON_W ,XW_TOPOF_BUTTON_H);
+        //previw
+        xw_node_def_add(XW_PERVIEW_WINDOW_ID, XW_PERVIEW_WINDOW_X,XW_PERVIEW_WINDOW_Y,
+                XW_TOPOF_BUTTON_W ,XW_TOPOF_BUTTON_H);
+        //set off/on
+        xw_node_def_add(XW_SET_WINDOW_ID, XW_SET_WINDOW_X,XW_SET_WINDOW_Y,
+                XW_TOPOF_BUTTON_W ,XW_TOPOF_BUTTON_H);
+
+        //iamge perviwe window def
+        //mages any perviwe
+        xw_node_def_add(XW_PERVIEW_IMAGE_ANY_WINDOW_ID, XW_PERVIEW_IMAGE_ANY_WINDOW_X,XW_PERVIEW_IMAGE_ANY_WINDOW_Y,
+                XW_PERVIEW_WINDOW_ANY_W ,XW_PERVIEW_WINDOW_ANY_H);
+
+        //one big image perviwe
+        xw_node_def_add(XW_PERVIEW_IMAGE_ONLY_WINDOW_ID, XW_PERVIEW_IMAGE_ONLY_WINDOW_X,XW_PERVIEW_IMAGE_ONLY_WINDOW_Y,
+                XW_PERVIEW_WINDOW_ONLY_W ,XW_PERVIEW_WINDOW_ONLY_H);
+
+        //most images previwe next 
+        xw_node_def_add(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID, XW_PERVIEW_IMAGE_ANEXT_WINDOW_X,XW_PERVIEW_IMAGE_ANEXT_WINDOW_Y,
+                XW_PERVIEW_WINDOW_ANEXT_W ,XW_PERVIEW_WINDOW_ANEXT_H);
+        //pevr
+        xw_node_def_add(XW_PERVIEW_IMAGE_APER_WINDOW_ID, XW_PERVIEW_IMAGE_APER_WINDOW_X,XW_PERVIEW_IMAGE_APER_WINDOW_Y,
+                XW_PERVIEW_WINDOW_ANEXT_W ,XW_PERVIEW_WINDOW_ANEXT_H);
+
+        //message info put
+        //prompt box
+        xw_node_def_add(XW_TEXT_PROMPT_BOX_WINDOW_ID ,XW_TEXT_PROMPT_BOX_WINDOW_X , XW_TEXT_PROMPT_BOX_WINDOW_Y,
+               XW_TEXT_PROMPT_BOX_FONT_W,  XW_TEXT_PROMPT_BOX_FONT_H);
+        //record time count
+        xw_node_def_add(XW_TEXT_TIME_CNT_BOX_WINDOW_ID ,XW_TEXT_TIME_CNT_BOX_WINDOW_X ,XW_TEXT_TIME_CNT_BOX_WINDOW_Y,
+                XW_TEXT_TIME_CNT_BOX_FONT_W, XW_TEXT_TIME_CNT_BOX_FONT_H);
+
+
+
+
+
+        
+
+
+    
 
 
     }
     else if(def_params->mode == SRCEE_MODE_600)
     {
+        
+        
+         xw_node_def_add(XW_MAIN_WINDOW_ID,SXW_MAIN_WINDOW_X,SXW_MAIN_WINDOW_Y,SXW_MAIN_MENU_W,SXW_MAIN_MENU_H);
+        
+        //line manger of main
+        
+        //close of open lines
+        xw_node_def_add(XW_LINE_SHOW_WINDOW_ID ,SXW_LINE_SHOW_WINDOW_X,
+                SXW_LINE_SHOW_WINDOW_Y,SXW_MAINOF_BUTTON_W ,SXW_MAINOF_BUTTON_H);
+        //selec lines array   
+        xw_node_def_add(XW_LINE_CHOICE_WINDOW_ID, SXW_LINE_CHOICE_WINDOW_X,SXW_LINE_CHOICE_WINDOW_Y,SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //set line size
+        xw_node_def_add(XW_LINE_SET_SIZE_WINDOW_ID ,SXW_LINE_SET_SIZE_WINDOW_X,
+                SXW_LINE_SET_SIZE_WINDOW_Y,SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //set line color
+        xw_node_def_add(XW_LINE_SET_COLOR_WINDOW_ID,SXW_LINE_SET_COLOR_WINDOW_X,SXW_LINE_SET_COLOR_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+       
+        //select line
+        xw_node_def_add(XW_LINE_SELECT_LINE_WINDOW_ID  ,SXW_LINE_SELECT_LINE_WINDOW_X,SXW_LINE_SELECT_LINE_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //line lock or video lock
+        xw_node_def_add(XW_LINE_LOCK_WINDOW_ID,SXW_LINE_LOCK_WINDOW_X,SXW_LINE_LOCK_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //line clear
+        xw_node_def_add(XW_LINE_CLEAR_WINDOW_ID ,SXW_LINE_CLAER_WINDOW_X,SXW_LINE_CLAER_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+
+        
+        //line params save
+        xw_node_def_add(XW_LINE_SAVE_WINDOW_ID,SXW_LINE_SAVE_WINDOW_X,SXW_LINE_SAVE_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //add video set button of main 
+        
+        //filp
+        xw_node_def_add(XW_VIDEO_FILP_WINDOW_ID,SXW_VIDEO_FILP_WINDOW_X,SXW_VIDEO_FILP_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //mirror
+        xw_node_def_add(XW_VIDEO_MIRROR_WINDOW_ID ,SXW_VIDEO_MIRROR_WINDOW_X,SXW_VIDEO_MIRROR_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+
+       //night or day
+        xw_node_def_add(XW_VIDEO_NIGHGT_WINDOW_ID ,SXW_VIDEO_NIGHGT_WINDOW_X,SXW_VIDEO_NIGHGT_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
     
+        //hdr
+        xw_node_def_add(XW_VIDEO_HDR_WINDOW_ID,SXW_VIDEO_HDR_WINDOW_X,SXW_VIDEO_HDR_WINDOW_Y,
+                SXW_MAINOF_BUTTON_W,SXW_MAINOF_BUTTON_H);
+        
+        //isp  set button of main  
+        
+        //color temp
+        xw_node_def_add(XW_ISP_COLOR_TEMP_WINDOW_ID ,SXW_ISP_COLOR_TEMP_WINDOW_X,SXW_ISP_COLOR_TEMP_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID  ,SXW_ISP_COLOR_TEMP_TEXT_WINDOW_X,
+                SXW_ISP_COLOR_TEMP_TEXT_WINDOW_Y,SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        //wab bule
+        xw_node_def_add(XW_ISP_BLUE_WINDOW_ID   ,SXW_ISP_BLUE_WINDOW_X,SXW_ISP_BLUE_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_BLUE_TEXT_WINDOW_ID ,SXW_ISP_BLUE_TEXT_WINDOW_X,SXW_ISP_BLUE_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        //wab red
+        xw_node_def_add(XW_ISP_RED_WINDOW_ID,SXW_ISP_RED_WINDOW_X,SXW_ISP_RED_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_RED_TEXT_WINDOW_ID ,SXW_ISP_RED_TEXT_WINDOW_X,SXW_ISP_RED_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        
+        // wab green 
+        xw_node_def_add(XW_ISP_GREEN_WINDOW_ID   ,SXW_ISP_GREEN_WINDOW_X,SXW_ISP_GREEN_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_GREEN_TEXT_WINDOW_ID ,SXW_ISP_GREEN_TEXT_WINDOW_X,SXW_ISP_GREEN_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        //denoise
+        xw_node_def_add(XW_ISP_DENOISE_WINDOW_ID ,SXW_ISP_DENOISE_WINDOW_X,SXW_ISP_DENOISE_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_DENOISE_TEXT_WINDOW_ID ,SXW_ISP_DENOISE_TEXT_WINDOW_X,SXW_ISP_DENOISE_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        
+        //sharpness
+        xw_node_def_add(XW_ISP_SHARPNESS_WINDOW_ID ,SXW_ISP_SHARPNESS_WINDOW_X,SXW_ISP_SHARPNESS_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_SHARPNESS_TEXT_WINDOW_ID  ,SXW_ISP_SHARPNESS_TEXT_WINDOW_X,SXW_ISP_SHARPNESS_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+
+        //brightness
+        xw_node_def_add(XW_ISP_BRIGHTNESS_WINDOW_ID  ,SXW_ISP_BRIGHTNESS_WINDOW_X,SXW_ISP_BRIGHTNESS_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID  ,SXW_ISP_BRIGHTNESS_TEXT_WINDOW_X,SXW_ISP_BRIGHTNESS_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+
+        //staturation
+        xw_node_def_add(XW_ISP_SATURATION_WINDOW_ID ,SXW_ISP_SATURATION_WINDOW_X,SXW_ISP_SATURATION_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_SATURATION_TEXT_WINDOW_ID ,SXW_ISP_SATURATION_TEXT_WINDOW_X,SXW_ISP_SATURATION_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+
+        //contrast
+        xw_node_def_add(XW_ISP_CONTRAST_WINDOW_ID ,SXW_ISP_CONTRAST_WINDOW_X,SXW_ISP_CONTRAST_WINDOW_Y,
+                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_ISP_CONTRAST_TEXT_WINDOW_ID  ,SXW_ISP_CONTRAST_TEXT_WINDOW_X,SXW_ISP_CONTRAST_TEXT_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+    
+        //manu ae
+        xw_node_def_add(XW_MANUL_EXPOUSURE_WINDOW_ID   ,SXW_AE_MANUL_WINDOW_X,SXW_AE_MANUL_WINDOW_X,
+               SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
+
+        xw_node_def_add(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID, SXW_MANUL_EXPOUSURE_TEXT_WINDOW_X ,
+                SXW_MANUL_EXPOUSURE_TEXT_WINDOW_Y,SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+    
+       //
+       //50hz filcker 
+       xw_node_def_add(XW_FILCKER_50H_WINDOW_ID ,SXW_FILCKER_50H_WINDOW_X,SXW_FILCKER_50H_WINDOW_Y,
+                SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
+        
+       //60hz filcker
+       xw_node_def_add(XW_FILCKER_60H_WINDOW_ID ,SXW_FILCKER_60H_WINDOW_X,SXW_FILCKER_60H_WINDOW_Y,
+                SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
+        
+        //auto wab
+        xw_node_def_add(XW_AUTO_WHITE_BALANCE_WINDOW_ID ,SXW_AUTO_WHITE_BALANCE_WINDOW_X ,SXW_AUTO_WHITE_BALANCE_WINDOW_Y,
+                SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
+        
+        //auto ae
+        xw_node_def_add(XW_AUTO_EXPOUSURE_WINDOW_ID,SXW_AUTO_EXPOUSURE_WINDOW_X,SXW_AUTO_EXPOUSURE_WINDOW_Y,
+                SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
+        
+        //isp reset
+       xw_node_def_add(XW_ISP_RESET_WINDOW_ID, SXW_ISP_RESET_WINDOW_X,SXW_ISP_RESET_WINDOW_Y,
+               SXW_MAINOF_BUTTON_REST_W, SXW_MAINOF_BUTTON_REST_H);
+
+
+       //date set button of main
+       //year
+        xw_node_def_add(XW_DATE_YEAR_WINDOW_ID ,SXW_DATE_YEAR_WINDOW_X,SXW_DATE_YEAR_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        //moon
+        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,SXW_DATE_DAY_WINDOW_X ,SXW_DATE_DAY_WINDOW_Y ,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+       
+        //day
+        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,SXW_DATE_DAY_WINDOW_X ,SXW_DATE_DAY_WINDOW_Y ,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+       
+
+        //hour
+        xw_node_def_add(XW_DATE_HOUR_WINDOW_ID ,SXW_DATE_HOUR_WINDOW_X,SXW_DATE_HOUR_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+
+        //min
+        xw_node_def_add(XW_DATE_MIN_WINDOW_ID ,SXW_DATE_MIN_WINDOW_X,SXW_DATE_MIN_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        
+        //sec
+        xw_node_def_add(XW_DATE_SEC_WINDOW_ID,SXW_DATE_SEC_WINDOW_X,SXW_DATE_SEC_WINDOW_Y,
+                SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
+        
+        //set up
+        xw_node_def_add(XW_DATE_SET_UP_WINDOW_ID ,SXW_DATE_SET_UP_WINDOW_X ,SXW_DATE_SET_UP_WINDOW_Y,
+                SXW_MAINOF_DATE_SET_UP_W, SXW_MAINOF_DATE_SET_UP_H);
+    
+        //set down
+        xw_node_def_add(XW_DATE_SET_DOWN_WINDOW_ID ,SXW_DATE_SET_DOWN_WINDOW_X ,SXW_DATE_SET_DOWN_WINDOW_Y,
+                SXW_MAINOF_DATE_SET_DOWN_W, SXW_MAINOF_DATE_SET_DOWN_H);
+
+        //set all
+        xw_node_def_add(XW_DATE_SET_WINDOW_ID ,SXW_DATE_SET_WINDOW_X ,SXW_DATE_SET_WINDOW_Y,
+                SXW_MAINOF_DATE_SET_BUTTON_W,   SXW_MAINOF_DATE_SET_BUTTON_H);
+
+        
+        
+        //top-------
+        xw_node_def_add(XW_TOP_MENU_WINDOW_ID,SXW_TOP_MENU_WINDOW_X,SXW_TOP_MENU_WINDOW_Y,SXW_TOP_MENU_W,SXW_TOP_MENU_H);
+        //snap
+        xw_node_def_add(XW_SNAP_WINDOW_ID   , SXW_SNAP_WINDOW_X ,SXW_SNAP_WINDOW_Y, 
+                SXW_TOPOF_BUTTON_W ,SXW_TOPOF_BUTTON_H);
+        //recod
+        xw_node_def_add(XW_RECOD_WINDOW_ID, SXW_RECOD_WINDOW_X,SXW_RECOD_WINDOW_Y,
+                SXW_TOPOF_BUTTON_W ,SXW_TOPOF_BUTTON_H);
+        //previw
+        xw_node_def_add(XW_PERVIEW_WINDOW_ID, SXW_PERVIEW_WINDOW_X,SXW_PERVIEW_WINDOW_Y,
+                SXW_TOPOF_BUTTON_W ,SXW_TOPOF_BUTTON_H);
+        //set off/on
+        xw_node_def_add(XW_SET_WINDOW_ID, SXW_SET_WINDOW_X,SXW_SET_WINDOW_Y,
+                SXW_TOPOF_BUTTON_W ,SXW_TOPOF_BUTTON_H);
+
+        //iamge perviwe window def
+        //mages any perviwe
+        xw_node_def_add(XW_PERVIEW_IMAGE_ANY_WINDOW_ID, SXW_PERVIEW_IMAGE_ANY_WINDOW_X,SXW_PERVIEW_IMAGE_ANY_WINDOW_Y,
+                SXW_PERVIEW_WINDOW_ANY_W ,SXW_PERVIEW_WINDOW_ANY_H);
+
+        //one big image perviwe
+        xw_node_def_add(XW_PERVIEW_IMAGE_ONLY_WINDOW_ID, SXW_PERVIEW_IMAGE_ONLY_WINDOW_X,SXW_PERVIEW_IMAGE_ONLY_WINDOW_Y,
+                SXW_PERVIEW_WINDOW_ONLY_W ,SXW_PERVIEW_WINDOW_ONLY_H);
+
+        //most images previwe next 
+        xw_node_def_add(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID, SXW_PERVIEW_IMAGE_ANEXT_WINDOW_X,SXW_PERVIEW_IMAGE_ANEXT_WINDOW_Y,
+                SXW_PERVIEW_WINDOW_ANEXT_W ,SXW_PERVIEW_WINDOW_ANEXT_H);
+        //pevr
+        xw_node_def_add(XW_PERVIEW_IMAGE_APER_WINDOW_ID, SXW_PERVIEW_IMAGE_APER_WINDOW_X,SXW_PERVIEW_IMAGE_APER_WINDOW_Y,
+                SXW_PERVIEW_WINDOW_ANEXT_W ,SXW_PERVIEW_WINDOW_ANEXT_H);
+
+        //message info put
+        //prompt box
+        xw_node_def_add(XW_TEXT_PROMPT_BOX_WINDOW_ID ,SXW_TEXT_PROMPT_BOX_WINDOW_X , SXW_TEXT_PROMPT_BOX_WINDOW_Y,
+               SXW_TEXT_PROMPT_BOX_FONT_W,  SXW_TEXT_PROMPT_BOX_FONT_H);
+        //record time count
+        xw_node_def_add(XW_TEXT_TIME_CNT_BOX_WINDOW_ID ,SXW_TEXT_TIME_CNT_BOX_WINDOW_X ,SXW_TEXT_TIME_CNT_BOX_WINDOW_Y,
+                SXW_TEXT_TIME_CNT_BOX_FONT_W, SXW_TEXT_TIME_CNT_BOX_FONT_H);
+
+
+
     }else{
     
         xw_logsrv_err("the srcee  mode not def \n");
@@ -186,32 +547,38 @@ int xw_get_node_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *w,uint1
     if(window_id == NULL)
         return -1;
     
-    if(strlen(window_id) > sizeof(long))
+    if(def_params == NULL)
+        return -1;
+
+
+    int i  = 0;
+
+    for(i = 0 ; i < def_params->cnt;i++)
     {
-        xw_logsrv_err("the node id is long:%s \n",window_id);
-        return -2 ;
-    }
-    long int id  = 0;
-    memcpy(&id,window_id,strlen(window_id));
-    return 0;    
+        if(strcmp(window_id,def_params->node_params[i].node_id) == 0)
+        {
+            
+            *x = def_params->node_params[i].x;
+            *y = def_params->node_params[i].y;
+            *w = def_params->node_params[i].w;
+            *h = def_params->node_params[i].h;
+            return 0;
+
+        }
+
+    } 
+    
+    return -1;    
 
 }
 
-int xw_get_main_node_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *w,uint16_t *h)
-{
+int xw_config_def_params_deinit(void){
+
+    if(!def_params)
+        return -1;
+    free(def_params);
+    def_params = NULL;
+    return 0;
 
 }
-int xw_get_line_wh(uint16_t *w,uint16_t *h)
-{
-
-}
-int xw_get_top_button_linesize(void)
-{
-
-}
-int xw_get_main_button_linesize(void)
-{
-
-}
-
 
