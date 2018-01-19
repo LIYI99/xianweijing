@@ -50,6 +50,8 @@ int  socket_send_filp(void  ){ return -1;}
 int  socket_send_mirror(void ){ return -1;}
 int  socket_send_night(  int vaule){ return -1;}
 int  socket_send_exit(void  ){ return -1;}
+int  socket_send_reset_isp(void){return -1;}
+
 
 
 int  socket_get_ae_auto(void  ){ return -1;}

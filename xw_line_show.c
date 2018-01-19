@@ -7,6 +7,8 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "xw_logsrv.h"
+#include "xw_config.h"
+
 
 #define     XW_LINE_NUMS_MAX            16   //H:8 w:8    
 #define     XW_LINE_CONF_NUMS           8
@@ -42,8 +44,7 @@ static  xw_lines_t              *xw_lt = NULL;
 static  FILE                    *xw_fp = NULL;
 
 
-#define     XW_LINE_T_SAVEFILE_PATH     NULL
-
+#define     XW_LINE_T_SAVEFILE_PATH     LINE_SET_PARAMS_FILE_PATH  
 //file save and load
 static  int  xw_load_line_data(char *path,xw_lines_t *lt);
 
@@ -338,12 +339,17 @@ static  int  xw_load_line_data(char *path,xw_lines_t *lt)
         return -2;
     int ret = 0;
     xw_fp = fopen(path,"rb+");
+    if(!xw_fp)
+        return -2;
+
     ret = fread((void*)lt,1,sizeof(xw_lines_t),xw_fp);
     if(ret < sizeof(xw_lines_t))
     {
         fclose(xw_fp);
         xw_fp = NULL;
-        xw_logsrv_debug("read config file error ret :%d sizeof(xw_lines_t):%d\n",ret,sizeof(xw_lines_t));
+        xw_logsrv_err("read config file error ret :%d sizeof(xw_lines_t):%d\n",ret,sizeof(xw_lines_t));
+        return -3;
+
     }
        
     return 0;
@@ -357,7 +363,7 @@ int  xw_save_line_data(char *path)
         return -1;
 
     if(xw_fp == NULL)
-        xw_fp = fopen(path,"wr+");
+        xw_fp = fopen(XW_LINE_T_SAVEFILE_PATH,"wb+");
     
     if(xw_fp == NULL)
         return -2;
@@ -365,8 +371,9 @@ int  xw_save_line_data(char *path)
 
     fseek(xw_fp,0,SEEK_SET);
     ret = fwrite((void *)xw_lt,1,sizeof(xw_lines_t),xw_fp);
-    //fclose(xw_fp);
-    //xw_fp = NULL;
+    fclose(xw_fp);
+    xw_logsrv_err("write line data to file \n");
+    xw_fp = NULL;
     return 0;
 }  
 

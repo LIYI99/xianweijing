@@ -329,9 +329,12 @@ static void*    prompt_box_manger(void *data)
         {
             
             char xbuf[25];
+           // sleep(1);
             ret  = Image_Msg_Get(IDSCAM_EVENT_GET_RECORED_FILENAME,xbuf, 25);
-            if(ret >= 0){
-                 xw_text_promt_put(xbuf,2000);
+            if(ret >= 0)
+            {
+                 xw_logsrv_err("get record file name:%s",xbuf);
+                 xw_text_promt_put(xbuf,3000);
             }
             need_put_recod_name = 0;
         }

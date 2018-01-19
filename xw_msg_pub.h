@@ -73,6 +73,8 @@ struct image_get{
 
 int  socket_get_get_snap_point(void* data ,int len);
 
+int  socket_send_reset_isp(void);
+
 
 
 #ifdef  __cplusplus
