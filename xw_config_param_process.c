@@ -67,9 +67,69 @@ int xw_config_def_params_init(srcee_mode_type mode)
         return -2;
     memset(def_params,0x0,sizeof(node_def_hanlde_t));
     def_params->mode = mode;
-     
-    if(def_params->mode == SRCEE_MODE_1080)
+    
+    if(def_params->mode == SRCEE_MODE_1080){  //hdmi
+        
+        xw_node_params_add_1080P();
+
+    }else if(def_params->mode == SRCEE_MODE_600){ //lcd
+        xw_node_params_add_600P();
+
+    }else{
+        xw_logsrv_err("set srcee mode err \n");
+    }
+    
+    return 0;
+
+}
+
+int xw_get_node_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *w,uint16_t *h)
+{
+    if(window_id == NULL)
+        return -1;
+    
+    if(def_params == NULL)
+        return -1;
+
+
+    int i  = 0;
+
+    for(i = 0 ; i < def_params->cnt;i++)
     {
+        if(strcmp(window_id,def_params->node_params[i].node_id) == 0)
+        {
+            
+            *x = def_params->node_params[i].x;
+            *y = def_params->node_params[i].y;
+            *w = def_params->node_params[i].w;
+            *h = def_params->node_params[i].h;
+            return 0;
+
+        }
+
+    } 
+    
+    return -1;    
+
+}
+
+int xw_config_def_params_deinit(void){
+
+    if(!def_params)
+        return -1;
+    free(def_params);
+    def_params = NULL;
+    return 0;
+
+}
+
+
+
+
+//1080P define params load
+
+static void xw_node_params_add_1080P(void)
+{
         //ada main mueu        
         xw_node_def_add(XW_MAIN_WINDOW_ID,XW_MAIN_WINDOW_X,XW_MAIN_WINDOW_Y,XW_MAIN_MENU_W,XW_MAIN_MENU_H);
         
@@ -293,18 +353,12 @@ int xw_config_def_params_init(srcee_mode_type mode)
                 XW_TEXT_TIME_CNT_BOX_FONT_W, XW_TEXT_TIME_CNT_BOX_FONT_H);
 
 
+    return ;
+}
 
-
-
-        
-
-
-    
-
-
-    }
-    else if(def_params->mode == SRCEE_MODE_600)
-    {
+//1024 *600 
+static void xw_node_params_add_600P(void)
+{
         
         
          xw_node_def_add(XW_MAIN_WINDOW_ID,SXW_MAIN_WINDOW_X,SXW_MAIN_WINDOW_Y,SXW_MAIN_MENU_W,SXW_MAIN_MENU_H);
@@ -529,56 +583,8 @@ int xw_config_def_params_init(srcee_mode_type mode)
         xw_node_def_add(XW_TEXT_TIME_CNT_BOX_WINDOW_ID ,SXW_TEXT_TIME_CNT_BOX_WINDOW_X ,SXW_TEXT_TIME_CNT_BOX_WINDOW_Y,
                 SXW_TEXT_TIME_CNT_BOX_FONT_W, SXW_TEXT_TIME_CNT_BOX_FONT_H);
 
-
-
-    }else{
-    
-        xw_logsrv_err("the srcee  mode not def \n");
-    }
-
-
-
-    return 0;
+        return ;
     
 }
 
-int xw_get_node_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *w,uint16_t *h)
-{
-    if(window_id == NULL)
-        return -1;
-    
-    if(def_params == NULL)
-        return -1;
-
-
-    int i  = 0;
-
-    for(i = 0 ; i < def_params->cnt;i++)
-    {
-        if(strcmp(window_id,def_params->node_params[i].node_id) == 0)
-        {
-            
-            *x = def_params->node_params[i].x;
-            *y = def_params->node_params[i].y;
-            *w = def_params->node_params[i].w;
-            *h = def_params->node_params[i].h;
-            return 0;
-
-        }
-
-    } 
-    
-    return -1;    
-
-}
-
-int xw_config_def_params_deinit(void){
-
-    if(!def_params)
-        return -1;
-    free(def_params);
-    def_params = NULL;
-    return 0;
-
-}
 
