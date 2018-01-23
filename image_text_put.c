@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdint.h>
 
+
+//all put text form 16bit zoom
 #include "image_text_put.h"
 #include "xw_logsrv.h"
 
@@ -174,22 +176,83 @@ uint8_t *   image_text_lib_put_pixl(char *text){
 			}
         }
     }
-#if 0  //test
-    iii = 0;
-    printf("\n");
-    for(i = 0; i < _text_handle->text_size ;i++){
-        for(ii = 0 ; ii < _text_handle->asc_width; ii++,iii++)
-            printf("%d",_text_handle->put_buf[iii]);
-        
-        printf("\n");
-    }
-
-
-#endif
-
     return _text_handle->put_buf; 
 
 }
+
+
+typedef struct text_zoom{
+    uint16_t    inwidth;
+    uint16_t    inheight;
+    uint8_t     *inbuf;
+    uint16_t    outwidth;
+    uint16_t    outheight;
+    uint8_t    *outbuf;
+    
+
+}text_zoom_t;
+
+int     text_zoom_func(text_zoom_t *data)
+{
+
+    if(data == NULL)
+        return -1;
+    if(data->inbuf == NULL || data->outbuf == NULL)
+        return -1;
+
+    uint16_t sx,sy,dx,dy;
+    uint8_t  *inrow,*outrow;
+    int     xz,yz;
+
+    xz = (data->inwidth <<  16) / data->outwidth;
+    yz = (data->inheight << 16) / data->outheight;
+    
+    for(dy = 0 ; dy < data->outheight ;dy++)
+    {
+        sy = (dy *  yz) >> 16;
+        outrow = data->outbuf + dy * data->outwidth;
+        inrow  = data->inbuf  + sy * data->inwidth;
+        for(dx = 0 ;dx < data->outwidth ;dx++)
+        {
+            sx = (dx *  xz) >> 16;
+            outrow[dx] = inrow[sx];
+            //*(data->outbuf+ dy*data->inwidth + dx) = *(data->inbuf + sy *data->inwidth + sx);
+        }
+    }
+
+    return 0;
+
+
+}
+
+
+
+
+int     image_text_lib_put_pixl_v2(char *text,uint8_t *getbuf,int w,int h)
+{
+    uint8_t *buf = NULL;
+    buf = image_text_lib_put_pixl(text);
+    if(!buf)
+        return -1;
+    if(w == _text_handle->asc_width && h == _text_handle->text_size )
+    {
+        
+        memcpy(getbuf,buf,w*h);
+        return 0;
+    }
+
+    text_zoom_t data;
+    data.outbuf     = getbuf;
+    data.inbuf      = buf;
+    data.inheight   = _text_handle->text_size;
+    data.inwidth    = _text_handle->asc_width;
+    data.outheight  =  h;
+    data.outwidth   =  w;
+    text_zoom_func(&data);
+
+    return 0;
+}
+
 
 int     image_text_get_font_size(void){
     

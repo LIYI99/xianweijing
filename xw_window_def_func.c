@@ -132,11 +132,15 @@ int xw_get_node_window_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *
     {
         if(strcmp(window_id,def_params->node_params[i].node_id) == 0)
         {
-            
-            *x = def_params->node_params[i].x;
-            *y = def_params->node_params[i].y;
-            *w = def_params->node_params[i].w;
-            *h = def_params->node_params[i].h;
+           
+            if(x)
+                *x = def_params->node_params[i].x;
+            if(y)
+                *y = def_params->node_params[i].y;
+            if(w)
+                *w = def_params->node_params[i].w;
+            if(h)
+                *h = def_params->node_params[i].h;
             return 0;
 
         }
