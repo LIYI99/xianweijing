@@ -2,7 +2,11 @@
 #define __XW_PNG_LOAD_H__
 #include<stdint.h>
 
-int    xw_png_load_all(void);
+#define     VRCEE_VOUT_MODE_1080    0       //1920* 1080
+#define     VRCEE_VOUT_MODE_600     1       //1024*600
+
+
+int    xw_png_load_all(int mode);
 void   xw_png_destory(void);
 
 uint16_t *xw_get_window_png(char *window_id);
