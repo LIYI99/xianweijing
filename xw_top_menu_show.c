@@ -11,6 +11,8 @@
 #include "xw_text_prompt_box.h"
 #include "xw_logsrv.h"
 #include "xw_msg_prv.h"
+#include "xw_png_load.h"
+#include "xw_window_def_func.h"
 #include "xw_config.h"
 
 
@@ -72,29 +74,32 @@ int  xw_top_menu_show(void *data)
     _attr.en_node = 1; 
     window_node_menu_t         _mt;
     memset(&_mt,0x0,sizeof(window_node_menu_t));
-    _mt.x = XW_TOP_MENU_WINDOW_X; 
-    _mt.y = XW_TOP_MENU_WINDOW_Y;
-    _mt.h = XW_TOP_MENU_H;
-    _mt.w = XW_TOP_MENU_W;
+    
+    ret = xw_get_node_window_param(XW_TOP_MENU_WINDOW_ID,&_mt.x,&_mt.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("windows:%s get x,y fail \n",XW_TOP_MENU_WINDOW_ID);
+    }
+    
+    xw_get_png_hw(XW_TOP_MENU_WINDOW_ID,&_mt.w,&_mt.h);
     _mt.image_cache = (char *)xw_get_window_png(XW_TOP_MENU_WINDOW_ID);
-    //printf("top image mem:%p\n",_mt.image_cache);
     _mt.video_set.mouse_offset = mouse_offset_top_menu;
     _mt.video_set.mouse_leave  = mouse_leave_top_menu;
     ret = Image_SDK_Create_Menu(_attr,_mt); 
     Image_SDK_Set_Node_Order(XW_TOP_MENU_WINDOW_ID,FIXD_ORDER);
-
 
     //snap
     window_node_button_t    _bt;
 
     memcpy(_attr.node_id,XW_SNAP_WINDOW_ID,strlen(XW_SNAP_WINDOW_ID));
     memset(&_bt,0x0,sizeof(_bt));
-    _bt.x       =   XW_SNAP_WINDOW_X;
-    _bt.y       =   XW_SNAP_WINDOW_Y;
-    _bt.h       =   XW_SNAP_BUTTON_H;
-    _bt.w       =   XW_SNAP_BUTTON_W;
+    
+    ret = xw_get_node_window_param(XW_SNAP_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret < 0){
+        xw_logsrv_err("windows:%s get x,y,w,h fail\n",XW_SNAP_WINDOW_ID );
+    }
+  
     _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
-;
+
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen          = usr_push_video_button;
     _bt.video_set.mouse_offset      = mouse_offset_button_snap;
@@ -106,8 +111,10 @@ int  xw_top_menu_show(void *data)
     //recod
     memcpy(_attr.node_id,XW_RECOD_WINDOW_ID,strlen(XW_RECOD_WINDOW_ID));
     //memset(&_bt,0x0,sizeof(_bt));
-    _bt.x       =   XW_RECOD_WINDOW_X;
-    _bt.y       =   XW_RECOD_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_RECOD_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret < 0){
+        xw_logsrv_err("windows:%s get x,y,w,h fail\n",XW_RECOD_WINDOW_ID );
+    }
     _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.video_set.mouse_left_down   = mouse_ldown_button_recod;
@@ -115,10 +122,12 @@ int  xw_top_menu_show(void *data)
     
     memcpy(_attr.node_id,XW_PERVIEW_WINDOW_ID,strlen(XW_PERVIEW_WINDOW_ID));
     //memset(&_bt,0x0,sizeof(_bt));
-    _bt.x       =   XW_PERVIEW_WINDOW_X;
-    _bt.y       =   XW_PERVIEW_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_PERVIEW_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret < 0){
+        xw_logsrv_err("windows:%s get x,y,w,h fail\n",XW_PERVIEW_WINDOW_ID );
+    }
+    
     _bt.color   =   XW_SNAP_BUTTON_LEAVE_COLOR;
-
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen = usr_push_video_button;
     _bt.video_set.mouse_left_down = mouse_ldown_button_perview;
@@ -128,8 +137,10 @@ int  xw_top_menu_show(void *data)
     //set
     memcpy(_attr.node_id,XW_SET_WINDOW_ID,strlen(XW_SET_WINDOW_ID));
     //memset(&_bt,0x0,sizeof(_bt));
-    _bt.x       =   XW_SET_WINDOW_X;
-    _bt.y       =   XW_SET_WINDOW_Y;
+     ret = xw_get_node_window_param(XW_SET_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret < 0){
+        xw_logsrv_err("windows:%s get x,y,w,h fail\n",XW_SET_WINDOW_ID );
+    }
     _bt.color   =  XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.size    =   XW_SNAP_BUTTON_LIEN_SIZE;
     _bt.user_video_freshen = usr_push_video_button;
@@ -203,6 +214,8 @@ static void mouse_ldown_button_snap(void *data)
     ret  = Image_Msg_Get(IDSCAM_IMG_MSG_GET_SDCARD_STATE,NULL,0);
     if(ret <= 0){
         xw_text_promt_put("NOT SDCRAD!",3000);
+       // xw_text_promt_put("1234567890 100 99 1",3000);
+
         return ;
     }
     Image_Msg_Send(IDSCAM_IMG_MSG_CAPTURE,NULL,0);

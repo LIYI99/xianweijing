@@ -9,6 +9,8 @@
 #include "xw_window_xy_df.h"
 #include "xw_logsrv.h"
 #include "xw_config.h"
+#include "xw_window_def_func.h"
+
 
 struct  xw_line_ui_set{
         uint8_t     order;
@@ -336,12 +338,13 @@ int  xw_main_line_manger_show(void *data)
         xw_get_png_hw(idbuf,&select_set[i].w,&select_set[i].h);
         xw_logsrv_debug("select_set[%d].png_p:%p,select_set[i].w:%d select_set[i].h:%d png id:%s\n",i,
                 select_set[i].png_p,select_set[i].w,select_set[i].h,idbuf);
-}
+    }
 
 
     
     NULL;
 //create button  show
+    int ret  = 0;
     struct user_set_node_atrr  node_attr;
     memset(&node_attr,0x0,sizeof(struct user_set_node_atrr));
     node_attr.en_node       = 1;
@@ -349,28 +352,29 @@ int  xw_main_line_manger_show(void *data)
     node_attr.move_arrt     = 0;
     window_node_button_t    _button;
     memset(&_button,0x0,sizeof(window_node_button_t));
-    _button.x     = XW_LINE_SHOW_WINDOW_X ;
-    _button.y     = XW_LINE_SHOW_WINDOW_Y ;
+
+    ret = xw_get_node_window_param(XW_LINE_SHOW_WINDOW_ID,&_button.x,&_button.y,&_button.w,&_button.h);
+    if(ret <  0){
+        xw_logsrv_err("window:%s get x,yx,w,h fail\n",XW_LINE_SHOW_WINDOW_ID);
+    }
     _button.color = XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
-    _button.w     = 45;
-    _button.h     = 45;
     _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.video_set.mouse_left_down   = xw_line_show_button_ldow;
     _button.video_set.mouse_leave     =    xw_line_show_button_leave;
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
     _button.user_video_freshen          = usr_push_video_button_line;
-
     memcpy(node_attr.node_id,XW_LINE_SHOW_WINDOW_ID,strlen(XW_LINE_SHOW_WINDOW_ID));
     Image_SDK_Create_Button(  node_attr,_button);
     
-    //lock 
-    _button.x    =  XW_LINE_LOCK_WINDOW_X ;
-    _button.y     =  XW_LINE_LOCK_WINDOW_Y ;
+    //lock
+    
+    ret = xw_get_node_window_param(XW_LINE_LOCK_WINDOW_ID,&_button.x,&_button.y,&_button.w,&_button.h);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_LINE_LOCK_WINDOW_ID);
+    }
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
-    _button.w     = 45;
-    _button.h     = 45;
     _button.video_set.mouse_left_down   = xw_line_lock_button_ldow;
     _button.video_set.mouse_leave       = xw_line_show_button_leave; 
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
@@ -380,8 +384,11 @@ int  xw_main_line_manger_show(void *data)
 
 
     //create set arry 
-    _button.x  =     XW_LINE_CHOICE_WINDOW_X ;
-    _button.y     =  XW_LINE_CHOICE_WINDOW_Y ;
+    ret = xw_get_node_window_param(XW_LINE_CHOICE_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_CHOICE_WINDOW_ID);
+    }
+
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)arry_set[arry_now].png_p;
@@ -398,8 +405,10 @@ int  xw_main_line_manger_show(void *data)
    
 
     // set size
-     _button.x    =  XW_LINE_SET_SIZE_WINDOW_X ;
-    _button.y     =  XW_LINE_SET_SIZE_WINDOW_Y ;
+    ret = xw_get_node_window_param(XW_LINE_SET_SIZE_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_SET_SIZE_WINDOW_ID);
+    }
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)size_set[size_now].png_p;
@@ -414,8 +423,10 @@ int  xw_main_line_manger_show(void *data)
     
 
     // color set
-    _button.x    =  XW_LINE_SET_COLOR_WINDOW_X ;
-    _button.y     =  XW_LINE_SET_COLOR_WINDOW_Y ;
+    ret = xw_get_node_window_param(XW_LINE_SET_COLOR_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_SET_COLOR_WINDOW_ID);
+    }
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)color_set[color_now].png_p;
@@ -427,12 +438,13 @@ int  xw_main_line_manger_show(void *data)
     
     //return 0; 
    //select line
-    _button.x    =  XW_LINE_SELECT_LINE_WINDOW_X ;
-    _button.y     =  XW_LINE_SELECT_LINE_WINDOW_Y ;
+    ret = xw_get_node_window_param(XW_LINE_SELECT_LINE_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_SELECT_LINE_WINDOW_ID);
+    }
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  1;
     _button.image_cache = (char *)select_set[select_now].png_p;
-    
     _button.w     = select_set[select_now].w;
     _button.h     = select_set[select_now].h;
 
@@ -440,8 +452,11 @@ int  xw_main_line_manger_show(void *data)
     memcpy(node_attr.node_id,XW_LINE_SELECT_LINE_WINDOW_ID,strlen(XW_LINE_SELECT_LINE_WINDOW_ID));
     Image_SDK_Create_Button(  node_attr,_button);
    //clean line
-    _button.x     =  XW_LINE_CLAER_WINDOW_X ;
-    _button.y     =  XW_LINE_CLAER_WINDOW_Y ;
+    
+    ret = xw_get_node_window_param(XW_LINE_CLEAR_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_CLEAR_WINDOW_ID);
+    }
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =   XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
@@ -455,8 +470,12 @@ int  xw_main_line_manger_show(void *data)
     Image_SDK_Create_Button(  node_attr,_button);
     
     //lines param save
-    _button.x     =  XW_LINE_SAVE_WINDOW_X ;
-    _button.y     =  XW_LINE_SAVE_WINDOW_Y ;
+       
+    ret = xw_get_node_window_param(XW_LINE_SAVE_WINDOW_ID,&_button.x,&_button.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y,fail \n",XW_LINE_SAVE_WINDOW_ID);
+    }
+ 
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  =  XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
@@ -465,8 +484,6 @@ int  xw_main_line_manger_show(void *data)
     Image_SDK_Create_Button(  node_attr,_button);
     
 
-
-     
     return 0;
 
 }

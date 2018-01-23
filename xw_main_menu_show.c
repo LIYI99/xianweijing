@@ -5,6 +5,7 @@
 #include "xw_png_load.h"
 #include "image_sdk_core.h"
 #include "xw_logsrv.h"
+#include "xw_window_def_func.h"
 #define     MAIN_MENU_H         396
 #define     MAIN_MENU_W         813
 #define     MAIN_MENU_COLOR     0x0
@@ -37,17 +38,19 @@ int xw_main_menu_show(void *data)
 
     window_node_menu_t  mt;
     memset(&mt,0x0,sizeof(window_node_menu_t));
-    
-    mt.x    = XW_MAIN_WINDOW_X;
-    mt.y    = XW_MAIN_WINDOW_Y;
-    
+    int ret = 0 ; 
+    ret = xw_get_node_window_param(XW_MAIN_WINDOW_ID,&mt.x,&mt.y,NULL,NULL);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get x,y fail\n",XW_MAIN_WINDOW_ID);
+    }
+
     xw_get_png_hw(XW_MAIN_WINDOW_ID,&mt.w,&mt.h);
    
     mt.image_cache = (char *)xw_get_window_png(XW_MAIN_WINDOW_ID);
     mt.video_set.mouse_offset =  NULL;//mouse_offset_main_menu_func;
 
     mt.video_set.mouse_leave  =  mouse_leave_main_menu_func;
-    int ret = 0;
+
     ret = Image_SDK_Create_Menu(_attr,mt);
     return ret ;
 

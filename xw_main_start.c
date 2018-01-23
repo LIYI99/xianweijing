@@ -19,13 +19,16 @@
 
 static void  main_sdk_params_init( sdk_init_param_t *params)
 {
-    params->mouse_h =    30;
-    params->mouse_w =    30;
-    params->font_h  =    16;
-    params->font_w  =    8;
-    params->srcee_w =    1920;
-    params->srcee_h =    1080;
-    params->color_fmt =  16;
+    
+    params->mouse_h         =    30;
+    params->mouse_w         =    30;
+    params->font_h          =    16;
+    params->font_w          =    8;
+    params->srcee_w         =    1024;
+    params->srcee_h         =    600;
+    params->base_srcee_w    =    1920;   //now device not modfily
+    params->base_srcee_h    =    1080;
+    params->color_fmt       =    16;
 
     return;
 }
@@ -37,10 +40,10 @@ int     xw_main_ui_start(int times,srcee_vout_mode mode){
     int ret = 0;
     //init logsvr
     ret = xw_logsrv_init("/mnt/para/log.txt",6);
-    
+        
     //init def 
     srcee_mode_type type  = *((srcee_mode_type *)&mode);
-    ret  = xw_window_def_params_init(type);
+    ret  = xw_window_def_params_init(1);
     //start msg connet
     ret =  Image_Msg_Start();
     if(ret < 0){
@@ -49,7 +52,9 @@ int     xw_main_ui_start(int times,srcee_vout_mode mode){
     //init ayunv table
     image_ayuv_talbe_init(RGBA8888_AYUV4444);
     //load all UI
-    xw_png_load_all();
+    
+    xw_png_load_all(1);
+
     
     
     //////////init image sdk//////

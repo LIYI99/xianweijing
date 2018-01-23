@@ -10,6 +10,7 @@
 #include "xw_logsrv.h"
 #include "xw_msg_prv.h"
 #include "xw_config.h"
+#include "xw_window_def_func.h"
 
 
 typedef struct  xw_isp_set{
@@ -228,34 +229,6 @@ int  xw_main_isp_show(void *data)
     }else{
         xw_isp_p->filcker = 1;
     }
-#if 0
-if(ret <= 0)
-    {
-        //AE
-        xw_isp_p->auto_exposure     = 1;
-        xw_isp_p->exposure_vaule    = 30;
-        //AWB
-        xw_isp_p->auto_awb          = 1;
-        xw_isp_p->red_awb           = 30;
-        xw_isp_p->green_awb          = 30;
-        xw_isp_p->blue_awb          = 30;
-        xw_isp_p->colortemp_awb     = 300;
-
-        //ulit
-        xw_isp_p->contrast          = 30;
-        xw_isp_p->sharpness         = 30;
-        xw_isp_p->saturation        = 30;
-        xw_isp_p->brightness        = 30;
-        xw_isp_p->denoise           = 30;
-
-        //video set
-        xw_isp_p->filcker           = 1;  // 1: 50HZ  0:60HZ
-        xw_isp_p->chroma            = 90;
-        xw_isp_p->filp              = 0;
-        xw_isp_p->mirror            = 0;
-        xw_isp_p->hdr               = 0;
-    }
-#endif
     ret = xw_isp_exposure_show(NULL);
     ret = xw_isp_white_banlance_show(NULL);
     //return ;
@@ -368,11 +341,12 @@ static int  xw_isp_exposure_show(void *data)
     memset(&_text,0x0,sizeof(window_node_text_t));
     _attr.en_node = 1;
     
-
-    _bt.x = XW_AUTO_EXPOUSURE_WINDOW_X ;
-    _bt.y = XW_AUTO_EXPOUSURE_WINDOW_Y; 
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
+    
+    ret = xw_get_node_window_param(XW_AUTO_EXPOUSURE_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_AUTO_EXPOUSURE_WINDOW_ID);
+    }
     if(xw_isp_p->auto_exposure == 1)
     {
         _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
@@ -387,10 +361,12 @@ static int  xw_isp_exposure_show(void *data)
 
 
     //create  AE manul bar
-    _bar.x = XW_AE_MANUL_WINDOW_X ;
-    _bar.y = XW_AE_MANUL_WINDOW_Y; 
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_MANUL_EXPOUSURE_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_EXPOUSURE_WINDOW_ID);
+    }
+    
     _bar.bar_color   = XW_ISP_BAR_COLOR;
     _bar.now_value = xw_isp_p->exposure_vaule;
     _bar.max_value = XW_ISP_BAR_MAX_VALUE;
@@ -399,9 +375,13 @@ static int  xw_isp_exposure_show(void *data)
     memcpy(_attr.node_id,XW_MANUL_EXPOUSURE_WINDOW_ID,strlen(XW_MANUL_EXPOUSURE_WINDOW_ID ));
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  AE manul text
+    
+    ret = xw_get_node_window_param(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
 
-    _text.x = XW_MANUL_EXPOUSURE_TEXT_WINDOW_X;
-    _text.y = XW_MANUL_EXPOUSURE_TEXT_WINDOW_Y;
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID);
+    }
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
