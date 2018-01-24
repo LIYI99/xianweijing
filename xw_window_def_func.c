@@ -117,6 +117,15 @@ int xw_window_def_params_init(srcee_mode_type mode)
 
 }
 
+srcee_mode_type xw_get_node_window_mode(void)
+{
+    
+    if(!def_params)
+        return SRCEE_MODE_ERR;
+    return def_params->mode;
+
+}
+
 int xw_get_node_window_param(char * window_id,uint16_t *x,uint16_t *y,uint16_t *w,uint16_t *h)
 {
     if(window_id == NULL)
@@ -174,6 +183,11 @@ static void xw_node_params_add_1080P(void)
         //line manger of main
         
         //close of open lines
+        
+        xw_node_def_add(XW_LINE_RARR_WINDOW_ID ,XW_LINE_RARR_WINDOW_X,
+                XW_LINE_RARR_WINDOW_Y,XW_LINE_RARR_WINDOW_W , XW_LINE_RARR_WINDOW_H) ;
+        
+
         xw_node_def_add(XW_LINE_SHOW_WINDOW_ID ,XW_LINE_SHOW_WINDOW_X,
                 XW_LINE_SHOW_WINDOW_Y,XW_MAINOF_BUTTON_W ,XW_MAINOF_BUTTON_H);
         //selec lines array   
@@ -226,13 +240,13 @@ static void xw_node_params_add_1080P(void)
         
         //color temp
         xw_node_def_add(XW_ISP_COLOR_TEMP_WINDOW_ID ,XW_ISP_COLOR_TEMP_WINDOW_X,XW_ISP_COLOR_TEMP_WINDOW_Y,
-                SXW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
+                XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID  ,XW_ISP_COLOR_TEMP_TEXT_WINDOW_X,
                 XW_ISP_COLOR_TEMP_TEXT_WINDOW_Y,XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
         //wab bule
         xw_node_def_add(XW_ISP_BLUE_WINDOW_ID   ,XW_ISP_BLUE_WINDOW_X,XW_ISP_BLUE_WINDOW_Y,
-                SXW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
+                XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_ISP_BLUE_TEXT_WINDOW_ID ,XW_ISP_BLUE_TEXT_WINDOW_X,XW_ISP_BLUE_TEXT_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
@@ -285,7 +299,7 @@ static void xw_node_params_add_1080P(void)
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
     
         //manu ae
-        xw_node_def_add( XW_MANUL_EXPOUSURE_WINDOW_ID   ,XW_AE_MANUL_WINDOW_X,XW_AE_MANUL_WINDOW_X,
+        xw_node_def_add( XW_MANUL_EXPOUSURE_WINDOW_ID   ,XW_AE_MANUL_WINDOW_X,XW_AE_MANUL_WINDOW_Y,
                XW_MAINOF_BAR_LINE_W,XW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add( XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID, XW_MANUL_EXPOUSURE_TEXT_WINDOW_X ,
@@ -303,7 +317,10 @@ static void xw_node_params_add_1080P(void)
         //auto wab
         xw_node_def_add( XW_AUTO_WHITE_BALANCE_WINDOW_ID ,XW_AUTO_WHITE_BALANCE_WINDOW_X ,XW_AUTO_WHITE_BALANCE_WINDOW_Y,
                 XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
-        
+        xw_node_def_add( XW_MANUL_WHITE_BALANCE_WINDOW_ID ,XW_MANUL_WHITE_BALANCE_WINDOW_X ,XW_MANUL_WHITE_BALANCE_WINDOW_Y,
+                XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
+
+
         //auto ae
         xw_node_def_add( XW_AUTO_EXPOUSURE_WINDOW_ID,XW_AUTO_EXPOUSURE_WINDOW_X,XW_AUTO_EXPOUSURE_WINDOW_Y,
                 XW_MAINOF_CHECK_WINDOW_W, XW_MAINOF_CHECK_WINDOW_H);
@@ -318,7 +335,7 @@ static void xw_node_params_add_1080P(void)
         xw_node_def_add(XW_DATE_YEAR_WINDOW_ID ,XW_DATE_YEAR_WINDOW_X,XW_DATE_YEAR_WINDOW_Y,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
         //moon
-        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,XW_DATE_DAY_WINDOW_X ,XW_DATE_DAY_WINDOW_Y ,
+        xw_node_def_add(XW_DATE_MONN_WINDOW_ID ,XW_DATE_MONN_WINDOW_X ,XW_DATE_MONN_WINDOW_Y ,
                 XW_WINDOW_FONT_SIZE_W,XW_WINDOW_FONT_SIZE_H);
        
         //day
@@ -404,6 +421,11 @@ static void xw_node_params_add_600P(void)
         //line manger of main
         
         //close of open lines
+        xw_node_def_add(XW_LINE_RARR_WINDOW_ID ,SXW_LINE_RARR_WINDOW_X,
+                SXW_LINE_RARR_WINDOW_Y,SXW_LINE_RARR_WINDOW_W , SXW_LINE_RARR_WINDOW_H) ;
+        
+
+
         xw_node_def_add(XW_LINE_SHOW_WINDOW_ID ,SXW_LINE_SHOW_WINDOW_X,
                 SXW_LINE_SHOW_WINDOW_Y,SXW_MAINOF_BUTTON_W ,SXW_MAINOF_BUTTON_H);
         //selec lines array   
@@ -515,7 +537,7 @@ static void xw_node_params_add_600P(void)
                 SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
     
         //manu ae
-        xw_node_def_add(XW_MANUL_EXPOUSURE_WINDOW_ID   ,SXW_AE_MANUL_WINDOW_X,SXW_AE_MANUL_WINDOW_X,
+        xw_node_def_add(XW_MANUL_EXPOUSURE_WINDOW_ID   ,SXW_AE_MANUL_WINDOW_X,SXW_AE_MANUL_WINDOW_Y,
                SXW_MAINOF_BAR_LINE_W,SXW_MAINOF_BAR_LINE_H);
 
         xw_node_def_add(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID, SXW_MANUL_EXPOUSURE_TEXT_WINDOW_X ,
@@ -534,6 +556,10 @@ static void xw_node_params_add_600P(void)
         xw_node_def_add(XW_AUTO_WHITE_BALANCE_WINDOW_ID ,SXW_AUTO_WHITE_BALANCE_WINDOW_X ,SXW_AUTO_WHITE_BALANCE_WINDOW_Y,
                 SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
         
+        xw_node_def_add(XW_MANUL_WHITE_BALANCE_WINDOW_ID ,SXW_MANUL_WHITE_BALANCE_WINDOW_X ,SXW_MANUL_WHITE_BALANCE_WINDOW_Y,
+                SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
+
+        
         //auto ae
         xw_node_def_add(XW_AUTO_EXPOUSURE_WINDOW_ID,SXW_AUTO_EXPOUSURE_WINDOW_X,SXW_AUTO_EXPOUSURE_WINDOW_Y,
                 SXW_MAINOF_CHECK_WINDOW_W, SXW_MAINOF_CHECK_WINDOW_H);
@@ -548,7 +574,7 @@ static void xw_node_params_add_600P(void)
         xw_node_def_add(XW_DATE_YEAR_WINDOW_ID ,SXW_DATE_YEAR_WINDOW_X,SXW_DATE_YEAR_WINDOW_Y,
                 SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
         //moon
-        xw_node_def_add(XW_DATE_DAY_WINDOW_ID ,SXW_DATE_DAY_WINDOW_X ,SXW_DATE_DAY_WINDOW_Y ,
+        xw_node_def_add(XW_DATE_MONN_WINDOW_ID ,SXW_DATE_MONN_WINDOW_X ,SXW_DATE_MONN_WINDOW_Y ,
                 SXW_WINDOW_FONT_SIZE_W,SXW_WINDOW_FONT_SIZE_H);
        
         //day

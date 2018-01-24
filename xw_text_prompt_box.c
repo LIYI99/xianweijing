@@ -5,6 +5,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "xw_text_prompt_box.h"
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
@@ -14,6 +15,9 @@
 #include "xw_logsrv.h"
 #include "xw_png_load.h"
 #include "xw_msg_prv.h"
+#include "xw_window_def_func.h"
+
+
 
 
 #define     SRC_FONT_W              8 
@@ -32,88 +36,131 @@
 #define     TIME_CNT_WINDOW_COLOR       0x0
 #define     TIME_CNT_TEXT_COLOR         0xf00f
 
-static uint16_t *errfontsrc = NULL, *errwindow_cache = NULL,*timecntfontsrc = NULL,*timewindow_cache = NULL;
+
+typedef struct  text_box_handle{
+    
+    pthread_t       xw_promt_box_id;
+    uint16_t        errbox_x;
+    uint16_t        errbox_y;
+    uint16_t        errfont_w;
+    uint16_t        errfont_h;
+
+    uint16_t*       errfontsrc;
+    uint16_t*       errwindow_cache;
+    struct timeval  prompt_tv;
+    uint16_t        prompt_sec;
+
+    uint8_t         need_put_snap_name;
+    uint8_t         need_put_recod_name;
+    uint8_t         xw_promt_quit;
+
+    uint16_t        timebox_x;
+    uint16_t        timebox_y;
+    uint16_t        timefont_w;
+    uint16_t        timefont_h;
+    uint16_t*       timecntfontsrc;
+    uint16_t*       timewindow_cache;
+    struct timeval  time_cnt_tv;
+    uint16_t        time_cnt_sec;
+
+    
+}text_box_handle_t;
 
 
-
-static  struct timeval  prompt_tv,time_cnt_tv;
-static  uint16_t        prompt_sec = 0,time_cnt_sec = 0;
-static  pthread_t       xw_promt_box_id;
-static  uint8_t         xw_promt_quit  = 0,need_put_snap_name = 0,need_put_recod_name = 0;
-
+text_box_handle_t*  _xw_message_box = NULL;
 
 static void*    prompt_box_manger(void *data);
 
 int xw_text_prompt_box_show(void*data)
 {
-     
-    errfontsrc = (uint16_t *)malloc(sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
-    if(!errfontsrc)
+    if(_xw_message_box)
         return -1;
-    errwindow_cache = (uint16_t *)malloc(sizeof(uint16_t)*PROMPT_WINDOW_H*PROMPT_WINDOW_W*PROMPT_WINDOW_NUMS);
-    if(!errwindow_cache){
-        if(errfontsrc)
-            free(errfontsrc);
-        return -1;
+    
+    int ret = 0;
+    uint16_t  tfw,tfh,efw,efh;
+    
+    ret  = xw_get_node_window_param(XW_TEXT_PROMPT_BOX_WINDOW_ID,NULL,NULL,&efw,&efh);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get ,w,h fail \n",XW_TEXT_PROMPT_BOX_WINDOW_ID);
+        return ret;
     }
+    ret  = xw_get_node_window_param(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,NULL,NULL,&tfw,&tfh);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get w,h fail \n",XW_TEXT_TIME_CNT_BOX_WINDOW_ID);
+        return ret;
+    }
+    
+    _xw_message_box =  (text_box_handle_t *)malloc(sizeof(text_box_handle_t) + SRC_FONT_H * SRC_FONT_W * PROMPT_WINDOW_NUMS * 2 +
+            efw * efh * PROMPT_WINDOW_NUMS*2 + SRC_FONT_H *SRC_FONT_W * TIME_CNT_WINDOW_NUMS * 2 + tfw *tfh * TIME_CNT_WINDOW_NUMS * 2);
+
+    if(!_xw_message_box)
+    {
+        xw_logsrv_err("malloc text box handle free \n");
+    }
+    memset(_xw_message_box,0x0,sizeof(text_box_handle_t) + SRC_FONT_H * SRC_FONT_W * PROMPT_WINDOW_NUMS *2 +
+            efw * efh * PROMPT_WINDOW_NUMS * 2 + SRC_FONT_H *SRC_FONT_W * TIME_CNT_WINDOW_NUMS * 2  + tfw *tfh * TIME_CNT_WINDOW_NUMS*2);
+
+    _xw_message_box->errfont_w  =  efw;
+    _xw_message_box->errfont_h  =  efh;
+    _xw_message_box->timefont_w =  tfw;
+    _xw_message_box->timefont_h =  tfh;
+    
+    _xw_message_box->errfontsrc         = (uint16_t *)(((void *)_xw_message_box) + sizeof(text_box_handle_t));
+    _xw_message_box->errwindow_cache    = _xw_message_box->errfontsrc + SRC_FONT_H * SRC_FONT_W * PROMPT_WINDOW_NUMS;
+    _xw_message_box->timecntfontsrc     = _xw_message_box->errwindow_cache + efw *efh *PROMPT_WINDOW_NUMS;
+    _xw_message_box->timewindow_cache   = _xw_message_box->timecntfontsrc + SRC_FONT_H * SRC_FONT_W * TIME_CNT_WINDOW_NUMS;
 
 
+
+    //ceate err message window
     struct  user_set_node_atrr _attr;
     memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
-
-    int ret = 0;
-    //err info 
     memcpy(_attr.node_id,XW_TEXT_PROMPT_BOX_WINDOW_ID,strlen(XW_TEXT_PROMPT_BOX_WINDOW_ID));
     _attr.en_freshen = NEED_CLEAR;
     _attr.en_node    = 0; 
     window_node_menu_t         _mt;
     memset(&_mt,0x0,sizeof(window_node_menu_t));
-    _mt.x = XW_TEXT_PROMPT_BOX_WINDOW_X; 
-    _mt.y = XW_TEXT_PROMPT_BOX_WINDOW_Y;
-    
-    _mt.h           =  PROMPT_WINDOW_H;
-    _mt.w           =  PROMPT_WINDOW_W * PROMPT_WINDOW_NUMS;
-    _mt.image_cache = (char *) errwindow_cache;
-    _mt.color       = 0xf00f;
-    
+
+    ret  = xw_get_node_window_param(XW_TEXT_PROMPT_BOX_WINDOW_ID,&_mt.x,&_mt.y,&efw,&efh);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get ,w,h fail \n",XW_TEXT_PROMPT_BOX_WINDOW_ID);
+        return ret;
+    }
+    _mt.h           =  efh;
+    _mt.w           =  efw * PROMPT_WINDOW_NUMS;
+    _mt.image_cache = (char *)  _xw_message_box->errwindow_cache;
+    _mt.color       = 0xf00f; 
     _mt.video_set.mouse_offset =  NULL;//mouse_offset_top_menu;
     _mt.video_set.mouse_leave  =  NULL;//mouse_leave_top_menu;
     ret = Image_SDK_Create_Menu(_attr,_mt);
     if(ret < 0){
         xw_logsrv_debug("create put text windwow menu fail ret:%d \n",ret);
     }
-   ret = Image_SDK_Set_Node_Order(XW_TEXT_PROMPT_BOX_WINDOW_ID,FIXD_ORDER);
-
-    //cont sec 
-    timecntfontsrc = (uint16_t *)malloc(sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*TIME_CNT_WINDOW_NUMS);
-    if(!timecntfontsrc)
-        return -1;
-    timewindow_cache = (uint16_t *)malloc(sizeof(uint16_t)*TIME_CNT_WINDOW_H*TIME_CNT_WINDOW_W*TIME_CNT_WINDOW_NUMS);
-    if(!timewindow_cache){
-        if(timecntfontsrc)
-            free(timecntfontsrc);
-        return -1;
-    }
+    ret = Image_SDK_Set_Node_Order(XW_TEXT_PROMPT_BOX_WINDOW_ID,FIXD_ORDER);
     
+    
+    //time count window
     memcpy(_attr.node_id,XW_TEXT_TIME_CNT_BOX_WINDOW_ID,strlen(XW_TEXT_TIME_CNT_BOX_WINDOW_ID));
     _attr.en_freshen = NEED_CLEAR;
     _attr.en_node    = 0; 
     memset(&_mt,0x0,sizeof(window_node_menu_t));
-    _mt.x = XW_TEXT_TIME_CNT_BOX_WINDOW_X;
-    _mt.y = XW_TEXT_TIME_CNT_BOX_WINDOW_Y;
     
-    _mt.h           =  TIME_CNT_WINDOW_H;
-    _mt.w           =  TIME_CNT_WINDOW_W * TIME_CNT_WINDOW_NUMS;
-    _mt.image_cache =  (char *) timewindow_cache;
+    ret  = xw_get_node_window_param(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,&_mt.x,&_mt.y,&tfw,&tfh);
+    if(ret < 0){
+        xw_logsrv_err("window:%s get w,h fail \n",XW_TEXT_TIME_CNT_BOX_WINDOW_ID);
+        return ret;
+    }
+    _mt.h           =  tfh;
+    _mt.w           =  tfw  * TIME_CNT_WINDOW_NUMS;
+    _mt.image_cache =  (char *)_xw_message_box->timewindow_cache;
     _mt.color       = 0xf00f;
     
     _mt.video_set.mouse_offset =  NULL;//mouse_offset_top_menu;
     _mt.video_set.mouse_leave  =  NULL;//mouse_leave_top_menu;
     ret = Image_SDK_Create_Menu(_attr,_mt); 
     ret = Image_SDK_Set_Node_Order(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,FIXD_ORDER);
-
     //create manger thread
-    pthread_create(&xw_promt_box_id,NULL,
+    pthread_create(&_xw_message_box->xw_promt_box_id,NULL,
              prompt_box_manger,NULL);
 
 
@@ -128,8 +175,8 @@ static int  text_to_image(char *s)
     if(s == NULL || *s == '\0')
         return -1;
 
-    memset(errfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
-    memset(errwindow_cache,0x0,sizeof(uint16_t)*PROMPT_WINDOW_H*PROMPT_WINDOW_W*PROMPT_WINDOW_NUMS);
+    memset(_xw_message_box->errfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
+    memset(_xw_message_box->errwindow_cache,0x0,sizeof(uint16_t)*PROMPT_WINDOW_H*PROMPT_WINDOW_W*PROMPT_WINDOW_NUMS);
 
 
 
@@ -147,9 +194,9 @@ static int  text_to_image(char *s)
             for(i = 0 ; i < SRC_FONT_H ;i++ ){
                 for(j = 0 ;j < SRC_FONT_W;j++,getp++ ){
                     if(*getp == 0){ 
-                        *(errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_WINDOW_COLOR;
+                        *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_WINDOW_COLOR;
                     }else{
-                        *(errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_TEXT_COLOR;
+                        *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_TEXT_COLOR;
                     }
                 }   
             
@@ -159,12 +206,12 @@ static int  text_to_image(char *s)
     }
     
     image_zoom_t    zt;
-    zt.inbuf        = errfontsrc;
+    zt.inbuf        = _xw_message_box->errfontsrc;
     zt.inwidth      = SRC_FONT_W * PROMPT_WINDOW_NUMS;
     zt.inheight     = SRC_FONT_H;
-    zt.outbuf       = errwindow_cache;
-    zt.outwidth     = PROMPT_WINDOW_W * PROMPT_WINDOW_NUMS;
-    zt.outheight    = PROMPT_WINDOW_H;
+    zt.outbuf       = _xw_message_box->errwindow_cache;
+    zt.outwidth     = _xw_message_box->errfont_w * PROMPT_WINDOW_NUMS;
+    zt.outheight    = _xw_message_box->errfont_h;
     iamge_zoom_func(&zt);
 
     return 0;
@@ -177,8 +224,8 @@ int xw_text_promt_put(char *s,int msec){
 
     
     text_to_image(s);
-    gettimeofday(&prompt_tv,NULL);
-    prompt_sec = msec/1000;
+    gettimeofday(&_xw_message_box->prompt_tv,NULL);
+    _xw_message_box->prompt_sec = msec/1000;
     Image_SDK_Set_Node_En(XW_TEXT_PROMPT_BOX_WINDOW_ID,1);
     Image_SDK_Set_Node_En_Freshen(XW_TEXT_PROMPT_BOX_WINDOW_ID,NEED_FRESHEN);
     return 0;
@@ -188,15 +235,15 @@ int xw_time_cnt_start(uint8_t en)
 {
     
     if(en == 1){
-        gettimeofday(&time_cnt_tv,NULL);
+        gettimeofday(&_xw_message_box->time_cnt_tv,NULL);
         Image_SDK_Set_Node_En(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,1);
        // Image_SDK_Set_Node_En_Freshen(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,NEED_FRESHEN);
     }else{
         //gettimeofday(&time_cnt_tv,NULL);
         Image_SDK_Set_Node_En(XW_TEXT_PROMPT_BOX_WINDOW_ID,0);
         Image_SDK_Set_Node_En_Freshen(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,NEED_CLEAR);
-        time_cnt_tv.tv_sec  = 0 ;
-        time_cnt_tv.tv_usec = 0 ;
+        _xw_message_box->time_cnt_tv.tv_sec  = 0 ;
+        _xw_message_box->time_cnt_tv.tv_usec = 0 ;
     }   
     
     return 0;
@@ -209,8 +256,8 @@ static int  time_text_to_image(char *s)
     if(s == NULL || *s == '\0')
         return -1;
 
-    memset(timecntfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*TIME_CNT_WINDOW_NUMS);
-    memset(timewindow_cache,0x0,sizeof(uint16_t)*TIME_CNT_WINDOW_H*TIME_CNT_WINDOW_W*TIME_CNT_WINDOW_NUMS);
+    memset(_xw_message_box->timecntfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*TIME_CNT_WINDOW_NUMS);
+    memset(_xw_message_box->timewindow_cache,0x0,sizeof(uint16_t)*TIME_CNT_WINDOW_H*TIME_CNT_WINDOW_W*TIME_CNT_WINDOW_NUMS);
 
 
 
@@ -230,9 +277,9 @@ static int  time_text_to_image(char *s)
             for(i = 0 ; i < SRC_FONT_H ;i++ ){
                 for(j = 0 ;j < SRC_FONT_W;j++,getp++ ){
                     if(*getp == 0){ 
-                            *(timecntfontsrc + i*(SRC_FONT_W*TIME_CNT_WINDOW_NUMS) + k*SRC_FONT_W + j) = TIME_CNT_WINDOW_COLOR ; 
+                            *(_xw_message_box->timecntfontsrc + i*(SRC_FONT_W*TIME_CNT_WINDOW_NUMS) + k*SRC_FONT_W + j) = TIME_CNT_WINDOW_COLOR ; 
                         }else{
-                            *(timecntfontsrc + i*(SRC_FONT_W*TIME_CNT_WINDOW_NUMS) + k*SRC_FONT_W + j) = TIME_CNT_TEXT_COLOR;
+                            *(_xw_message_box->timecntfontsrc + i*(SRC_FONT_W*TIME_CNT_WINDOW_NUMS) + k*SRC_FONT_W + j) = TIME_CNT_TEXT_COLOR;
                         }
                 }   
 
@@ -243,12 +290,12 @@ static int  time_text_to_image(char *s)
     }
 
     image_zoom_t    zt;
-    zt.inbuf        = timecntfontsrc;
+    zt.inbuf        = _xw_message_box->timecntfontsrc;
     zt.inwidth      = SRC_FONT_W * TIME_CNT_WINDOW_NUMS;
     zt.inheight     = SRC_FONT_H;
-    zt.outbuf       = timewindow_cache;
-    zt.outwidth     = TIME_CNT_WINDOW_W * TIME_CNT_WINDOW_NUMS;
-    zt.outheight    = TIME_CNT_WINDOW_H;
+    zt.outbuf       = _xw_message_box->timewindow_cache;
+    zt.outwidth     = _xw_message_box->timefont_w * TIME_CNT_WINDOW_NUMS;
+    zt.outheight    = _xw_message_box->timefont_h;
     iamge_zoom_func(&zt);
 
     return 0;
@@ -261,11 +308,11 @@ static int  time_text_to_image(char *s)
 static void*    prompt_box_manger(void *data)
 {
     
-    prompt_tv.tv_sec    = 0 ;
-    prompt_tv.tv_usec   = 0 ;
-    prompt_sec          = 0 ;
-    time_cnt_tv.tv_sec  = 0 ;
-    time_cnt_tv.tv_usec = 0 ;
+    _xw_message_box->prompt_tv.tv_sec    = 0 ;
+    _xw_message_box->prompt_tv.tv_usec   = 0 ;
+    _xw_message_box->prompt_sec          = 0 ;
+    _xw_message_box->time_cnt_tv.tv_sec  = 0 ;
+    _xw_message_box->time_cnt_tv.tv_usec = 0 ;
 
     
     int ret = 0 ;
@@ -275,7 +322,7 @@ static void*    prompt_box_manger(void *data)
     int     timecnt = 0 ;
     char    timebuf[TIME_CNT_WINDOW_NUMS + 1];
     while(1){
-       if(xw_promt_quit)
+       if(_xw_message_box->xw_promt_quit)
            break;
 
         gettimeofday(&tv,NULL);
@@ -283,10 +330,10 @@ static void*    prompt_box_manger(void *data)
             tvp = tv;
         }
 
-        if(time_cnt_tv.tv_sec)
+        if(_xw_message_box->time_cnt_tv.tv_sec)
         {   
             
-            if(tvs.tv_sec != time_cnt_tv.tv_sec && time_cnt_tv.tv_sec != 0)
+            if(tvs.tv_sec != _xw_message_box->time_cnt_tv.tv_sec && _xw_message_box->time_cnt_tv.tv_sec != 0)
                 timecnt = 0;
             
             if(tv.tv_sec != tvp.tv_sec)
@@ -299,22 +346,22 @@ static void*    prompt_box_manger(void *data)
                 Image_SDK_Set_Node_En_Freshen(XW_TEXT_TIME_CNT_BOX_WINDOW_ID,NEED_FRESHEN);
             }
 
-            tvs = time_cnt_tv;
+            tvs = _xw_message_box->time_cnt_tv;
 
         }else{
             timecnt = 0;
         }
         
-        if(prompt_sec > 0 && tv.tv_sec != tvp.tv_sec)
+        if(_xw_message_box->prompt_sec > 0 && tv.tv_sec != tvp.tv_sec)
         {
-            prompt_sec --;
-            if(prompt_sec == 0){
+            _xw_message_box->prompt_sec --;
+            if(_xw_message_box->prompt_sec == 0){
                 Image_SDK_Set_Node_En(XW_TEXT_PROMPT_BOX_WINDOW_ID,0);
                 Image_SDK_Set_Node_En_Freshen(XW_TEXT_PROMPT_BOX_WINDOW_ID,NEED_CLEAR);
             }
         }
 #if 1
-        if(need_put_snap_name)
+        if(_xw_message_box->need_put_snap_name)
         {
             
             char xbuf[25];
@@ -322,10 +369,10 @@ static void*    prompt_box_manger(void *data)
             if(ret >= 0){
                  xw_text_promt_put(xbuf,2000);
             }
-            need_put_snap_name = 0;
+            _xw_message_box->need_put_snap_name = 0;
         }
 
-        if(need_put_recod_name)
+        if(_xw_message_box->need_put_recod_name)
         {
             
             char xbuf[25];
@@ -333,10 +380,9 @@ static void*    prompt_box_manger(void *data)
             ret  = Image_Msg_Get(IDSCAM_EVENT_GET_RECORED_FILENAME,xbuf, 25);
             if(ret >= 0)
             {
-                 xw_logsrv_err("get record file name:%s",xbuf);
-                 xw_text_promt_put(xbuf,3000);
+                xw_text_promt_put(xbuf,3000);
             }
-            need_put_recod_name = 0;
+            _xw_message_box->need_put_recod_name = 0;
         }
 
 
@@ -351,13 +397,13 @@ static void*    prompt_box_manger(void *data)
 
 int xw_text_prompt_box_quit(void*data){
     
-    xw_promt_quit = 1;
-    pthread_join(xw_promt_box_id,NULL);
-    xw_promt_quit = 0;
-    free(errfontsrc );
-    free(errwindow_cache);
-    free(timecntfontsrc);
-    free(timewindow_cache);
+    _xw_message_box->xw_promt_quit = 1;
+    pthread_join(_xw_message_box->xw_promt_box_id,NULL);
+    _xw_message_box->xw_promt_quit = 0;
+    
+    if(_xw_message_box)
+        free(_xw_message_box);
+    _xw_message_box = NULL;
 
     return 0;
 
@@ -368,14 +414,14 @@ int xw_text_prompt_box_quit(void*data){
 
 int xw_snap_name_put(char *s)
 {
-    need_put_snap_name = 1;
+    _xw_message_box->need_put_snap_name = 1;
     return 0;
 }
 
 
 int xw_record_name_put(char *s)
 {
-    need_put_recod_name = 1;
+    _xw_message_box->need_put_recod_name = 1;
       return 0;
 }
 

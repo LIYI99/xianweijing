@@ -378,7 +378,7 @@ static int  xw_isp_exposure_show(void *data)
     
     ret = xw_get_node_window_param(XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
 
-    if(ret){
+    if(ret < 0){
     
         xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_EXPOUSURE_TEXT_WINDOW_ID);
     }
@@ -661,10 +661,12 @@ static int  xw_isp_white_banlance_show(void *data)
     _attr.en_node = 1;
 
     //create  AWB auto
-    _bt.x = XW_AUTO_WHITE_BALANCE_WINDOW_X;
-    _bt.y = XW_AUTO_WHITE_BALANCE_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
+    ret = xw_get_node_window_param(XW_AUTO_WHITE_BALANCE_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret < 0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_AUTO_WHITE_BALANCE_WINDOW_ID);
+    }
+    
     if(xw_isp_p->auto_awb == 1)
     {
         _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
@@ -677,10 +679,11 @@ static int  xw_isp_white_banlance_show(void *data)
     memcpy(_attr.node_id,XW_AUTO_WHITE_BALANCE_WINDOW_ID  ,strlen(XW_AUTO_WHITE_BALANCE_WINDOW_ID ) );
     ret = Image_SDK_Create_Button(_attr,_bt); 
     //create  AWB manul
-    _bt.x = XW_MANUL_WHITE_BALANCE_WINDOW_X;
-    _bt.y = XW_MANUL_WHITE_BALANCE_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
+    ret = xw_get_node_window_param(XW_MANUL_WHITE_BALANCE_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_WHITE_BALANCE_WINDOW_ID);
+    }
     if(xw_isp_p->auto_awb == 0)
     {
         _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
@@ -695,10 +698,13 @@ static int  xw_isp_white_banlance_show(void *data)
    
    
     //create  AWB temp
-    _bar.x = XW_ISP_COLOR_TEMP_WINDOW_X ;
-    _bar.y = XW_ISP_COLOR_TEMP_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_COLOR_TEMP_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_COLOR_TEMP_WINDOW_ID);
+    }
+    xw_logsrv_err("temp x:%d y:%d w:%d h:%d \n",_bar.x,_bar.y,_bar.w,_bar.h);
+
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->colortemp_awb;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE * 10;
@@ -709,8 +715,11 @@ static int  xw_isp_white_banlance_show(void *data)
     ret = Image_SDK_Create_Bar(_attr,_bar);
     
     //create  temp text
-    _text.x = XW_ISP_COLOR_TEMP_TEXT_WINDOW_X;
-    _text.y = XW_ISP_COLOR_TEMP_TEXT_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_COLOR_TEMP_TEXT_WINDOW_ID);
+    }
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 4;
@@ -724,10 +733,11 @@ static int  xw_isp_white_banlance_show(void *data)
 
     
     //create AWB red
-     _bar.x = XW_ISP_RED_WINDOW_X  ;
-    _bar.y = XW_ISP_RED_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_RED_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_RED_WINDOW_ID);
+    }
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->red_awb;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -736,8 +746,12 @@ static int  xw_isp_white_banlance_show(void *data)
     memcpy(_attr.node_id,XW_ISP_RED_WINDOW_ID,strlen(XW_ISP_RED_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  red text
-    _text.x = XW_ISP_RED_TEXT_WINDOW_X;
-    _text.y = XW_ISP_RED_TEXT_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_ISP_RED_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_RED_TEXT_WINDOW_ID);
+    }
+
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -749,10 +763,11 @@ static int  xw_isp_white_banlance_show(void *data)
 
     
     //create AWB green
-    _bar.x = XW_ISP_GREEN_WINDOW_X  ;
-    _bar.y = XW_ISP_GREEN_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_GREEN_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_GREEN_WINDOW_ID);
+    }
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->green_awb;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -761,22 +776,27 @@ static int  xw_isp_white_banlance_show(void *data)
     memcpy(_attr.node_id,XW_ISP_GREEN_WINDOW_ID,strlen(XW_ISP_GREEN_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  gree text
-    _text.x = XW_ISP_GREEN_TEXT_WINDOW_X;
-    _text.y = XW_ISP_GREEN_TEXT_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_ISP_GREEN_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_GREEN_TEXT_WINDOW_ID);
+    }
+
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
     memcpy(_attr.node_id,XW_ISP_GREEN_TEXT_WINDOW_ID,strlen(XW_ISP_GREEN_TEXT_WINDOW_ID ) );
     ret = Image_SDK_Create_Text(_attr,_text);
-    
     sprintf(text_buf,"%d",xw_isp_p->green_awb);
     Image_SDK_Set_Text_Node_Text(XW_ISP_GREEN_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
-
+    
     //craate AWB bule
-    _bar.x = XW_ISP_BLUE_WINDOW_X  ;
-    _bar.y = XW_ISP_BLUE_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_BLUE_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_BLUE_WINDOW_ID);
+    }
+    xw_logsrv_err("bule x:%d y:%d w:%d h:%d \n",_bar.x,_bar.y,_bar.w,_bar.h);
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->blue_awb;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -785,8 +805,12 @@ static int  xw_isp_white_banlance_show(void *data)
     memcpy(_attr.node_id,XW_ISP_BLUE_WINDOW_ID,strlen(XW_ISP_BLUE_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create text
-    _text.x = XW_ISP_BLUE_TEXT_WINDOW_X;
-    _text.y = XW_ISP_BLUE_TEXT_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_ISP_BLUE_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_BLUE_TEXT_WINDOW_ID);
+    }
+
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -855,11 +879,13 @@ static int  xw_isp_filck_show(void *data)
     memset(&_attr,0x0,sizeof(window_node_button_t));
     _attr.en_node = 1;
 
-      //create filk 50HZ
-    _bt.x = XW_FILCKER_50H_WINDOW_X;
-    _bt.y = XW_FILCKER_50H_WINDOW_Y; 
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
+    //create filk 50HZ
+    ret = xw_get_node_window_param(XW_FILCKER_50H_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_FILCKER_50H_WINDOW_ID);
+    }
+
     if(xw_isp_p->filcker == 1)
     {
         _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
@@ -872,10 +898,12 @@ static int  xw_isp_filck_show(void *data)
     memcpy(_attr.node_id, XW_FILCKER_50H_WINDOW_ID ,strlen(XW_FILCKER_50H_WINDOW_ID));
     ret = Image_SDK_Create_Button(_attr,_bt); 
     //create filk 60HZ    
-    _bt.x = XW_FILCKER_60H_WINDOW_X;
-    _bt.y = XW_FILCKER_60H_WINDOW_Y; 
-    _bt.w = XW_ISP_BUTTON_W;
-    _bt.h = XW_ISP_BUTTON_H;
+    ret = xw_get_node_window_param(XW_FILCKER_60H_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_FILCKER_60H_WINDOW_ID);
+    }
+
     if(xw_isp_p->filcker == 0)
     {
         _bt.color = XW_ISP_BUTTON_CHCEK_COLOR;
@@ -1117,10 +1145,12 @@ static int  xw_isp_frequen_show(void *data)
     _attr.en_node = 1;
     
     //create denosie
-    _bar.x = XW_ISP_DENOISE_WINDOW_X  ;
-    _bar.y = XW_ISP_DENOISE_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_DENOISE_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_DENOISE_WINDOW_ID);
+    }
+
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->denoise;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -1129,8 +1159,12 @@ static int  xw_isp_frequen_show(void *data)
     memcpy(_attr.node_id,XW_ISP_DENOISE_WINDOW_ID,strlen(XW_ISP_DENOISE_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  red text
-    _text.x = XW_ISP_DENOISE_TEXT_WINDOW_X;
-    _text.y = XW_ISP_DENOISE_TEXT_WINDOW_Y;
+     ret = xw_get_node_window_param(XW_ISP_DENOISE_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_DENOISE_TEXT_WINDOW_ID);
+    }
+
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -1141,10 +1175,11 @@ static int  xw_isp_frequen_show(void *data)
     Image_SDK_Set_Text_Node_Text(XW_ISP_DENOISE_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
 
     //sharpness
-    _bar.x = XW_ISP_SHARPNESS_WINDOW_X  ;
-    _bar.y = XW_ISP_SHARPNESS_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_SHARPNESS_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_SHARPNESS_WINDOW_ID);
+    }
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->sharpness;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -1152,9 +1187,12 @@ static int  xw_isp_frequen_show(void *data)
     memcpy(_bar.text_id,XW_ISP_SHARPNESS_TEXT_WINDOW_ID,strlen(XW_ISP_SHARPNESS_TEXT_WINDOW_ID));
     memcpy(_attr.node_id,XW_ISP_SHARPNESS_WINDOW_ID,strlen(XW_ISP_SHARPNESS_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  red text
-    _text.x = XW_ISP_SHARPNESS_TEXT_WINDOW_X;
-    _text.y = XW_ISP_SHARPNESS_TEXT_WINDOW_Y;
+    //text
+    ret = xw_get_node_window_param(XW_ISP_SHARPNESS_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_SHARPNESS_TEXT_WINDOW_ID);
+    }
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -1165,21 +1203,26 @@ static int  xw_isp_frequen_show(void *data)
     Image_SDK_Set_Text_Node_Text(XW_ISP_SHARPNESS_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
 
     //brightness
-     _bar.x = XW_ISP_BRIGHTNESS_WINDOW_X  ;
-    _bar.y = XW_ISP_BRIGHTNESS_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
+    ret = xw_get_node_window_param(XW_ISP_BRIGHTNESS_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_BRIGHTNESS_WINDOW_ID);
+    }
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->brightness;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
-
+    
     _bar.video_set.mouse_left_down =  xw_isp_brightness_ldown;
     memcpy(_bar.text_id,XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,strlen(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID));
     memcpy(_attr.node_id,XW_ISP_BRIGHTNESS_WINDOW_ID,strlen(XW_ISP_BRIGHTNESS_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  red text
-    _text.x = XW_ISP_BRIGHTNESS_TEXT_WINDOW_X;
-    _text.y = XW_ISP_BRIGHTNESS_TEXT_WINDOW_Y;
+    //create  text
+    ret = xw_get_node_window_param(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID);
+    }
+
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -1190,21 +1233,24 @@ static int  xw_isp_frequen_show(void *data)
     Image_SDK_Set_Text_Node_Text(XW_ISP_BRIGHTNESS_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
 
     //staruration
+    ret = xw_get_node_window_param(XW_ISP_SATURATION_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
     
-     _bar.x = XW_ISP_SATURATION_WINDOW_X  ;
-    _bar.y = XW_ISP_SATURATION_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
-    _bar.bar_color  = XW_ISP_BAR_COLOR; 
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_SATURATION_WINDOW_ID);
+    }
+     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->saturation;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
     _bar.video_set.mouse_left_down =  xw_isp_saturation_ldown ;
     memcpy(_bar.text_id,XW_ISP_SATURATION_TEXT_WINDOW_ID,strlen(XW_ISP_SATURATION_TEXT_WINDOW_ID));
     memcpy(_attr.node_id,XW_ISP_SATURATION_WINDOW_ID,strlen(XW_ISP_SATURATION_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
-    //create  red text
-    _text.x = XW_ISP_SATURATION_TEXT_WINDOW_X;
-    _text.y = XW_ISP_SATURATION_TEXT_WINDOW_Y;
+    //create  text
+    ret = xw_get_node_window_param(XW_ISP_SATURATION_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_SATURATION_TEXT_WINDOW_ID);
+    }
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3;
@@ -1213,12 +1259,15 @@ static int  xw_isp_frequen_show(void *data)
     
     sprintf(text_buf,"%d",xw_isp_p->saturation);
     Image_SDK_Set_Text_Node_Text(XW_ISP_SATURATION_TEXT_WINDOW_ID,text_buf,strlen(text_buf));
+    
+    //contrast
+    ret = xw_get_node_window_param(XW_ISP_CONTRAST_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_CONTRAST_WINDOW_ID);
+    }
+ 
 
-     //contrast
-     _bar.x = XW_ISP_CONTRAST_WINDOW_X  ;
-    _bar.y = XW_ISP_CONTRAST_WINDOW_Y;
-    _bar.w = XW_ISP_BAR_LINE_W;
-    _bar.h = XW_ISP_BAR_LINE_H;
     _bar.bar_color  = XW_ISP_BAR_COLOR; 
     _bar.now_value  = xw_isp_p->contrast;
     _bar.max_value  = XW_ISP_BAR_MAX_VALUE;
@@ -1227,8 +1276,11 @@ static int  xw_isp_frequen_show(void *data)
     memcpy(_attr.node_id,XW_ISP_CONTRAST_WINDOW_ID,strlen(XW_ISP_CONTRAST_WINDOW_ID ) );
     ret = Image_SDK_Create_Bar(_attr,_bar);
     //create  red text
-    _text.x = XW_ISP_CONTRAST_TEXT_WINDOW_X;
-    _text.y = XW_ISP_CONTRAST_TEXT_WINDOW_Y;
+    ret = xw_get_node_window_param(XW_ISP_CONTRAST_TEXT_WINDOW_ID,&_text.x,&_text.y,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_CONTRAST_TEXT_WINDOW_ID);
+    }
     _text.win_color     = XW_ISP_BAR_TEXT_WIN_COLOR ;
     _text.text_color    = XW_ISP_BAR_TEXT_FONT_COLOR;
     _text.lens          = 3 ;
@@ -1382,10 +1434,12 @@ static int  xw_video_frequen_show(void *data)
     memset(&_attr,0x0,sizeof(window_node_button_t));
     _attr.en_node = 1;
     //create filp button
-    _bt.x = XW_VIDEO_FILP_WINDOW_X;
-    _bt.y = XW_VIDEO_FILP_WINDOW_Y;
-    _bt.w = XW_VIDEO_SET_BUTTON_W;
-    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    ret = xw_get_node_window_param(XW_VIDEO_FILP_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_VIDEO_FILP_WINDOW_ID);
+    }
+    
     _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
     _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
     
@@ -1398,10 +1452,11 @@ static int  xw_video_frequen_show(void *data)
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
     //create mirror button
-    _bt.x = XW_VIDEO_MIRROR_WINDOW_X;
-    _bt.y = XW_VIDEO_MIRROR_WINDOW_Y;
-    _bt.w =XW_VIDEO_SET_BUTTON_W;
-    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    ret = xw_get_node_window_param(XW_VIDEO_MIRROR_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_VIDEO_MIRROR_WINDOW_ID);
+    }
     _bt.color =XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
     _bt.size  = XW_VIDEO_SET_BUTTON_SIZE;
     _bt.video_set.mouse_left_down =  xw_video_mirror_button_ldown;
@@ -1409,10 +1464,12 @@ static int  xw_video_frequen_show(void *data)
     ret = Image_SDK_Create_Button(_attr,_bt); 
     
      //create  choram button
-    _bt.x = XW_VIDEO_NIGHGT_WINDOW_X;
-    _bt.y = XW_VIDEO_NIGHGT_WINDOW_Y;
-    _bt.w = XW_VIDEO_SET_BUTTON_W;
-    _bt.h = XW_VIDEO_SET_BUTTON_H;
+    ret = xw_get_node_window_param(XW_VIDEO_NIGHGT_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_VIDEO_NIGHGT_WINDOW_ID);
+    }
+
     _bt.color = XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
     _bt.size  = XW_VIDEO_SET_BUTTON_SIZE;
     _bt.video_set.mouse_left_down =  xw_video_day_night_button_ldown;
@@ -1421,10 +1478,11 @@ static int  xw_video_frequen_show(void *data)
     
 
      //create mirror button
-    _bt.x = XW_VIDEO_HDR_WINDOW_X;
-    _bt.y = XW_VIDEO_HDR_WINDOW_Y;
-    _bt.w = XW_VIDEO_SET_BUTTON_W;
-    _bt.h =  XW_VIDEO_SET_BUTTON_H;
+     ret = xw_get_node_window_param(XW_VIDEO_HDR_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_VIDEO_HDR_WINDOW_ID);
+    }
     _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
     _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
     _bt.video_set.mouse_left_down =  xw_video_hdr_button_ldown;
@@ -1611,10 +1669,11 @@ static int  xw_isp_reset_show(void *data)
     memset(&_attr,0x0,sizeof(window_node_button_t));
     _attr.en_node = 1;
     //create filp button
-    _bt.x = XW_ISP_RESET_WINDOW_X;
-    _bt.y = XW_ISP_RESET_WINDOW_Y;
-    _bt.w = XW_ISP_BUTTON_REST_W ; 
-    _bt.h = XW_ISP_BUTTON_REST_H ;
+    ret = xw_get_node_window_param(XW_ISP_RESET_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    if(ret){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_ISP_RESET_WINDOW_ID);
+    }
     _bt.color =  XW_VIDEO_SET_BUTTON_LEAVE_COLOR;
     _bt.size  =  XW_VIDEO_SET_BUTTON_SIZE;
     

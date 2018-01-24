@@ -8,7 +8,7 @@
 #include "xw_window_xy_df.h"
 #include "xw_logsrv.h"
 #include "xw_config.h"
-
+#include "xw_window_def_func.h"
 
 #define     XW_LINE_NUMS_MAX            16   //H:8 w:8    
 #define     XW_LINE_CONF_NUMS           8
@@ -210,14 +210,25 @@ static int  xw_line_t_init(void){
 
     }
     //init h line param
-    int j;
+
+    int j,lh = 0 ,lw = 0;
+    if(xw_get_node_window_mode() ==  SRCEE_MODE_1080){
+        lh = 1070;
+        lw = 1910;
+    }else if(xw_get_node_window_mode() == SRCEE_MODE_600){
+        lh = 590;
+        lw = 1015;
+    }else{
+        xw_logsrv_err("not get srcee mode \n");
+    }
+
     for(j = 0 ; j < XW_LINE_CONF_NUMS ; j++){ 
         for(i = 0 ,k = 100; i < XW_LINE_NUMS_MAX/2; i++,k += 200){
 
             xw_lt->lines[j][i].line.start_x   = k;
             xw_lt->lines[j][i].line.start_y   = 5;
             xw_lt->lines[j][i].line.end_x     = k;
-            xw_lt->lines[j][i].line.end_y     = 1070;
+            xw_lt->lines[j][i].line.end_y     = lh;
             xw_lt->lines[j][i].line.color     = 0xf00f;
             xw_lt->lines[j][i].line.size      =  XW_LINE_SIZE_DEUFALT ;
             xw_lt->lines[j][i].line.video_set.mouse_left_up = mouse_ldown_theline;
@@ -232,7 +243,7 @@ static int  xw_line_t_init(void){
 
             xw_lt->lines[j][i].line.start_x   = 5 ;
             xw_lt->lines[j][i].line.start_y   = k ;
-            xw_lt->lines[j][i].line.end_x     = 1910 ;
+            xw_lt->lines[j][i].line.end_x     = lw ;
             xw_lt->lines[j][i].line.end_y     = k;
             xw_lt->lines[j][i].line.color     = 0xf0f0;
             xw_lt->lines[j][i].line.size      =  XW_LINE_SIZE_DEUFALT;
@@ -268,10 +279,12 @@ void xw_line_show_all(void *data)
     //ceater line father menu
     window_node_menu_t mt;
     memset(&mt,0x0,sizeof(window_node_menu_t));
-    mt.x =   XW_LINE_RARR_WINDOW_X;
-    mt.y =   XW_LINE_RARR_WINDOW_Y;
-    mt.h =   XW_LINE_RARR_WINDOW_H;
-    mt.w =   XW_LINE_RARR_WINDOW_W;
+    ret = xw_get_node_window_param(XW_LINE_RARR_WINDOW_ID,&mt.x,&mt.y,&mt.w,&mt.h);
+    if(ret < 0){
+        
+        xw_logsrv_err("windows:%s get x,y,w,h fail \n",XW_LINE_RARR_WINDOW_ID);
+
+    }
     ret  = Image_SDK_Create_Menu(_attr,mt);
     mt.video_set.mouse_right_down = mouse_ldown_line_menu;
 
@@ -284,11 +297,14 @@ void xw_line_show_all(void *data)
     memset(&_text,0x0,sizeof(window_node_text_t));
     memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     _attr.en_node = 1;
-
+    ret = xw_get_node_window_param(XW_ISP_SATURATION_TEXT_WINDOW_ID,NULL,NULL,&_text.asc_width,&_text.font_size);
+    if(ret <  0){
+    
+        xw_logsrv_err("window:%s get x,y,w,h fail \n","LINE TEXT");
+    }
     _text.win_color =  XW_LINE_TEXT_WIN_COLOR; 
     _text.text_color = XW_LINE_TEXT_FONT_COLOR;
     _text.lens = 2;
-
     //ceate all line  add text win
     int  i = 0;
     char text_buf[4];
