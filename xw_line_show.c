@@ -78,8 +78,10 @@ static window_node_line_t*  find_line_for_array(char *node_id)
 //mouse active 
 static  void mouse_ldown_theline(void *data)
 {
+    
     window_node_line_t *lt  = (window_node_line_t *)data;
     window_node_line_t *sa = NULL;
+  
     if(lt->this_node->move_arrt != 0 && xw_lt->lock  == 0)
     {   
                 
@@ -144,20 +146,22 @@ static int  xw_line_t_init(void){
 
 
     int ret = -1;
+    int i = 0,k ;
+
 
     if(XW_LINE_T_SAVEFILE_PATH != NULL)
     {
         ret = xw_load_line_data(XW_LINE_T_SAVEFILE_PATH,xw_lt);
-    }
-    
-    if(ret == 0)
-        return 0;
 
+    }
+    if(ret == 0){
+        xw_lt->line_arry_state = 0;
+        return 0;
+    }
 
     
 
     //if not load conf file else need init all config mem
-    int i = 0,k ;
     for(k = 0 ; k < XW_LINE_CONF_NUMS ;k++)
     {
         for(i = 0; i < XW_LINE_NUMS_MAX; i++)
@@ -285,8 +289,11 @@ void xw_line_show_all(void *data)
         xw_logsrv_err("windows:%s get x,y,w,h fail \n",XW_LINE_RARR_WINDOW_ID);
 
     }
+    xw_logsrv_err("line arrr params x:%d y:%d w:%d h:%d\n",mt.x,mt.y,mt.w,mt.h);
+
     ret  = Image_SDK_Create_Menu(_attr,mt);
-    mt.video_set.mouse_right_down = mouse_ldown_line_menu;
+    
+    //mt.video_set.mouse_right_down = mouse_ldown_line_menu;
 
     ret =  Image_SDK_Set_Node_Disp(XW_LINE_RARR_WINDOW_ID,CLOSE_DISP);
     ret =  Image_SDK_Set_Node_Order(XW_LINE_RARR_WINDOW_ID,FIXD_ORDER);
@@ -315,7 +322,7 @@ void xw_line_show_all(void *data)
         //create line window
         ret = Image_SDK_Create_Line(xw_lt->lines[xw_lt->now_order][i]._attr,xw_lt->lines[xw_lt->now_order][i].line);
         //create text window
-        //continue;
+    
 
         memcpy(_attr.node_id,xw_lt->lines[xw_lt->now_order][i].line.text_id,strlen(XW_LINE_H1_TEXT_WINDOW_ID));
         _attr.en_node = 1;
@@ -367,7 +374,18 @@ static  int  xw_load_line_data(char *path,xw_lines_t *lt)
         return -3;
 
     }
-       
+    int k,i ;
+       for(k = 0 ; k < XW_LINE_CONF_NUMS ;k++){
+        for(i = 0 ;i < XW_LINE_NUMS_MAX ;i ++){
+        
+            xw_lt->lines[k][i].line.video_set.mouse_left_down = mouse_ldown_theline;
+            xw_lt->lines[k][i].line.video_set.mouse_left_up   = mouse_ldown_theline;
+        }
+    }
+
+
+
+
     return 0;
     
 }

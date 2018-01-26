@@ -5,6 +5,12 @@
 #define     VRCEE_VOUT_MODE_1080    0       //1920* 1080
 #define     VRCEE_VOUT_MODE_600     1       //1024*600
 
+#define     MOUSE_HANDLE_ID         "mouse_h"
+#define     MOUSE_ID                "mouse_i"
+
+
+
+
 
 int    xw_png_load_all(int mode);
 void   xw_png_destory(void);

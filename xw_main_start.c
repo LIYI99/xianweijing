@@ -17,18 +17,35 @@
 #include "xw_window_def_func.h"
 
 
-static void  main_sdk_params_init( sdk_init_param_t *params)
+static void  main_sdk_params_init( sdk_init_param_t *params,srcee_mode_type type)
 {
     
-    params->mouse_h         =    30;
-    params->mouse_w         =    30;
-    params->font_h          =    16;
-    params->font_w          =    8;
-    params->srcee_w         =    1024;
-    params->srcee_h         =    600;
-    params->base_srcee_w    =    1920;   //now device not modfily
-    params->base_srcee_h    =    1080;
-    params->color_fmt       =    16;
+    if(type  == SRCEE_MODE_1080)
+    {
+        params->font_h          =    16;
+        params->font_w          =    8;
+        params->srcee_w         =    1920;
+        params->srcee_h         =    1080;
+        params->base_srcee_w    =    1920;   //now device not modfily
+        params->base_srcee_h    =    1080;
+        params->color_fmt       =    16;
+    }else if(type  == SRCEE_MODE_600){
+        params->font_h          =    8;
+        params->font_w          =    8;
+        params->srcee_w         =    1024;
+        params->srcee_h         =    600;
+        params->base_srcee_w    =    1920;   //now device not modfily
+        params->base_srcee_h    =    1080;
+        params->color_fmt       =    16;
+    }
+    
+    params->mouse_cahce = xw_get_window_png(MOUSE_ID);
+    params->mouse_cahce_v2 = xw_get_window_png(MOUSE_HANDLE_ID);
+    xw_get_png_hw(MOUSE_ID,&params->mouse_w,&params->mouse_h);
+    xw_get_png_hw(MOUSE_HANDLE_ID,&params->mouse_w_v2,&params->mouse_w_v2);
+
+    xw_logsrv_err("debug mouse_cahce:%p mouse_cahce_v2:%p\n",params->mouse_cahce,
+            params->mouse_cahce_v2);
 
     return;
 }
@@ -43,7 +60,7 @@ int     xw_main_ui_start(int times,srcee_vout_mode mode){
         
     //init def 
     srcee_mode_type type  = *((srcee_mode_type *)&mode);
-    ret  = xw_window_def_params_init(1);
+    ret  = xw_window_def_params_init(type);
     //start msg connet
     ret =  Image_Msg_Start();
     if(ret < 0){
@@ -53,14 +70,14 @@ int     xw_main_ui_start(int times,srcee_vout_mode mode){
     image_ayuv_talbe_init(RGBA8888_AYUV4444);
     //load all UI
     
-    xw_png_load_all(1);
+    xw_png_load_all(type);
 
     
     
-    //////////init image sdk//////
+    //init sdk params
     sdk_init_param_t    params;
     memset(&params,0x0,sizeof(params));
-    main_sdk_params_init(&params);
+    main_sdk_params_init(&params,type);
 
     Image_SDK_Init(&params);
     //create top menu

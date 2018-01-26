@@ -176,7 +176,7 @@ static int  text_to_image(char *s)
         return -1;
 
     memset(_xw_message_box->errfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
-    memset(_xw_message_box->errwindow_cache,0x0,sizeof(uint16_t)*PROMPT_WINDOW_H*PROMPT_WINDOW_W*PROMPT_WINDOW_NUMS);
+    memset(_xw_message_box->errwindow_cache,0x0,sizeof(uint16_t)*_xw_message_box->errfont_w*_xw_message_box->errfont_h*PROMPT_WINDOW_NUMS);
 
 
 

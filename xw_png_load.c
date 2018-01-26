@@ -110,6 +110,13 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/png/vert8.png"
 
 
+//mouse
+#define     WINDOW_MOUSE_IMAGE             "/usr/local/bin/png/mouse.png"
+#define     WINDOW_MOUSEH_IMAGE            "/usr/local/bin/png/mouseh.png"
+
+
+
+
 
 
 void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color)
@@ -126,6 +133,22 @@ void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint
     return ;
 
 }
+
+static void  xw_color_change_func_v2(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color)
+{
+    if(image == NULL)
+        return ;
+    int i = 0;
+    for(i = 0 ; i < size; i++)
+    {
+        if(image[i] == src_color)
+            image[i] = det_color;
+    }
+    return ;
+
+}
+
+
 
 
 struct  rgb{
@@ -388,9 +411,21 @@ static void  xw_png_load_1080(void)
     p = xw_get_window_png(id);
     xw_color_change_func(p,w*h,0x112,0xfeee);
 
+    //mouse image add
+    ret = xw_window_png_add( WINDOW_MOUSE_IMAGE, MOUSE_ID);
+    if(ret < 0){
+        xw_logsrv_err("load mouse image fail\n");
+    }
+    
+    xw_get_png_hw(WINDOW_MOUSE_IMAGE,&w,&h);
+    p = xw_get_window_png(MOUSE_ID);
+    xw_color_change_func_v2(p,w*h,0xfd88,0xfd98);
     
 
-
+    ret = xw_window_png_add( WINDOW_MOUSEH_IMAGE, MOUSE_HANDLE_ID);
+    if(ret < 0){
+        xw_logsrv_err("load mouse hanle image fail \n");
+    }
 
     return ;
 
@@ -442,6 +477,13 @@ static void  xw_png_load_1080(void)
 #define     SWINDOW_LINE_MANGER_SELECTV6    "/usr/local/bin/pngs/vert6.png"
 #define     SWINDOW_LINE_MANGER_SELECTV7    "/usr/local/bin/pngs/vert7.png"
 #define     SWINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/pngs/vert8.png"
+
+//mouse path 
+#define     SWINDOW_MOUSE_IMAGE             "/usr/local/bin/pngs/mouse.png"
+#define     SWINDOW_MOUSEH_IMAGE            "/usr/local/bin/pngs/mouseh.png"
+
+
+
 
 
 
@@ -663,8 +705,16 @@ static void  xw_png_load_600(void)
     p = xw_get_window_png(id);
     xw_color_change_func(p,w*h,0x112,0xfeee);
 
-    
+    ret = xw_window_png_add( SWINDOW_MOUSE_IMAGE, MOUSE_ID);
+    if(ret < 0){
+        xw_logsrv_err("load mouse image fail\n");
+    }
+    ret = xw_window_png_add( SWINDOW_MOUSEH_IMAGE, MOUSE_HANDLE_ID);
+    if(ret < 0){
+        xw_logsrv_err("load mouse hanle image fail \n");
+    }
     return ;
+
 
 }
 

@@ -361,7 +361,7 @@ static int  xw_isp_exposure_show(void *data)
 
 
     //create  AE manul bar
-    ret = xw_get_node_window_param(XW_MANUL_EXPOUSURE_WINDOW_ID,&_bt.x,&_bt.y,&_bt.w,&_bt.h);
+    ret = xw_get_node_window_param(XW_MANUL_EXPOUSURE_WINDOW_ID,&_bar.x,&_bar.y,&_bar.w,&_bar.h);
     if(ret){
     
         xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_EXPOUSURE_WINDOW_ID);
