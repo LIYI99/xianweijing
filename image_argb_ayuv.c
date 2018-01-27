@@ -94,10 +94,10 @@ int  image_ayuv_talbe_init(int  format){
             g = (index & 0x00F0)  >> 0;
             r = (index & 0x000F)  << 4;
 #else
-            a = (index & 0xF000) >> 12;
+            a = (index & 0xF000)  >> 12;
             b = (index & 0x0F00)  >> 4;
             g = (index & 0x00F0)  >> 0;
-            r = (index & 0x000F) << 4;
+            r = (index & 0x000F)  << 4;
 
 #endif
 
@@ -112,7 +112,7 @@ int  image_ayuv_talbe_init(int  format){
             ayuv_buf[index] = ((a << 12) | (y << 8) | (u << 4) | (v << 0));
         }
 
-        xw_logsrv_debug(" XXXRGBA8888 0xffff ayuv:%x index:%x\n",ayuv_buf[0xffff],index);
+        xw_logsrv_debug(" RGBA8888  0xffff ayuv 4444:%x index:%x\n",ayuv_buf[0xffff],index);
  
 
     }else if(format == AGBR8888_AYUV4444){
@@ -133,6 +133,36 @@ int  image_ayuv_talbe_init(int  format){
             ayuv_buf[index] = ((a << 12) | (y << 8) | (u << 4) | (v << 0));
         }
 
+    }else if(format == RGBA8888_AYUV1555)
+    {
+        #if 1
+            a = (index & 0xF000)  >> 15;
+            b = (index & 0xEF00)  >> 3;
+            g = (index & 0x0CF0)  >> 0;
+            r = (index & 0x00CF)  << 3;
+#else
+            a = (index & 0xF000) >> 12;
+            b = (index & 0x0F00)  >> 4;
+            g = (index & 0x00F0)  >> 0;
+            r = (index & 0x000F) << 4;
+
+#endif
+
+            y = (( 66 * r + 129 * g +  25 * b + 128) >> 8) +  16;
+            u = ((-38 * r -  74 * g + 112 * b + 128) >> 8) + 128;
+            v = ((112 * r -  94 * g -  18 * b + 128) >> 8) + 128;
+
+            y >>= 3;
+            u >>= 3;
+            v >>= 3;
+            if(a != 0)
+                a = 1;
+            ayuv_buf[index] = ((a << 15) | (y << 10) | (u << 5) | (v << 0));
+
+        xw_logsrv_debug(" RGBA8888 0xffff ayuv1555:%x index:%x\n",ayuv_buf[0xffff],index);
+ 
+
+ 
     }else{
 
             xw_logsrv_err("init ayuv tabel fail \n");
@@ -152,12 +182,19 @@ void  inline image_argb4444_to_ayuv(uint16_t argb, uint16_t *ayuv){
 void  inline  image_rgba8888_to_ayuv(uint32_t rgba,uint16_t *ayuv){
      
     uint16_t rgba16;
-
+#if 1
     rgba16 = ((rgba & 0xf0000000) >> 16) |
             ((rgba & 0x00f00000) >> 12) |
             ((rgba & 0x0000f000) >> 8) |
             ((rgba & 0x000000f0) >> 4);
+#endif
+#if 0
+    rgba16 = ((rgba & 0xf0000000) >> 16) |
+            ((rgba & 0x00f00000) >> 9) |
+            ((rgba & 0x0000f000) >> 6) |
+            ((rgba & 0x000000f0) >> 3);
     
+#endif
     *ayuv = ayuv_buf[rgba16];
     return ;
 }

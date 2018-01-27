@@ -7,23 +7,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
 #include "gk_device_init.h"
-#include "image_sdk_core.h"
-#include "xw_png_load.h"
-#include "xw_main_menu_show.h"
-#include "xw_top_menu_show.h"
-#include "xw_date_show.h"
-#include "xw_line_show.h"
-#include "xw_main_line_manger_show.h"
-#include "xw_main_isp_show.h"
-#include "xw_logsrv.h"
-#include "image_argb_ayuv.h"
-#include "xw_text_prompt_box.h"
-#include "xw_preview_show.h"
-#include "xw_msg_prv.h"
-#include "xw_test_freshen.h"
-
+#include "xw_main_start.h"
 
 int main(int argc,char **argv)
 {
@@ -32,30 +17,36 @@ int main(int argc,char **argv)
      *  other = 'A.....'
      *
      * */
-    //devcie init 
-    int ret = 0;
-    ret = xw_logsrv_init(NULL,6);
+
+    int  times = 60;
+    if(argv[1] != NULL){
+        times = atoi(argv[1]);
+        printf("run times:%d\n",times);
+        //xw_logsrv_debug("run times:%d \n",times);
+    }
     
 
-
+    int ret = 0;
+    //init losgsrv
+    //int device
     ret = gk_device_init(NULL); //ok
     ret =start_read_venc_thread(); //ok
-    
+   
+    xw_main_ui_start(times,0);
 
+#if 0
+    //init logsvr
+    ret = xw_logsrv_init(NULL,6);
+    //start msg connet
     ret =  Image_Msg_Start();
     if(ret < 0){
-    
         xw_logsrv_err("connet the srv fail \n");
     }
-
-
     //init ayunv table
     image_ayuv_talbe_init(RGBA8888_AYUV4444);
-    //image_ayuv_talbe_init(RGB565_YUV565);
-    //////////load all png///////////
+    //load all UI
     xw_png_load_all();
-    
-    //////////init image handle//////
+    //////////init image sdk//////
     Image_SDK_Init();
 
 #if 1
@@ -67,7 +58,7 @@ int main(int argc,char **argv)
     //create main menu
      ret = xw_main_menu_show(NULL);
     // create date
-    xw_date_show_thread(NULL);
+    xw_date_show_thread(NULL);v
     // create lines
     xw_line_show_all(NULL);
     // create lines manger
@@ -83,43 +74,27 @@ int main(int argc,char **argv)
     //test_32_png_image_put();
     xw_line_show_all(NULL);
 #endif
-
+    //not block
     Image_SDK_Run();
     
-    for(;;){
-        sleep(1);
+    for(;times > 0;){
+        sleep(3);
+        times -= 3;
     }
-#if 0
-    int type  = 2;
-    int i =0 ;
-    for(; ;i++)
-    {
-        sleep(1);
-        if((i%15) == 0){
-            printf("set device type :%d \n",type);
-            gdm_vout_en(type);
-            if(type == 3)
-                type = 2;
-            else
-                type = 3;
-
-        }
-
-    }
-#endif
+    
     xw_preview_quit(NULL);
     xw_main_line_quit_show(NULL);
     xw_date_quit_thread(NULL); 
     xw_main_isp_quit_show(NULL);
     xw_line_quit_all(NULL);
     xw_text_prompt_box_quit(NULL);
-    
     image_ayuv_talbe_deinit();
     Image_SDK_deInit();
     xw_logsrv_deinit();
     xw_png_destory();
 
 
+#endif
 
     return 0;
 }

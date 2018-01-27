@@ -298,6 +298,11 @@ static void mouse_ldown_button_perview(void *data)
     
     xw_lines_close_all_root(NULL);
     xw_preview_cl_op(NULL);
+    
+    
+    if(xw_preview_get_state() == 0)
+        xw_lines_unlock();
+
     return ;
 
 }

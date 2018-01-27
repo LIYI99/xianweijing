@@ -45,6 +45,13 @@ typedef enum{
     FRESHEN_NUMS,
 }NODE_FRESHEN_ARRT;
 
+//click attr
+typedef enum{
+    CLICK_CONSTANT = 0,
+    CLICK_ADVANCED,
+    CLICK_ROOT,
+}CLICK_ATTR;
+
 // V,node disp set
 typedef enum{
     OPEN_DISP,
@@ -200,8 +207,8 @@ typedef struct window_node_text{
     uint16_t        last_y;
     uint16_t        x;
     uint16_t        y;
-    uint8_t         font_size;
-    uint8_t         asc_width;
+    uint16_t         font_size;
+    uint16_t         asc_width;
     uint16_t        lens;
     uint32_t        win_color;
     uint32_t        text_color;
@@ -230,17 +237,32 @@ typedef struct window_node_bar{
 }window_node_bar_t;
 
 typedef struct window_node_mouse{
-    
+
+    uint8_t         reflect_state;
+    uint8_t         last_reflect_state;
+
     uint16_t        x_last;        //old
     uint16_t        y_last;        //old
+    
     uint16_t        x;
     uint16_t        y;
+    
     uint16_t        size;       //h
     uint16_t        size_w;     //w
+    
+    uint16_t        size_v2;
+    uint16_t        sizew_v2;
+
     uint32_t        color;
+
+    uint16_t        *mouse_buf;
+    uint16_t        *mouseh_buf;
+    
     char            *image_p;
     char            *image_cache;
     char            *save_cache;
+    char            *save_cache_v2;
+
 
 }window_node_mouse_t;
 
@@ -257,6 +279,10 @@ typedef struct  image_sdk_s{
     //video params
     uint16_t        scree_w;
     uint16_t        scree_h;
+    
+    uint16_t        base_scree_w;
+    uint16_t        base_scree_h;
+
     uint16_t        color_fmt;
     uint16_t        disp_fps;
     int             video_fd;
@@ -293,6 +319,10 @@ typedef struct sdk_init_param{
     //srcee
     uint16_t    srcee_w;
     uint16_t    srcee_h;
+    
+    uint16_t    base_srcee_w;
+    uint16_t    base_srcee_h;
+
     uint16_t    color_fmt;
     
     //window font size
@@ -302,6 +332,11 @@ typedef struct sdk_init_param{
     //mouse
     uint16_t    mouse_w;
     uint16_t    mouse_h;
+    uint16_t    mouse_w_v2;
+    uint16_t    mouse_h_v2;
+    uint16_t    *mouse_cahce;
+    uint16_t    *mouse_cahce_v2;
+
     char        mouse_path[64];
     char        mouse_pathv2[64];
     

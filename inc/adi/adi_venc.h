@@ -783,6 +783,24 @@ typedef struct
     GADI_U16    height;
 }GADI_VENC_ChanlParamsT;
 
+/*!
+*******************************************************************************
+** \brief set one channel input window croping struct.
+*******************************************************************************
+*/
+typedef struct
+{
+    /*channel index.*/
+    GADI_U32    channelId;
+    /*channel input width.*/
+    GADI_U16    width;
+    /*channel input height.*/
+    GADI_U16    height;
+    /*channel input x offset.*/
+    GADI_U16    xOffset;
+    /*channel input offset.*/
+    GADI_U16    yOffset;
+}GADI_VENC_ChanlCropParamsT;
 
 //*****************************************************************************
 //*****************************************************************************
@@ -1727,6 +1745,25 @@ GADI_ERR gadi_venc_set_h264_mb_qp_ctl(GADI_SYS_HandleT handle,
 GADI_ERR gadi_venc_change_channel_onfly(GADI_SYS_HandleT handle,
     GADI_VENC_ChanlParamsT * chanlPar);
 
+/*!
+*******************************************************************************
+** \brief set channel input crop.
+**
+** \param[in]  handle     Valid ADI venc instance handle previously opened by
+**                        #gadi_venc_open.
+** \param[in]  cropPar pointer of  channel input croping parameters struct;
+**
+** \return
+** - #GADI_OK
+** - #GADI_VENC_ERR_FROM_DRIVER
+** - #GADI_VENC_ERR_BAD_PARAMETER
+**
+** \sa gadi_venc_open
+**
+*******************************************************************************
+*/
+GADI_ERR gadi_venc_set_channel_input_crop(GADI_SYS_HandleT handle,
+    GADI_VENC_ChanlCropParamsT * cropPar);
 
 #ifdef __cplusplus
 }

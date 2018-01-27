@@ -11,6 +11,10 @@
 #include "image_argb_ayuv.h"
 #include "xw_msg_prv.h"
 #include "xw_logsrv.h"
+#include "xw_window_def_func.h"
+#include "xw_png_load.h"
+
+
 
 #define  XW_IMAGE_ANY_PEVIEW_WIN_W          1920/2 + 20 
 #define  XW_IMAGE_ANY_PEVIEW_WIN_H          1080/2 + 20
@@ -381,20 +385,15 @@ int xw_preview_show(void *data)
     memset(&_mt,0x0,sizeof(window_node_menu_t));
     memset(&_attr,0x0,sizeof(struct user_set_node_atrr));
     //Anys
-    _mt.x = XW_PERVIEW_IMAGE_ANY_WINDOW_X; 
-    _mt.y = XW_PERVIEW_IMAGE_ANY_WINDOW_Y;
-    _mt.w = XW_IMAGE_ANY_PEVIEW_WIN_W ;
-    _mt.h = XW_IMAGE_ANY_PEVIEW_WIN_H ; 
+    
+    xw_get_node_window_param(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,&_mt.x,&_mt.y,&_mt.w,&_mt.h);
     _mt.color = 0x0;
     _mt.user_video_freshen = any_preview_freshen;
     _mt.video_set.mouse_left_down = any_preview_mouse_ldown;
     memcpy(_attr.node_id,XW_PERVIEW_IMAGE_ANY_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID ) );
     Image_SDK_Create_Menu(_attr,_mt);
     
-    _mt.x = XW_PERVIEW_IMAGE_ONLY_WINDOW_X; 
-    _mt.y = XW_PERVIEW_IMAGE_ONLY_WINDOW_Y;
-    _mt.w = XW_IMAGE_ONLY_PEVIEW_WIN_W ;
-    _mt.h = XW_IMAGE_ONLY_PEVIEW_WIN_H ; 
+    xw_get_node_window_param(XW_PERVIEW_IMAGE_ONLY_WINDOW_ID,&_mt.x,&_mt.y,&_mt.w,&_mt.h);
     _mt.color = 0x0;
     _mt.user_video_freshen = only_preview_freshen;
     _mt.video_set.mouse_left_down = only_preview_mouse_ldown;
@@ -408,31 +407,30 @@ int xw_preview_show(void *data)
 
 
     //create preivew prev button
-   
-#if 0
-    _mt.x = XW_PERVIEW_IMAGE_ANEXT_WINDOW_X ; 
-    _mt.y = XW_PERVIEW_IMAGE_ANEXT_WINDOW_Y;
-    _mt.w = 300;
-    _mt.h = 100; 
+    xw_get_node_window_param(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,&_mt.x,&_mt.y,NULL,NULL);
+    xw_get_png_hw(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,&_mt.w,&_mt.h);
+    xw_logsrv_err("next x:%d y:%d w:%d h:%d \n",_mt.x,_mt.y,_mt.w,_mt.h);
+    
+    _mt.image_cache =  (char *)xw_get_window_png(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID);
     _mt.color = 0x0;
     _mt.user_video_freshen = NULL;
     _mt.video_set.mouse_left_down = any_next_mouse_ldown;
 ;
     memcpy(_attr.node_id,XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID ) );
     Image_SDK_Create_Menu(_attr,_mt);
+    
+    
+    xw_get_node_window_param(XW_PERVIEW_IMAGE_APER_WINDOW_ID,&_mt.x,&_mt.y,NULL,NULL);
+    xw_get_png_hw(XW_PERVIEW_IMAGE_APER_WINDOW_ID,&_mt.w,&_mt.h);
+    xw_logsrv_err("per x:%d y:%d w:%d h:%d \n",_mt.x,_mt.y,_mt.w,_mt.h);
 
-    _mt.x = XW_PERVIEW_IMAGE_APRE_WINDOW_X ; 
-    _mt.y = XW_PERVIEW_IMAGE_APER_WINDOW_Y;
-    _mt.w = 300;
-    _mt.h = 100; 
+    _mt.image_cache =  (char *)xw_get_window_png(XW_PERVIEW_IMAGE_APER_WINDOW_ID);
     _mt.color = 0x0;
     _mt.user_video_freshen = NULL;
     _mt.video_set.mouse_left_down = any_prev_mouse_ldown;
 ;
     memcpy(_attr.node_id,XW_PERVIEW_IMAGE_APER_WINDOW_ID,strlen(XW_PERVIEW_IMAGE_APER_WINDOW_ID ) );
     Image_SDK_Create_Menu(_attr,_mt);
-
-#endif
 
 
 
@@ -443,16 +441,39 @@ int xw_preview_show(void *data)
 
 }
 
+
+void xw_preview_close(void)
+{
+
+    int x = 0;
+    xw_preview_cl_op((void *)&x);
+    return ;
+}
+
 int xw_preview_cl_op(void *data)
 {
     
+    int px = 0;
+    if(data){
+        px  = *((int *)data);
+    }else{
+        px = 2;
+    }
     struct getmage_p mage_p;
     mage_p.nums = 0;
-
+    
     int ret  = 0;
+    
     if(xw_preview_p == NULL)
         return -1;
+    
+    if(px == 0 && xw_preview_p->preview_now_state == 0)
+        return 0;
+
+
     if(xw_preview_p->preview_now_state == 0){
+        
+       
         //open any
         //get data buf save the handle 
         mage_p.mode = 0 ; //friset get
@@ -470,9 +491,28 @@ int xw_preview_cl_op(void *data)
         //set node open
         Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANY_WINDOW_ID ,1);
         Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,  NEED_FRESHEN);
+        
+        //next and per ui
+        Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID ,1);
+        Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,  NEED_FRESHEN);
+        
+        //per node
+        Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_APER_WINDOW_ID ,1);
+        Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_APER_WINDOW_ID,  NEED_FRESHEN);
+
         xw_preview_p->preview_now_state = 1;
     }else if(xw_preview_p->preview_now_state == 1){
        //close any
+   
+        //next node
+        Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID ,0);
+        Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID,  NEED_CLEAR);
+        
+        //per node
+        Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_APER_WINDOW_ID ,0);
+        Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_APER_WINDOW_ID,  NEED_CLEAR);
+
+
         Image_SDK_Set_Node_En_Freshen(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,NEED_CLEAR);
         Image_SDK_Set_Node_En(XW_PERVIEW_IMAGE_ANY_WINDOW_ID,0);
         xw_preview_p->preview_now_state = 0;
@@ -492,6 +532,12 @@ int xw_preview_cl_op(void *data)
 
 }
 
+int xw_preview_get_state(void){
+
+    if(xw_preview_p == NULL)
+        return 0;
+    return  xw_preview_p->preview_now_state;
+} 
 
 int xw_preview_quit(void *data)
 {

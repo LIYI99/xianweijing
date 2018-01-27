@@ -5,12 +5,12 @@
 #include "xw_window_id_df.h"
 #include "xw_window_xy_df.h"
 #include "xw_window_wh_df.h"
+
 #include "xw_config_param_process.h"
 #include "xw_logsrv.h"
 
 #define  NODE_ID_MAX_LEN        10
 #define  NODE_SAVE_MAX_NUMS     300
-
 struct node_def_params{
     char        node_id[NODE_ID_MAX_LEN];
     uint16_t    x;
@@ -26,7 +26,13 @@ typedef struct node_def_hanlde{
     struct  node_def_params node_params[NODE_SAVE_MAX_NUMS];
 }node_def_hanlde_t;
 
+
+
 node_def_hanlde_t   *def_params = NULL;
+
+
+
+
 
 static void xw_node_params_add_1080P(void);
 static void xw_node_params_add_600P(void);

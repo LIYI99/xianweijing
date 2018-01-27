@@ -42,7 +42,7 @@ static void  main_sdk_params_init( sdk_init_param_t *params,srcee_mode_type type
     params->mouse_cahce = xw_get_window_png(MOUSE_ID);
     params->mouse_cahce_v2 = xw_get_window_png(MOUSE_HANDLE_ID);
     xw_get_png_hw(MOUSE_ID,&params->mouse_w,&params->mouse_h);
-    xw_get_png_hw(MOUSE_HANDLE_ID,&params->mouse_w_v2,&params->mouse_w_v2);
+    xw_get_png_hw(MOUSE_HANDLE_ID,&params->mouse_w_v2,&params->mouse_h_v2);
 
     xw_logsrv_err("debug mouse_cahce:%p mouse_cahce_v2:%p\n",params->mouse_cahce,
             params->mouse_cahce_v2);

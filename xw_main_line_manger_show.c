@@ -9,6 +9,7 @@
 #include "xw_window_xy_df.h"
 #include "xw_logsrv.h"
 #include "xw_config.h"
+#include "xw_preview_show.h"
 #include "xw_window_def_func.h"
 
 
@@ -39,9 +40,9 @@ static void xw_line_show_button_ldow(void *data)
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->color = 0xf0f0;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
-
-
-        xw_lines_cl_op_all(NULL);
+    //need close prewiv
+    xw_preview_close();
+    xw_lines_cl_op_all(NULL);
     return;
     
 }
@@ -128,6 +129,8 @@ static void xw_line_setsize_button_ldow(void *data)
     
     ret = xw_lines_line_set_param(0, colors[color_now],size_now + 1);
     if(ret < 0){
+
+
         if(size_now != 0)
             size_now --;
         return ;

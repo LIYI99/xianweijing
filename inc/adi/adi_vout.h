@@ -189,6 +189,24 @@ typedef enum  {
     GADI_VOUT_I80_Cmd_ProchCtrl       , //0xB5,
     GADI_VOUT_I80_Cmd_NUMBER,
 }GADI_VOUT_I80_CmdT;
+    
+/*!
+*******************************************************************************
+** \brief video&OSD flip enum.
+*******************************************************************************
+*/
+typedef enum
+{
+    /*no flip.*/
+    GADI_VOUT_FLIP_NONE = 0,
+    /*flip video/OSD horizontal(nonsupport).*/
+    GADI_VOUT_FLIP_HORIZONTAL,
+    /*flip video/OSD vertical(nonsupport).*/ 
+    GADI_VOUT_FLIP_VERTICAL,
+    /*flip video/OSD horizontal and vertical. Rotate 180 degrees*/
+    GADI_VOUT_FLIP_HV,
+}GADI_VOUT_FlipEnumT;
+
 
 //*****************************************************************************
 //*****************************************************************************
@@ -272,6 +290,20 @@ typedef struct
     /*enable or disable rotate 90*/
     GADI_BOOL               rotateEn;
 }GADI_VO_RotateEnT;
+
+/*!
+*******************************************************************************
+** \brief osd flip  struct.
+*******************************************************************************
+*/
+
+typedef struct
+{
+    /*specify vout channel.*/
+    GADI_VOUT_ChannelEnumT  voutChannel;
+    /*flip osd type*/
+    GADI_VOUT_FlipEnumT     flipType;
+}GADI_VO_OsdFlipT;
 
 //*****************************************************************************
 //*****************************************************************************
@@ -469,6 +501,23 @@ GADI_ERR gadi_vout_set_backlight(GADI_SYS_HandleT handle, GADI_U16 duty);
 
 GADI_ERR gadi_vout_init_rotate(GADI_SYS_HandleT handle, GADI_VO_RotateEnT *voutRotate);
 
+/*!
+*******************************************************************************
+** \brief inital the flip status of osd(fb).
+**
+** \param[in]  handle     Valid dsp ADI instance handle previously opened by
+**                        #gadi_vout_open.
+** \param[in]  voutFlip  pointer of osd flip struct.
+**
+** \return
+** - #GADI_OK
+** - #GADI_VOUT_ERR_BAD_PARAMETER
+**
+** \sa gadi_vout_init_osd_flip
+**
+*******************************************************************************
+*/
+GADI_ERR gadi_vout_init_osd_flip(GADI_SYS_HandleT handle, GADI_VO_OsdFlipT *voutFlip);
 
 #ifdef __cplusplus
     }

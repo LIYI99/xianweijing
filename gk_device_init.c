@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
-
+#include "gk_device_init.h"
 #include "adi_types.h"
 #include "adi_sys.h"
 #include "adi_vi.h"
@@ -69,7 +69,8 @@ unsigned char runing_enable = FALSE;
 unsigned char snphot_enable = FALSE;
 unsigned char ispStart = FALSE;
 //vi
-static GADI_VI_SettingParamsT   viParams = {
+static GADI_VI_SettingParamsT   viParams = 
+{
     .resoluMode = 0,//GK_VIDEO_MODE(VI_INPUT_WIDTH, VI_INPUT_HEIGHT, VI_INPUT_FPS, 1),
     .frameRate  = VI_INPUT_FPS,
     .mirrorMode = {0, 0},
@@ -77,9 +78,9 @@ static GADI_VI_SettingParamsT   viParams = {
 //vo
 static GADI_VOUT_SettingParamsT voParams[GADI_VOUT_NUMBER] = {
     {
-        .voutChannel = 0,
-        .resoluMode  = 13,//GADI_VOUT_RESOLUTION_HDTV,
-        .deviceType  = 3,
+        .voutChannel =  0,
+        .resoluMode  =  13,    // LCD:3, //  HDMI:13,//GADI_VOUT_RESOLUTION_HDTV,
+        .deviceType  =  3,    // LCD:4, //  HDMI:3
     },
     {
         .voutChannel = 1,
@@ -975,7 +976,7 @@ void* gdm_read_encode_streams(void *arg)
             return NULL;
         }
     }
-
+    int sleep_cnt = 0;
     while(runing_enable)
     {
         for(i = 0; i < GADI_VENC_STREAM_NUM; i ++){
@@ -1032,6 +1033,13 @@ void* gdm_read_encode_streams(void *arg)
         }else{
             printf("--not in encode status.\n");
             usleep(30000);
+        }
+        sleep_cnt++;
+        if(sleep_cnt == 300)
+        {
+          //  int enable = 0;
+          //  gadi_vi_enable(viHandle, enable);
+
         }
     }
 

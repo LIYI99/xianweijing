@@ -110,6 +110,12 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/png/vert8.png"
 
 
+//next and per
+#define     WINDOW_PERVIEW_NEXT_UI         "/usr/local/bin/png/next.png"
+#define     WINDOW_PERVIEW_PER_UI         "/usr/local/bin/png/per.png"
+
+
+
 //mouse
 #define     WINDOW_MOUSE_IMAGE             "/usr/local/bin/png/mouse.png"
 #define     WINDOW_MOUSEH_IMAGE            "/usr/local/bin/png/mouseh.png"
@@ -411,6 +417,13 @@ static void  xw_png_load_1080(void)
     p = xw_get_window_png(id);
     xw_color_change_func(p,w*h,0x112,0xfeee);
 
+
+    //next per ui
+    ret  =  xw_window_png_add(WINDOW_PERVIEW_NEXT_UI,XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID) ;
+    ret  =  xw_window_png_add(WINDOW_PERVIEW_PER_UI,XW_PERVIEW_IMAGE_APER_WINDOW_ID) ;
+
+
+
     //mouse image add
     ret = xw_window_png_add( WINDOW_MOUSE_IMAGE, MOUSE_ID);
     if(ret < 0){
@@ -421,12 +434,11 @@ static void  xw_png_load_1080(void)
     p = xw_get_window_png(MOUSE_ID);
     xw_color_change_func_v2(p,w*h,0xfd88,0xfd98);
     
-
     ret = xw_window_png_add( WINDOW_MOUSEH_IMAGE, MOUSE_HANDLE_ID);
     if(ret < 0){
         xw_logsrv_err("load mouse hanle image fail \n");
     }
-
+    //xw_get_png_hw(WINDOW_MOUSE_IMAGE,&w,&h);
     return ;
 
 }
@@ -477,6 +489,13 @@ static void  xw_png_load_1080(void)
 #define     SWINDOW_LINE_MANGER_SELECTV6    "/usr/local/bin/pngs/vert6.png"
 #define     SWINDOW_LINE_MANGER_SELECTV7    "/usr/local/bin/pngs/vert7.png"
 #define     SWINDOW_LINE_MANGER_SELECTV8    "/usr/local/bin/pngs/vert8.png"
+
+//preview next and per
+#define     SWINDOW_PERVIEW_NEXT_UI         "/usr/local/bin/pngs/next.png"
+#define     SWINDOW_PERVIEW_PER_UI         "/usr/local/bin/pngs/per.png"
+
+
+
 
 //mouse path 
 #define     SWINDOW_MOUSE_IMAGE             "/usr/local/bin/pngs/mouse.png"
@@ -704,7 +723,17 @@ static void  xw_png_load_600(void)
     ret = xw_window_png_add(SWINDOW_LINE_MANGER_SELECTV8 , id);
     p = xw_get_window_png(id);
     xw_color_change_func(p,w*h,0x112,0xfeee);
+    
+    //next per ui
+    //
+    ret  =  xw_window_png_add(SWINDOW_PERVIEW_NEXT_UI,XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID) ;
+    ret  =  xw_window_png_add(SWINDOW_PERVIEW_PER_UI,XW_PERVIEW_IMAGE_APER_WINDOW_ID) ;
 
+
+
+    
+
+    //mouse
     ret = xw_window_png_add( SWINDOW_MOUSE_IMAGE, MOUSE_ID);
     if(ret < 0){
         xw_logsrv_err("load mouse image fail\n");

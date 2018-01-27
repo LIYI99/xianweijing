@@ -8,6 +8,8 @@
 #define     RGBA8888_AYUV4444   3
 #define     AGBR8888_AYUV4444   4
 #define     RGB565_YUV565       5
+#define     RGBA8888_AYUV1555   6
+
 
 
 #ifdef  __cplusplus

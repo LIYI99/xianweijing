@@ -81,7 +81,9 @@ static  void mouse_ldown_theline(void *data)
     
     window_node_line_t *lt  = (window_node_line_t *)data;
     window_node_line_t *sa = NULL;
-  
+
+    //xw_logsrv_err("the line handle lt:%p lt->this_node:%p xw_lt:%p \n",lt,lt->this_node,xw_lt);
+    //xw_logsrv_err("xxxxxxxxxxxx\n");
     if(lt->this_node->move_arrt != 0 && xw_lt->lock  == 0)
     {   
                 
@@ -94,8 +96,14 @@ static  void mouse_ldown_theline(void *data)
                 lt->end_x = lt->start_x;
 
             }
-            *sa = *lt;
-
+            
+            if(sa == NULL)
+            {
+                xw_logsrv_err("xw not find save data point\n");
+                return ;
+            }else
+                *sa = *lt;
+        //xw_logsrv_err("xw test ----\n");
         Image_SDK_Set_Text_Node_Xy(lt->text_id,lt->start_x,lt->start_y);
         lt->this_node->f_node->freshen_arrt = NEED_FRESHEN;
         
@@ -117,11 +125,7 @@ static  void mouse_ldown_theline(void *data)
         
     }
     
-  
-
-
-
-       return;
+   return;
 
 
 }
@@ -154,6 +158,8 @@ static int  xw_line_t_init(void){
         ret = xw_load_line_data(XW_LINE_T_SAVEFILE_PATH,xw_lt);
 
     }
+    //ret = -1;
+
     if(ret == 0){
         xw_lt->line_arry_state = 0;
         return 0;
@@ -253,7 +259,9 @@ static int  xw_line_t_init(void){
             xw_lt->lines[j][i].line.size      =  XW_LINE_SIZE_DEUFALT;
             xw_lt->lines[j][i].line.video_set.mouse_left_up = mouse_ldown_theline;
             xw_lt->lines[j][i].line.video_set.mouse_left_down = mouse_ldown_theline;
-            
+            xw_logsrv_debug("mouse_left_down:%p savep:%p\n",mouse_ldown_theline,xw_lt->lines[j][i].line.video_set.mouse_left_down);
+
+ 
 
         }
     }
@@ -289,7 +297,6 @@ void xw_line_show_all(void *data)
         xw_logsrv_err("windows:%s get x,y,w,h fail \n",XW_LINE_RARR_WINDOW_ID);
 
     }
-    xw_logsrv_err("line arrr params x:%d y:%d w:%d h:%d\n",mt.x,mt.y,mt.w,mt.h);
 
     ret  = Image_SDK_Create_Menu(_attr,mt);
     
@@ -374,17 +381,28 @@ static  int  xw_load_line_data(char *path,xw_lines_t *lt)
         return -3;
 
     }
+    xw_logsrv_debug("read savefile len:%d sizeof xw_lines_t:%d func:%p\n",ret,sizeof(xw_lines_t),mouse_ldown_theline);
     int k,i ;
        for(k = 0 ; k < XW_LINE_CONF_NUMS ;k++){
         for(i = 0 ;i < XW_LINE_NUMS_MAX ;i ++){
         
-            xw_lt->lines[k][i].line.video_set.mouse_left_down = mouse_ldown_theline;
-            xw_lt->lines[k][i].line.video_set.mouse_left_up   = mouse_ldown_theline;
+            xw_lt->lines[k][i].line.video_set.mouse_left_down  = mouse_ldown_theline;
+            xw_lt->lines[k][i].line.video_set.mouse_left_up    = mouse_ldown_theline;
+            xw_lt->lines[k][i].line.video_set.mouse_right_down = NULL;
+            xw_lt->lines[k][i].line.video_set.mouse_right_up   = NULL;
+            xw_lt->lines[k][i].line.video_set.mouse_offset     = NULL;
+            xw_lt->lines[k][i].line.video_set.mouse_leave      = NULL;
+            xw_lt->lines[k][i].line.video_set.data             = NULL;
+
+            
+
+            xw_logsrv_debug("mouse_left_down:%p savep:%p\n",mouse_ldown_theline,xw_lt->lines[k][i].line.video_set.mouse_left_down);
+
         }
     }
-
-
-
+    
+    fclose(xw_fp);
+    xw_fp = NULL;
 
     return 0;
     
@@ -515,6 +533,15 @@ int     xw_lines_close_all_root(void *data)
 
 
     return 0;
+
+}
+int xw_lines_unlock(void){
+
+    if(xw_lt == NULL)
+        return -1;
+    xw_lt->lock = 0;
+    
+    return;
 
 }
 

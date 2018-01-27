@@ -38,7 +38,8 @@ static void*    basic_log_write_file(void*data)
         }    
         
         int n =  s->pos -s->p;
-        fwrite(s->p,n,1,s->fp);
+        if(s->fp)
+            fwrite(s->p,n,1,s->fp);
         s->pos = s->p;
         pthread_mutex_unlock(&s->cache_lock);
     }
@@ -100,10 +101,10 @@ basic_log_t*    basic_log_init(char* logs_name,unsigned int level, unsigned int 
 
         s->fp = fopen(s->path,"w+");
         if(s->fp == NULL){
-            printf("fopen path fail :%s\n",s->path);
-            goto ERR3;
+            printf("fopen path fail ,not be record the log message info:%s\n",s->path);
+         //   goto ERR3;
         }
-        printf("s->fp:%p\n",s->fp) ;
+        //printf("s->fp:%p\n",s->fp) ;
         s->logcnt = 0;
         s->level = level;
 

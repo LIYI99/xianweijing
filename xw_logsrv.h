@@ -7,7 +7,7 @@ int     xw_logsrv_deinit(void );
 basic_log_t *xw_logsrv_get(void );
 
 
-#define DEBUG   1
+#define DEBUG   0
 
 #define xw_logsrv_err(format,...)           basic_log_error_core(LOGS_ERR,xw_logsrv_get(),format,##__VA_ARGS__)
 
