@@ -49,7 +49,7 @@
 #define     XW_MAINOF_DATE_SET_DOWN_W           260
 
 #define     XW_MAINOF_DATE_SET_BUTTON_W         80
-#define     XW_MAINOF_DATE_SET_BUTTON_H         80
+#define     XW_MAINOF_DATE_SET_BUTTON_H         77
 
 //1024 * 600
 #define     SXW_MAINOF_BUTTON_REST_H            (32*600/1080)

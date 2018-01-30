@@ -92,7 +92,7 @@
 #define XW_DATE_SET_DOWN_WINDOW_Y          XW_MAIN_WINDOW_Y + 539
 
 #define XW_DATE_SET_WINDOW_X          XW_MAIN_WINDOW_X + 3
-#define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 479
+#define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 482
 
 
 
@@ -259,6 +259,30 @@
 #define XW_TEXT_TIME_CNT_BOX_WINDOW_X               50
 #define XW_TEXT_TIME_CNT_BOX_WINDOW_Y               50
 
+//define update window x,y
+
+#define XW_UPDATE_WINDOW_X                      850
+#define XW_UPDATE_WINDOW_Y                      400
+
+#define XW_UPDATE_YES_WINDOW_X                 (XW_UPDATE_WINDOW_X + 47)
+#define XW_UPDATE_YES_WINDOW_Y                 (XW_UPDATE_WINDOW_Y + 105)
+#define XW_UPDATE_NO_WINDOW_X                  (XW_UPDATE_WINDOW_X + 233)
+#define XW_UPDATE_NO_WINDOW_Y                   (XW_UPDATE_WINDOW_Y + 105)
+
+#define XW_UPDATE_BAR_WINDOW_X                  900
+#define XW_UPDATE_BAR_WINDOW_Y                  500
+
+#define XW_UPDATE_BAR_TEXT_WINDOW_X             1220
+#define XW_UPDATE_BAR_TEXT_WINDOW_Y             500
+
+
+
+
+
+
+
+
+
 
 
 
@@ -354,7 +378,7 @@
 #define SXW_DATE_SET_DOWN_WINDOW_Y          SXW_MAIN_WINDOW_Y + 299
 
 #define SXW_DATE_SET_WINDOW_X          SXW_MAIN_WINDOW_X + 1
-#define SXW_DATE_SET_WINDOW_Y          SXW_MAIN_WINDOW_Y + 266
+#define SXW_DATE_SET_WINDOW_Y          SXW_MAIN_WINDOW_Y + 269
 
 
 
@@ -520,6 +544,27 @@
 
 #define SXW_TEXT_TIME_CNT_BOX_WINDOW_X               30
 #define SXW_TEXT_TIME_CNT_BOX_WINDOW_Y               30
+
+//define update window x,y
+
+#define SXW_UPDATE_WINDOW_X                      900
+#define SXW_UPDATE_WINDOW_Y                      400
+
+#define SXW_UPDATE_YES_WINDOW_X                  900
+#define SXW_UPDATE_YES_WINDOW_Y                  400
+#define SXW_UPDATE_NO_WINDOW_X                   950
+#define SXW_UPDATE_NO_WINDOW_Y                   400
+
+#define SXW_UPDATE_BAR_WINDOW_X                  900
+#define SXW_UPDATE_BAR_WINDOW_Y                  500
+
+#define SXW_UPDATE_BAR_TEXT_WINDOW_X             1100
+#define SXW_UPDATE_BAR_TEXT_WINDOW_Y             500
+
+
+
+
+
 
 
 

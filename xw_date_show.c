@@ -25,7 +25,7 @@
 #define DATE_SET_DOWN_WINDOW_W      260
 
 #define DATE_SET_WINDOW_W           80
-#define DATE_SET_WINDOW_H           80
+#define DATE_SET_WINDOW_H           70
 
 
 
@@ -58,8 +58,9 @@ static  void  mouse_ldown_button_settime(void *data)
         return;
     }
 
-    bt->color = 0xfd88;
+    bt->color = CON_BUTTON_LEAVE_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
+
 
     time_t  tmp = 0 ;
 
@@ -77,7 +78,7 @@ static  void  mouse_ldown_button_settime(void *data)
 static void mouse_offset_settime_func(void *data){
     return ;
     window_node_button_t *bt  = (window_node_button_t *)data;
-    bt->color =0xf0f0;
+    bt->color =  CON_BUTTON_OFFSET_COLOR;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     return;
 }

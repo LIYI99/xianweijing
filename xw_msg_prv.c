@@ -136,6 +136,9 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
         case IDSCAM_IMG_MSG_RESET_ISP:
             ret = socket_send_reset_isp();
             break;
+        case IDSCAM_EVENT_MSG_UPDATE_SET_ENBALE:
+            //ret  = socket_send_udpate_en(*(int *)data,len);
+            break;
         case IDSCAM_IMG_MSG_EXIT:
             //ret = socket_send_exit(clt_fd );
 
@@ -152,7 +155,7 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
 int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
     
    // xw_logsrv_debug("XXXXXGET MSG CMD:%d\n",cmd);
-    int ret = 0;
+    int ret = -1;
     switch(cmd)
     {
         case  IDSCAM_IMG_MSG_GET_ENABLE_AE:
@@ -228,8 +231,11 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
         case IDSCAM_IMG_MSG_GET_CAPTURE_POINT: 
             ret =   socket_get_get_snap_point(data ,len);
 
-
+        case IDSCAM_EVENT_MSG_UPDATE_GET_VUALE:
+            *((int *)data)  = 10;
+            ret = 0;
             break;
+ 
         default:
             break;
 

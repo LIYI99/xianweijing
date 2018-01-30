@@ -408,6 +408,13 @@ static void xw_node_params_add_1080P(void)
                 XW_TEXT_TIME_CNT_BOX_FONT_W, XW_TEXT_TIME_CNT_BOX_FONT_H);
 
 
+        //update window about
+        xw_node_def_add(XW_UPDATE_WINDOW_ID , XW_UPDATE_WINDOW_X ,XW_UPDATE_WINDOW_Y,0, 0);
+        xw_node_def_add(XW_UPDATE_YES_WINDOW_ID , XW_UPDATE_YES_WINDOW_X ,XW_UPDATE_YES_WINDOW_Y,121, 43);
+        xw_node_def_add(XW_UPDATE_NO_WINDOW_ID , XW_UPDATE_NO_WINDOW_X ,XW_UPDATE_NO_WINDOW_Y,121, 43);
+        xw_node_def_add(XW_UPDATE_BAR_WINDOW_ID , XW_UPDATE_BAR_WINDOW_X ,XW_UPDATE_BAR_WINDOW_Y,300, 24);
+        xw_node_def_add(XW_UPDATE_BAR_TEXT_WINDOW_ID , XW_UPDATE_BAR_TEXT_WINDOW_X ,XW_UPDATE_BAR_TEXT_WINDOW_Y,12, 24);
+    
     return ;
 }
 
@@ -647,6 +654,16 @@ static void xw_node_params_add_600P(void)
         xw_node_def_add(XW_TEXT_TIME_CNT_BOX_WINDOW_ID ,SXW_TEXT_TIME_CNT_BOX_WINDOW_X ,SXW_TEXT_TIME_CNT_BOX_WINDOW_Y,
                 SXW_TEXT_TIME_CNT_BOX_FONT_W, SXW_TEXT_TIME_CNT_BOX_FONT_H);
 
+        //update window about
+        xw_node_def_add(XW_UPDATE_WINDOW_ID , SXW_UPDATE_WINDOW_X ,SXW_UPDATE_WINDOW_Y,0, 0);
+        xw_node_def_add(XW_UPDATE_YES_WINDOW_ID , SXW_UPDATE_YES_WINDOW_X ,SXW_UPDATE_YES_WINDOW_Y,30, 18);
+        xw_node_def_add(XW_UPDATE_NO_WINDOW_ID , SXW_UPDATE_NO_WINDOW_X ,SXW_UPDATE_NO_WINDOW_Y,30, 18);
+        xw_node_def_add(XW_UPDATE_BAR_WINDOW_ID , SXW_UPDATE_BAR_WINDOW_X ,SXW_UPDATE_BAR_WINDOW_Y,120, 18);
+        xw_node_def_add(XW_UPDATE_BAR_TEXT_WINDOW_ID , SXW_UPDATE_WINDOW_X ,SXW_UPDATE_WINDOW_Y,8, 16);
+
+
+
+        
         return ;
     
 }

@@ -154,8 +154,18 @@
 //define prompt_box id
 
 #define XW_TEXT_PROMPT_BOX_WINDOW_ID            "Ag"
-
 #define XW_TEXT_TIME_CNT_BOX_WINDOW_ID          "Ah"
+
+//define update window id
+#define XW_UPDATE_WINDOW_ID                     "Al"
+#define XW_UPDATE_YES_WINDOW_ID                 "Ala"
+#define XW_UPDATE_NO_WINDOW_ID                  "Alb"
+
+#define XW_UPDATE_BAR_WINDOW_ID                 "Am"
+#define XW_UPDATE_BAR_TEXT_WINDOW_ID            "An"
+
+
+
 
 
 

@@ -20,8 +20,8 @@
 #define     XW_LINE_RARR_WINDOW_W       1800
 
 
-#define     XW_LINE_TEXT_WIN_COLOR      0xfeee
-#define     XW_LINE_TEXT_FONT_COLOR     0xf00f
+#define     XW_LINE_TEXT_WIN_COLOR      CON_FONT_WIN_COLOR
+#define     XW_LINE_TEXT_FONT_COLOR     CON_FONT_TEXT_COLOR
 
 #define     FONT_SIZE                   16
 
@@ -239,7 +239,7 @@ static int  xw_line_t_init(void){
             xw_lt->lines[j][i].line.start_y   = 5;
             xw_lt->lines[j][i].line.end_x     = k;
             xw_lt->lines[j][i].line.end_y     = lh;
-            xw_lt->lines[j][i].line.color     = 0xf00f;
+            xw_lt->lines[j][i].line.color     = 0xa716;
             xw_lt->lines[j][i].line.size      =  XW_LINE_SIZE_DEUFALT ;
             xw_lt->lines[j][i].line.video_set.mouse_left_up = mouse_ldown_theline;
             xw_lt->lines[j][i].line.video_set.mouse_left_down = mouse_ldown_theline;
@@ -255,7 +255,7 @@ static int  xw_line_t_init(void){
             xw_lt->lines[j][i].line.start_y   = k ;
             xw_lt->lines[j][i].line.end_x     = lw ;
             xw_lt->lines[j][i].line.end_y     = k;
-            xw_lt->lines[j][i].line.color     = 0xf0f0;
+            xw_lt->lines[j][i].line.color     = 0xe452;
             xw_lt->lines[j][i].line.size      =  XW_LINE_SIZE_DEUFALT;
             xw_lt->lines[j][i].line.video_set.mouse_left_up = mouse_ldown_theline;
             xw_lt->lines[j][i].line.video_set.mouse_left_down = mouse_ldown_theline;

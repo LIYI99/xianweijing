@@ -115,6 +115,13 @@ static int xw_window_png_add(char *png_path,char *window_id)
 #define     WINDOW_PERVIEW_PER_UI         "/usr/local/bin/png/per.png"
 
 
+//update window
+
+#define     WINDOW_UPDATE_MENU_UI           "/usr/local/bin/png/update.png"
+
+
+
+
 
 //mouse
 #define     WINDOW_MOUSE_IMAGE             "/usr/local/bin/png/mouse.png"
@@ -127,13 +134,27 @@ static int xw_window_png_add(char *png_path,char *window_id)
 
 void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color)
 {
+    
+  
     if(image == NULL)
         return ;
     int i = 0;
     for(i = 0 ; i < size; i++)
     {
+#if 0 //ayuv444
         if(image[i] == 0xd88 || image[i] ==  0x278)
             image[i] = 0xfd88;
+#endif
+        //ayuv1555
+        
+         if(image[i] == 0x11f0)
+         {
+            image[i] = 0xea10;
+         }else if(image[i] == 0x7210)
+         {
+         
+            image[i] = 0x91f0;
+         }
 
     }
     return ;
@@ -142,6 +163,9 @@ void  xw_color_change_func(uint16_t *image,uint16_t size,uint16_t src_color,uint
 
 static void  xw_color_change_func_v2(uint16_t *image,uint16_t size,uint16_t src_color,uint16_t det_color)
 {
+    
+    return ;
+
     if(image == NULL)
         return ;
     int i = 0;
@@ -422,8 +446,11 @@ static void  xw_png_load_1080(void)
     ret  =  xw_window_png_add(WINDOW_PERVIEW_NEXT_UI,XW_PERVIEW_IMAGE_ANEXT_WINDOW_ID) ;
     ret  =  xw_window_png_add(WINDOW_PERVIEW_PER_UI,XW_PERVIEW_IMAGE_APER_WINDOW_ID) ;
 
+    //update
 
-
+    ret = xw_window_png_add( WINDOW_UPDATE_MENU_UI,XW_UPDATE_WINDOW_ID);
+    
+    
     //mouse image add
     ret = xw_window_png_add( WINDOW_MOUSE_IMAGE, MOUSE_ID);
     if(ret < 0){
@@ -438,6 +465,10 @@ static void  xw_png_load_1080(void)
     if(ret < 0){
         xw_logsrv_err("load mouse hanle image fail \n");
     }
+    
+    
+    
+
     //xw_get_png_hw(WINDOW_MOUSE_IMAGE,&w,&h);
     return ;
 
@@ -493,6 +524,9 @@ static void  xw_png_load_1080(void)
 //preview next and per
 #define     SWINDOW_PERVIEW_NEXT_UI         "/usr/local/bin/pngs/next.png"
 #define     SWINDOW_PERVIEW_PER_UI         "/usr/local/bin/pngs/per.png"
+
+//update
+#define     SWINDOW_UPDATE_MENU_UI           "/usr/local/bin/pngs/update.png"
 
 
 
@@ -730,6 +764,9 @@ static void  xw_png_load_600(void)
     ret  =  xw_window_png_add(SWINDOW_PERVIEW_PER_UI,XW_PERVIEW_IMAGE_APER_WINDOW_ID) ;
 
 
+
+    ret = xw_window_png_add( SWINDOW_UPDATE_MENU_UI,XW_UPDATE_WINDOW_ID);
+    
 
     
 

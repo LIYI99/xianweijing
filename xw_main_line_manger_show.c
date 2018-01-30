@@ -23,7 +23,7 @@ struct  xw_line_ui_set{
 
 static  struct xw_line_ui_set   *arry_set = NULL,*size_set = NULL,*color_set = NULL,*select_set = NULL;
 static  uint16_t     arry_now = 0 , size_now = 0, color_now = 0,select_now = 0;
-static  uint16_t     colors[6] = {0xf00f,0xfeef,0xff00,0xf0f0,0xfff0,0xf0ff};
+static  uint16_t     colors[6] = {0xa97d,0xc4e4,0x97ad,0xe452,0xd282,0xa716};
 
 
 #define     ARRY_SET_NUMS       8
@@ -38,7 +38,7 @@ static void xw_line_show_button_ldow(void *data)
 {
     
     window_node_button_t *bt = (window_node_button_t *)data; 
-    bt->color = 0xf0f0;
+    bt->color = CON_BUTTON_LDOWN_COLOR; 
     bt->this_node->freshen_arrt = NEED_FRESHEN;
     //need close prewiv
     xw_preview_close();
@@ -48,9 +48,9 @@ static void xw_line_show_button_ldow(void *data)
 }
 
 
-#define     XW_LINE_MANGER_BUTTON_OFFSET_COLOR      0xf00f
-#define     XW_LINE_MANGER_BUTTON_LDOWN_COLOR       0xf0f0
-#define     XW_LINE_MANGER_BUTTON_LEAVE_COLOR       0xfd88
+#define     XW_LINE_MANGER_BUTTON_OFFSET_COLOR     CON_BUTTON_OFFSET_COLOR 
+#define     XW_LINE_MANGER_BUTTON_LDOWN_COLOR     CON_BUTTON_LDOWN_COLOR  
+#define     XW_LINE_MANGER_BUTTON_LEAVE_COLOR       CON_BUTTON_LEAVE_COLOR 
 
 #define     XW_LINE_MANGER_BUTTON_SIZE              2
 
