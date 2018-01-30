@@ -49,7 +49,7 @@ int xw_main_menu_show(void *data)
     mt.image_cache = (char *)xw_get_window_png(XW_MAIN_WINDOW_ID);
     mt.video_set.mouse_offset =  NULL;//mouse_offset_main_menu_func;
 
-    mt.video_set.mouse_leave  =  mouse_leave_main_menu_func;
+    mt.video_set.mouse_leave  =  NULL; // mouse_leave_main_menu_func;
 
     ret = Image_SDK_Create_Menu(_attr,mt);
     return ret ;

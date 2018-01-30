@@ -366,7 +366,7 @@ static int  xw_isp_exposure_show(void *data)
     
         xw_logsrv_err("window:%s get x,y,w,h fail \n",XW_MANUL_EXPOUSURE_WINDOW_ID);
     }
-    
+   
     _bar.bar_color   = XW_ISP_BAR_COLOR;
     _bar.now_value = xw_isp_p->exposure_vaule;
     _bar.max_value = XW_ISP_BAR_MAX_VALUE;
