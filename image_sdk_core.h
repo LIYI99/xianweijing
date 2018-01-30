@@ -272,6 +272,8 @@ typedef struct  image_sdk_s{
 #define     SDK_WORK_STATE_QUIT     0
 #define     SDK_WORK_STATE_RUN      1
 #define     SDK_WORK_STATE_STOP     2
+#define     SDK_WORK_STATE_UPDATE   3
+
     uint8_t         en;
     uint8_t         mouse_thread_state;
     uint8_t         event_thread_state;
@@ -351,6 +353,17 @@ void    Image_SDK_Init(sdk_init_param_t *param);
 //void    Image_SDK_Init(void);
 void    Image_SDK_deInit(void);
 void    Image_SDK_Run(void);
+
+void    Image_SDK_Set_State_Update(void);
+void    Image_SDK_Set_State_Run(void);
+void    Image_SDK_Set_State_Quit(void);
+void    Image_SDK_Set_State_Stop(void);
+
+
+
+
+
+
 int     Image_SDK_Reset(void);
 
 void    Image_Fb_Push(int xoffset,int yoffset);

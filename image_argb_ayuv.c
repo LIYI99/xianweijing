@@ -7,20 +7,33 @@
 
 
 
-static uint16_t *  ayuv_buf = NULL;
+static uint16_t     *ayuv_buf = NULL;
+static uint16_t     rgbtoyuv_mode = 11;
 
 
 int  image_ayuv_talbe_init(int  format){
 
-    if(format > RGB565_YUV565 || format < ARGB4444_AYUV4444)
+    if(format > RGBA8888_AYUV1555 || format < ARGB4444_AYUV4444)
+    {
+        xw_logsrv_err("rgbtoyuv mode value error,fotmat:%d\n",format);
         return -1;
-
+    }
+    
+    
+    rgbtoyuv_mode = format;
+    
     if(ayuv_buf != NULL)
+    {
+        rgbtoyuv_mode = 11; 
         return -2;
+    }
 
     ayuv_buf  = (uint16_t *)malloc((0x1 << 16) *sizeof(uint16_t));
     if(ayuv_buf == NULL)
+    {
+        rgbtoyuv_mode = 11; 
         return -3;
+    }
 
     int index = 0;
     uint8_t     r,b,g,y,u,v ,a;
@@ -135,16 +148,21 @@ int  image_ayuv_talbe_init(int  format){
 
     }else if(format == RGBA8888_AYUV1555)
     {
-        #if 1
-            a = (index & 0xF000)  >> 15;
-            b = (index & 0xEF00)  >> 3;
-            g = (index & 0x0CF0)  >> 0;
-            r = (index & 0x00CF)  << 3;
-#else
-            a = (index & 0xF000) >> 12;
-            b = (index & 0x0F00)  >> 4;
-            g = (index & 0x00F0)  >> 0;
-            r = (index & 0x000F) << 4;
+        uint16_t aa; 
+        for (index = 0; index < (0x1 << 16); index++)
+         {
+
+#if 1
+            aa = (index & 0x8000);
+            b = (index & 0x7C00) >> 7;
+            g = (index & 0x03E0) >> 2;
+            r = (index & 0x001F) << 3;
+#else 
+
+            r = (index & 0xF100) >> 8;
+            g = (index & 0x07C0) >> 3;
+            b = (index & 0x003E) << 2;
+            a = (index & 0x0001);
 
 #endif
 
@@ -155,55 +173,78 @@ int  image_ayuv_talbe_init(int  format){
             y >>= 3;
             u >>= 3;
             v >>= 3;
-            if(a != 0)
-                a = 1;
-            ayuv_buf[index] = ((a << 15) | (y << 10) | (u << 5) | (v << 0));
+            
+            //ayuv_buf[index] = (a << 15 | (y << 10) | (u << 5) | (v << 0));
+            ayuv_buf[index] = (aa  | (y << 10) | (u << 5) | (v << 0));
 
-        xw_logsrv_debug(" RGBA8888 0xffff ayuv1555:%x index:%x\n",ayuv_buf[0xffff],index);
- 
 
+         }
  
     }else{
+            
+        rgbtoyuv_mode = 11; 
 
-            xw_logsrv_err("init ayuv tabel fail \n");
+        xw_logsrv_err("init ayuv tabel fail \n");
 
     }
-
+    
 
     return  0;
 
 
 }
 
-void  inline image_argb4444_to_ayuv(uint16_t argb, uint16_t *ayuv){
+void  inline image_argb4444_to_ayuv(uint16_t argb, uint16_t *ayuv)
+{
     *ayuv  =  ayuv_buf[argb];
      return;
 }
-void  inline  image_rgba8888_to_ayuv(uint32_t rgba,uint16_t *ayuv){
-     
+
+void  inline  image_rgba8888_to_ayuv(uint32_t rgba,uint16_t *ayuv)
+{
+
     uint16_t rgba16;
-#if 1
-    rgba16 = ((rgba & 0xf0000000) >> 16) |
+    
+    switch(rgbtoyuv_mode)
+    {
+        case RGBA8888_AYUV4444:  
+            rgba16 = ((rgba & 0xf0000000) >> 16) |
             ((rgba & 0x00f00000) >> 12) |
             ((rgba & 0x0000f000) >> 8) |
             ((rgba & 0x000000f0) >> 4);
-#endif
-#if 0
-    rgba16 = ((rgba & 0xf0000000) >> 16) |
-            ((rgba & 0x00f00000) >> 9) |
-            ((rgba & 0x0000f000) >> 6) |
-            ((rgba & 0x000000f0) >> 3);
-    
-#endif
+            break;
+        case RGBA8888_AYUV1555:
+#if 1
+            rgba16 = ((rgba & 0x80000000) >> 16) |
+            ((rgba & 0x00f80000) >> 9) |
+            ((rgba & 0x0000f800) >> 6) |
+            ((rgba & 0x000000f8) >> 3);
+
+#else
+            rgba16 = ((rgba & 0xf8000000) >> 16) |
+            ((rgba & 0x00f80000) >> 13) |
+            ((rgba & 0x0000f800) >> 10) |
+            ((rgba & 0x00000080) >> 7);
+
+#endif 
+
+            break;
+        default:
+            break;
+
+    }
     *ayuv = ayuv_buf[rgba16];
     return ;
 }
-void inline image_rgb565_to_ayuv(uint16_t rgb,uint16_t *ayuv){
+
+void inline image_rgb565_to_ayuv(uint16_t rgb,uint16_t *ayuv)
+{
     
     *ayuv = ayuv_buf[rgb];
     return ;
     
 }
+
 
 void image_ayuv_talbe_deinit(void)
 {
