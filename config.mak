@@ -1,4 +1,5 @@
-PWD_PATH		= /home/liyi/xianweijing
+PWD_PATH		= /home/liyi/idscam/xianweijing
+
 
 CONF_PATH 		=$(PWD_PATH)/config.mak
 
