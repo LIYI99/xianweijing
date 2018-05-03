@@ -164,6 +164,8 @@
 #define XW_UPDATE_BAR_WINDOW_ID                 "Am"
 #define XW_UPDATE_BAR_TEXT_WINDOW_ID            "An"
 
+#define XW_DEBUG_VERSION_TEXT_WINDOW_ID		"Ao"
+
 
 
 

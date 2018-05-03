@@ -403,6 +403,7 @@ int     Image_SDK_Set_Node_En_Freshen(char *node_id,NODE_FRESHEN_ARRT  en_freshe
 int     Image_SDK_Set_Text_Node_Text(char *node_id,char *text,int size);
 int     Image_SDK_Set_Text_Node_Xy(char *node_id,uint16_t x,uint16_t y);
 int     Image_SDK_Set_Bar_Vaule(char *node_id,uint16_t vaule);
+int 	Image_SDK_Set_Menu_Wh(char *node_id,uint16_t w,uint16_t h);
 
 
 

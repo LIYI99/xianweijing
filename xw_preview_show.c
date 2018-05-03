@@ -129,6 +129,7 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
     for(i = 0; i < xw_preview_p->samll_cnt_nums ; i ++)
     {
         imagep = xw_preview_p->preview_buf_samll[i];
+        xw_logsrv_err(" any putures preview freshen id:%d image:%p,all counts:%d\n",i,imagep,xw_preview_p->samll_cnt_nums);
 #if 0
         // if(imagep == NULL)
         //   break;
@@ -162,6 +163,14 @@ static void any_preview_freshen(void *data,uint16_t *fbbuf,
 
     
     }
+
+    {
+        xw_preview_p->preview_buf_samll[0] = NULL;
+        xw_preview_p->preview_buf_samll[1] = NULL;
+        xw_preview_p->preview_buf_samll[2] = NULL;
+        xw_preview_p->preview_buf_samll[3] = NULL;
+    }
+
     xw_preview_p->samll_cnt_nums_last =  xw_preview_p->samll_cnt_nums;
     xw_preview_p->samll_cnt_nums = 0;
     return ;

@@ -11,7 +11,7 @@
 #include "xw_config.h"
 #include "xw_preview_show.h"
 #include "xw_window_def_func.h"
-
+#include "xw_msg_prv.h"
 
 struct  xw_line_ui_set{
         uint8_t     order;
@@ -193,9 +193,12 @@ static void xw_line_select_line_button_ldow(void *data)
 static void xw_line_lock_button_ldow(void *data)
 {
     
-    int ret = 0;
+    int ret = 0,value = 1;
     
-    ret = xw_lines_set_lock(0);
+    	
+    ret  = Image_Msg_Send(IDSCAM_IMG_MSG_FREEZE	,(void *)(&value),4);
+
+    //ret = xw_lines_set_lock(0);
     window_node_button_t *bt = (window_node_button_t *)data; 
     bt->color = XW_LINE_MANGER_BUTTON_LDOWN_COLOR ;
     bt->this_node->freshen_arrt = NEED_FRESHEN;
@@ -378,7 +381,7 @@ int  xw_main_line_manger_show(void *data)
     _button.color =  XW_LINE_MANGER_BUTTON_LEAVE_COLOR;
     _button.size  = XW_LINE_MANGER_BUTTON_SIZE;
     _button.image_cache = NULL;
-    _button.video_set.mouse_left_down   = xw_line_lock_button_ldow;
+    _button.video_set.mouse_left_down   = xw_line_lock_button_ldow;   //now change the fucntion is freezeing 
     _button.video_set.mouse_leave       = xw_line_show_button_leave; 
     _button.video_set.mouse_offset      = xw_line_show_button_offset;
     _button.user_video_freshen          = usr_push_video_button_line;

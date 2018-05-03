@@ -414,6 +414,9 @@ static void xw_node_params_add_1080P(void)
         xw_node_def_add(XW_UPDATE_NO_WINDOW_ID , XW_UPDATE_NO_WINDOW_X ,XW_UPDATE_NO_WINDOW_Y,121, 43);
         xw_node_def_add(XW_UPDATE_BAR_WINDOW_ID , XW_UPDATE_BAR_WINDOW_X ,XW_UPDATE_BAR_WINDOW_Y,300, 24);
         xw_node_def_add(XW_UPDATE_BAR_TEXT_WINDOW_ID , XW_UPDATE_BAR_TEXT_WINDOW_X ,XW_UPDATE_BAR_TEXT_WINDOW_Y,12, 24);
+	
+	//addy debug version
+		
     
     return ;
 }
@@ -661,7 +664,8 @@ static void xw_node_params_add_600P(void)
         xw_node_def_add(XW_UPDATE_BAR_WINDOW_ID , SXW_UPDATE_BAR_WINDOW_X ,SXW_UPDATE_BAR_WINDOW_Y,120, 18);
         xw_node_def_add(XW_UPDATE_BAR_TEXT_WINDOW_ID , SXW_UPDATE_WINDOW_X ,SXW_UPDATE_WINDOW_Y,8, 16);
 
-
+	
+	//deubug version window
 
         
         return ;

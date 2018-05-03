@@ -18,13 +18,19 @@ int main(int argc,char **argv)
      *
      * */
 
-    int  times = 60;
+    int  times = 60,srmodes = 0,devmode = 0;
     if(argv[1] != NULL){
         times = atoi(argv[1]);
         printf("run times:%d\n",times);
         //xw_logsrv_debug("run times:%d \n",times);
     }
     
+    if(argv[2] != NULL){
+	srmodes  =  atoi(argv[2]);
+    }
+    if(argv[3] != NULL){
+	devmode = atoi(argv[3]);	
+    }
 
     int ret = 0;
     //init losgsrv
@@ -32,7 +38,11 @@ int main(int argc,char **argv)
     ret = gk_device_init(NULL); //ok
     ret =start_read_venc_thread(); //ok
    
-    xw_main_ui_start(times,0);
+	for(;;){
+		fprintf(stderr,"test lcd output\n");
+		sleep(1);
+	}
+    //xw_main_ui_start(times,srmodes,devmode);
 
 #if 0
     //init logsvr

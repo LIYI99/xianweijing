@@ -6,6 +6,14 @@
 #define XW_MAIN_WINDOW_X           1504             
 #define XW_MAIN_WINDOW_Y           150
 
+//define debug version text
+
+#define XW_DEBUG_VERSION_TEXT_WINDOW_X		200
+#define XW_DEBUG_VERSION_TEXT_WINDOW_Y		720
+
+
+
+
 //deinfine line set button
 #define XW_LINE_SHOW_WINDOW_X       XW_MAIN_WINDOW_X +  224
 #define XW_LINE_SHOW_WINDOW_Y       XW_MAIN_WINDOW_Y +  669
@@ -93,6 +101,7 @@
 
 #define XW_DATE_SET_WINDOW_X          XW_MAIN_WINDOW_X + 3
 #define XW_DATE_SET_WINDOW_Y          XW_MAIN_WINDOW_Y + 482
+
 
 
 
@@ -237,10 +246,10 @@
 #define XW_PERVIEW_IMAGE_ONLY_WINDOW_X          0
 #define XW_PERVIEW_IMAGE_ONLY_WINDOW_Y          0
 
-#define XW_PERVIEW_IMAGE_ANEXT_WINDOW_X         1500
+#define XW_PERVIEW_IMAGE_ANEXT_WINDOW_X         1300
 #define XW_PERVIEW_IMAGE_ANEXT_WINDOW_Y         500
 
-#define XW_PERVIEW_IMAGE_APER_WINDOW_X         300
+#define XW_PERVIEW_IMAGE_APER_WINDOW_X         260
 #define XW_PERVIEW_IMAGE_APER_WINDOW_Y         500
 
 
@@ -291,6 +300,11 @@
 
 #define SXW_MAIN_WINDOW_X           100 // (1504*1024/1920)             
 #define SXW_MAIN_WINDOW_Y           10  //(150*600/1080)
+
+#define SXW_DEBUG_VERSION_TEXT_WINDOW_X		100
+#define SXW_DEBUG_VERSION_TEXT_WINDOW_Y		480
+
+
 
 //deinfine line set button
 #define SXW_LINE_SHOW_WINDOW_X       SXW_MAIN_WINDOW_X +  118

@@ -12,6 +12,7 @@
 #include "xw_logsrv.h"
 #include "xw_config.h"
 #include "xw_window_def_func.h"
+#include "xw_msg_prv.h"
 
 
 //
@@ -72,6 +73,10 @@ static  void  mouse_ldown_button_settime(void *data)
     setval.tv_sec = tmp;
     settimeofday(&setval,&zval);
     _state = DATE_WINDOW_RUNING;
+    //sen cmd to borad
+    int values = 1;
+    Image_Msg_Send(IDSCAM_IMG_MSG_SET_TIME,&values,4);
+
     return ;
 }
 

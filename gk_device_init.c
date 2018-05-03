@@ -79,8 +79,8 @@ static GADI_VI_SettingParamsT   viParams =
 static GADI_VOUT_SettingParamsT voParams[GADI_VOUT_NUMBER] = {
     {
         .voutChannel =  0,
-        .resoluMode  =  13,    // LCD:3, //  HDMI:13,//GADI_VOUT_RESOLUTION_HDTV,
-        .deviceType  =  3,    // LCD:4, //  HDMI:3
+        .resoluMode  =  3,    // LCD:3, //  HDMI:13,//GADI_VOUT_RESOLUTION_HDTV,
+        .deviceType  =  4,    // LCD:4, //  HDMI:3
     },
     {
         .voutChannel = 1,

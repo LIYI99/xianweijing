@@ -11,7 +11,7 @@
 #include <fcntl.h> 
 #include <unistd.h>
 #include <pthread.h>
-#include "xw_logsrv.h"
+
 #include "ui_setup.h"
 #include "xw_msg_pub.h"
 //static  int     connet_fd = 0;
@@ -51,7 +51,10 @@ int  socket_send_mirror(void ){ return -1;}
 int  socket_send_night(  int vaule){ return -1;}
 int  socket_send_exit(void  ){ return -1;}
 int  socket_send_reset_isp(void){return -1;}
+int  socket_send_freeze(int vaule){return -1;}
 
+int  socket_send_set_time(int data){return -1;}
+  
 
 
 int  socket_get_ae_auto(void  ){ return -1;}
@@ -75,6 +78,8 @@ int  socket_get_get_recoder_filename(char *s ,int len ){ return -1;}
 
 // < 0 fail
 int  socket_get_get_snap_point(void* data ,int len){ return -1 ;}
+//update  en: 0 not ,1: yes
+int  socket_send_update_en(int en,int len){return -1;}
 
 
 

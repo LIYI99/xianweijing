@@ -8,6 +8,7 @@ int     xw_update_show(void *data);
 int     xw_update_quit(void *data);
 
 int     xw_update_enble(void *data);
+int     xw_update_push_sc(int vaule);
 
 
 

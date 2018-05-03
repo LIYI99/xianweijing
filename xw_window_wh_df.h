@@ -91,8 +91,8 @@
 #define     XW_WINDOW_FONT_SIZE_W               8
 
 //1024 * 600 font
-#define     SXW_WINDOW_FONT_SIZE_H               12
-#define     SXW_WINDOW_FONT_SIZE_W               8
+#define     SXW_WINDOW_FONT_SIZE_H               32
+#define     SXW_WINDOW_FONT_SIZE_W               16
 
 
 //1920 1080 image preview window w h def
@@ -120,15 +120,14 @@
 #define     XW_TEXT_TIME_CNT_BOX_FONT_H         48
 
 //600
-#define     SXW_TEXT_PROMPT_BOX_FONT_W           8
-#define     SXW_TEXT_PROMPT_BOX_FONT_H           16
-#define     SXW_TEXT_TIME_CNT_BOX_FONT_W         8
-#define     SXW_TEXT_TIME_CNT_BOX_FONT_H         16
+#define     SXW_TEXT_PROMPT_BOX_FONT_W           16
+#define     SXW_TEXT_PROMPT_BOX_FONT_H           32
+#define     SXW_TEXT_TIME_CNT_BOX_FONT_W         16
+#define     SXW_TEXT_TIME_CNT_BOX_FONT_H         32
 
 
 
-
-
+//define debug version window wh
 
 
 

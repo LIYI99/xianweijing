@@ -15,6 +15,7 @@
 #include "xw_logsrv.h"
 #include "xw_png_load.h"
 #include "xw_msg_prv.h"
+#include "xw_config.h"
 #include "xw_window_def_func.h"
 
 
@@ -22,11 +23,13 @@
 
 #define     SRC_FONT_W              8 
 #define     SRC_FONT_H              16
-#define     PROMPT_WINDOW_H         48
-#define     PROMPT_WINDOW_W         24      //   12 nums text
-#define     PROMPT_WINDOW_NUMS      24
+
+#define     PROMPT_WINDOW_H         32
+#define     PROMPT_WINDOW_W         16      //   12 nums text
+#define     PROMPT_WINDOW_NUMS      32
 #define     BOX_WINDOW_COLOR        0x0
-#define     BOX_TEXT_COLOR          0xf00f
+#define     BOX_TEXT_COLOR          0xa97d
+
 
 
 
@@ -34,7 +37,7 @@
 #define     TIME_CNT_WINDOW_W           16      //   12 nums text
 #define     TIME_CNT_WINDOW_NUMS        4
 #define     TIME_CNT_WINDOW_COLOR       0x0
-#define     TIME_CNT_TEXT_COLOR         0xf00f
+#define     TIME_CNT_TEXT_COLOR         0xa97d
 
 
 typedef struct  text_box_handle{
@@ -177,8 +180,14 @@ static int  text_to_image(char *s)
 
     memset(_xw_message_box->errfontsrc,0x0,sizeof(uint16_t)*SRC_FONT_H*SRC_FONT_W*PROMPT_WINDOW_NUMS);
     memset(_xw_message_box->errwindow_cache,0x0,sizeof(uint16_t)*_xw_message_box->errfont_w*_xw_message_box->errfont_h*PROMPT_WINDOW_NUMS);
+  
+  
+    int lens = 0;
+    lens  = strlen(s);
+    if(lens <= 0)
+	return -1;
 
-
+	
 
     uint8_t *getp = NULL;
     int     k,j,i;
@@ -194,9 +203,13 @@ static int  text_to_image(char *s)
             for(i = 0 ; i < SRC_FONT_H ;i++ ){
                 for(j = 0 ;j < SRC_FONT_W;j++,getp++ ){
                     if(*getp == 0){ 
-                        *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_WINDOW_COLOR;
+                      	*(_xw_message_box->errfontsrc + i*(SRC_FONT_W*lens) + k*SRC_FONT_W + j) = BOX_WINDOW_COLOR;
+
+			//  *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_WINDOW_COLOR;
                     }else{
-                        *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_TEXT_COLOR;
+			*(_xw_message_box->errfontsrc + i*(SRC_FONT_W*lens) + k*SRC_FONT_W + j) = BOX_TEXT_COLOR;
+
+                       // *(_xw_message_box->errfontsrc + i*(SRC_FONT_W*PROMPT_WINDOW_NUMS) + k*SRC_FONT_W + j) = BOX_TEXT_COLOR;
                     }
                 }   
             
@@ -207,13 +220,21 @@ static int  text_to_image(char *s)
     
     image_zoom_t    zt;
     zt.inbuf        = _xw_message_box->errfontsrc;
-    zt.inwidth      = SRC_FONT_W * PROMPT_WINDOW_NUMS;
+    //zt.inwidth      = SRC_FONT_W * PROMPT_WINDOW_NUMS;
+    //zt.inheight     = SRC_FONT_H;
+    zt.inwidth      = SRC_FONT_W * lens; //user real nums
     zt.inheight     = SRC_FONT_H;
-    zt.outbuf       = _xw_message_box->errwindow_cache;
-    zt.outwidth     = _xw_message_box->errfont_w * PROMPT_WINDOW_NUMS;
-    zt.outheight    = _xw_message_box->errfont_h;
-    iamge_zoom_func(&zt);
+       
 
+    zt.outbuf       = _xw_message_box->errwindow_cache;
+
+    //zt.outwidth     = _xw_message_box->errfont_w * PROMPT_WINDOW_NUMS;
+    zt.outwidth     = _xw_message_box->errfont_w * lens;
+    zt.outheight    = _xw_message_box->errfont_h;
+
+    iamge_zoom_func(&zt);
+    //set window w,h
+    Image_SDK_Set_Menu_Wh(XW_TEXT_PROMPT_BOX_WINDOW_ID, zt.outwidth,zt.outheight);
     return 0;
 
 }
@@ -222,7 +243,9 @@ static int  text_to_image(char *s)
 
 int xw_text_promt_put(char *s,int msec){
 
-    
+    if (!_xw_message_box)
+        return -1;
+
     text_to_image(s);
     gettimeofday(&_xw_message_box->prompt_tv,NULL);
     _xw_message_box->prompt_sec = msec/1000;

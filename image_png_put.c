@@ -391,11 +391,8 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
                 
                 for (px = xstart, ppx = 0; px < width; px += xstep, ++ppx)
                 {
-                    //rgba8888 to rbga4444
-                    //incolor = *((uint32_t )row_tmp+ppx);
+                    
                     incolor = *((uint32_t *)(row_tmp+ppx*pix_bytes));
-
-            
 #if 1
                     if(need_rgb_to_rgba){
                         incolor = rgb_to_rgba8888(&incolor);
@@ -407,11 +404,10 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
 
 #endif
 
-                    // rgba8888_to_rgba4444(((uint32_t *)row_tmp)+ppx, (uint16_t *)getp);
                     getp++;
                
 #if 0 
-                    if(py == 5 && px == 5){
+                    if(py == 10 && px == 20){
                             
                             struct  rgba8888 *testy = NULL ;
                             uint32_t testx  = 0;
@@ -419,7 +415,7 @@ int image_png_load_rgba_16bit(char *path,uint16_t *mem,uint32_t *h, uint32_t *w,
 
                             testx = *((uint32_t*)row_tmp+ppx);
                             testy = (struct rgba8888 *)&testx;
-                            printf("rgba testy.r:%d testy.g:%d testy.b:%d a:%d getp:%x\n",testy->r,testy->g,testy->b,testy->a,*(getp-1));
+                            printf("rgba testy.r:%d testy.g:%d testy.b:%d a:%d u32:%x getp:%x\n",testy->r,testy->g,testy->b,testy->a,testx,*(getp-1));
                             uint16_t testz =0;
                             rgba8888_to_rgba4444_test(&testx, &testz);
                             print_pixel(png_ptr, info_ptr, row_tmp, ppx);

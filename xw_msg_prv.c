@@ -137,9 +137,15 @@ int     Image_Msg_Send(img_msg_cmd_t cmd,void *data,int len)
             ret = socket_send_reset_isp();
             break;
         case IDSCAM_EVENT_MSG_UPDATE_SET_ENBALE:
-            //ret  = socket_send_udpate_en(*(int *)data,len);
+             ret =  socket_send_update_en(*((int *)data),len);
             break;
-        case IDSCAM_IMG_MSG_EXIT:
+        case IDSCAM_IMG_MSG_FREEZE:
+             ret =  socket_send_freeze(*((int *)data));
+            break;
+	case IDSCAM_IMG_MSG_SET_TIME:
+	     ret  = socket_send_set_time(*(int *)data);       
+ 
+	case IDSCAM_IMG_MSG_EXIT:
             //ret = socket_send_exit(clt_fd );
 
             break;
@@ -232,8 +238,8 @@ int     Image_Msg_Get(img_msg_cmd_t cmd,void *data,int len){
             ret =   socket_get_get_snap_point(data ,len);
 
         case IDSCAM_EVENT_MSG_UPDATE_GET_VUALE:
-            *((int *)data)  = 10;
-            ret = 0;
+            
+            //ret  = socket_get_update_salce((int *)data,len);
             break;
  
         default:

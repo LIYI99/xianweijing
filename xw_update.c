@@ -18,6 +18,8 @@
 
 typedef enum{
    XW_UPDATE_NOR,
+   XW_UPDATE_WIAT_YN,
+   XW_UPDATE_RUN,
    XW_UPDATE_QUIT,
 }xw_update_state_s;
 
@@ -191,12 +193,14 @@ static void mouse_ldown_button_yes(void *data)
     Image_Msg_Send(IDSCAM_EVENT_MSG_UPDATE_SET_ENBALE,(void *)&enbale,sizeof(int));
     //set ui main func state is updated,into update state ,the event stop tirgger
     Image_SDK_Set_State_Update();
-
+    xw_update_state = XW_UPDATE_RUN;
+#if 0
     //create a fresh thread
     if(xw_update_stared  == 0)
         pthread_create(&xw_update_th_id,NULL,xw_update_thread_func,NULL);
     
     xw_update_stared = 1;
+#endif
 
     return ;
 
@@ -204,6 +208,7 @@ static void mouse_ldown_button_yes(void *data)
 
 static void mouse_ldown_button_no(void *data)
 {
+    
     window_node_button_t *bt  = (window_node_button_t *)data;
     Image_SDK_Set_Node_En(bt->this_node->node_id,0);
     Image_SDK_Set_Node_En(XW_UPDATE_NO_WINDOW_ID,0);
@@ -211,6 +216,8 @@ static void mouse_ldown_button_no(void *data)
     Image_SDK_Set_Node_En_Freshen(XW_UPDATE_WINDOW_ID,NEED_CLEAR);
     int enbale = 0;
     Image_Msg_Send(IDSCAM_EVENT_MSG_UPDATE_SET_ENBALE,(void *)&enbale,sizeof(int));
+    xw_update_state = XW_UPDATE_QUIT;
+
 
     return;
 
@@ -222,10 +229,33 @@ static void mouse_ldown_button_no(void *data)
 int xw_update_quit(void *data)
 {
     
-    xw_text_promt_put("Forthcoming exit update!",2000);
-    xw_update_state = XW_UPDATE_QUIT; 
-    //change main handle state
+    
+    if(xw_update_state == XW_UPDATE_NOR)
+        return 0;
+
+    if(xw_update_state == XW_UPDATE_WIAT_YN)
+    {
+        Image_SDK_Set_Node_En(XW_UPDATE_WINDOW_ID,0);
+        Image_SDK_Set_Node_En(XW_UPDATE_YES_WINDOW_ID,0);
+        Image_SDK_Set_Node_En(XW_UPDATE_NO_WINDOW_ID,0);
+        Image_SDK_Set_Node_En_Freshen(XW_UPDATE_WINDOW_ID,NEED_CLEAR);
+
+    }else if(xw_update_state == XW_UPDATE_RUN){
+        
+        Image_SDK_Set_Node_En(XW_UPDATE_BAR_TEXT_WINDOW_ID,0);
+        Image_SDK_Set_Node_En_Freshen(XW_UPDATE_BAR_TEXT_WINDOW_ID,NEED_CLEAR);
+        Image_SDK_Set_Node_En(XW_UPDATE_BAR_WINDOW_ID,0);
+        Image_SDK_Set_Node_En_Freshen(XW_UPDATE_BAR_WINDOW_ID,NEED_CLEAR);
+        Image_SDK_Set_State_Run();
+
+    }else{
+        ; 
+    } 
     return 0;
+    //xw_text_promt_put("Forthcoming exit update!",2000);
+    //xw_update_state = XW_UPDATE_QUIT; 
+    //change main handle state
+    //return 0;
 }
 
 int xw_update_enble(void *data)
@@ -236,11 +266,27 @@ int xw_update_enble(void *data)
     Image_SDK_Set_Node_Submenu(XW_UPDATE_WINDOW_ID,1);
     Image_SDK_Set_Node_En(XW_UPDATE_YES_WINDOW_ID,1);
     Image_SDK_Set_Node_En(XW_UPDATE_NO_WINDOW_ID,1);
-    Image_SDK_Set_Node_En_Freshen(XW_UPDATE_WINDOW_ID,NEED_FRESHEN);   
+    Image_SDK_Set_Node_En_Freshen(XW_UPDATE_WINDOW_ID,NEED_FRESHEN);
+    xw_update_state = XW_UPDATE_WIAT_YN;
+    xw_logsrv_err("enble update window \n");
     return 0;
 
 }
 
+int xw_update_push_sc(int vaule)
+{
+    
+    if(xw_update_state != XW_UPDATE_RUN)
+        return -1;
+
+    Image_SDK_Set_Bar_Vaule(XW_UPDATE_BAR_WINDOW_ID,vaule);
+    Image_SDK_Set_Node_En_Freshen(XW_UPDATE_BAR_WINDOW_ID,NEED_FRESHEN);
+
+    return 0;
+}
+
+
+//use test
 static void* xw_update_thread_func(void *data)
 {
    

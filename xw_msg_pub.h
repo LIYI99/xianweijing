@@ -1,5 +1,6 @@
 #ifndef __XW_MSG_PUB_H__
 #define __XW_MSG_PUB_H__
+#include <stdint.h>
 
 
 /*
@@ -43,8 +44,9 @@ int  socket_send_hdr(  int vaule);
 int  socket_send_filp(void  );
 int  socket_send_mirror(void );
 int  socket_send_night(  int vaule);
+int  socket_send_freeze(int vaule);
 int  socket_send_exit(void  );
-
+int  socket_send_set_time(int data); //    
 
 int  socket_get_ae_auto(void  );
 int  socket_get_ae_manule(  int *vaule , int len);
@@ -67,13 +69,17 @@ int  socket_get_get_recoder_filename(char *s ,int len );
 
 //use get snap point
 struct image_get{
-    void*   buf[4];
-    int     nums;
+   uint8_t     mode;          // 0:firtst get,1:next 2:prve  3: only singbit saml      
+   uint8_t     order;          // sigl : 0 - 3 //,4:next 5:prve
+   void*       magep_p[4];
+   int         nums;
 };
 
 int  socket_get_get_snap_point(void* data ,int len);
-
 int  socket_send_reset_isp(void);
+
+//update
+int  socket_send_update_en(int en,int len);
 
 
 

@@ -12,7 +12,6 @@
 #include "xw_config.h"
 #include "xw_window_def_func.h"
 
-
 typedef struct  xw_isp_set{
     
     uint8_t     auto_exposure; // 0: auto 1:manul
